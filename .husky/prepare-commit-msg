@@ -1,0 +1,68 @@
+#!/bin/sh
+# .husky/prepare-commit-msg
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+if [ "$COMMIT_SOURCE" = "message" ]; then
+  COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+  case $COMMIT_MSG in
+    feat*)
+      COMMIT_MSG="✨ Feat:${COMMIT_MSG#feat:}"
+      ;;
+    fix*)
+      COMMIT_MSG="🎯 Fix:${COMMIT_MSG#fix:}"
+      ;;
+    progress*)
+      COMMIT_MSG="🚧 Progress:${COMMIT_MSG#progress:}"
+      ;;
+    bug*)
+      COMMIT_MSG="🐛 Bug:${COMMIT_MSG#bug:}"
+      ;;
+    design*)
+      COMMIT_MSG="🎨 Design:${COMMIT_MSG#design:}"
+      ;;
+    style*)
+      COMMIT_MSG="💄 Style:${COMMIT_MSG#style:}"
+      ;;
+    refactor*)
+      COMMIT_MSG="♻️ Refactor:${COMMIT_MSG#refactor:}"
+      ;;
+    comment*)
+      COMMIT_MSG="💡 Comment:${COMMIT_MSG#comment:}"
+      ;;
+    docs*)
+      COMMIT_MSG="📋 Docs:${COMMIT_MSG#docs:}"
+      ;;
+    test*)
+      COMMIT_MSG="✅ Test:${COMMIT_MSG#test:}"
+      ;;
+    chore*)
+      COMMIT_MSG="🔖 Chore:${COMMIT_MSG#chore:}"
+      ;;
+    rename*)
+      COMMIT_MSG="📝 Rename:${COMMIT_MSG#rename:}"
+      ;;
+    remove*)
+      COMMIT_MSG="🔥 Remove:${COMMIT_MSG#remove:}"
+      ;;
+    init*)
+      COMMIT_MSG="📌 Init:${COMMIT_MSG#init:}"
+      ;;
+    breaking*)
+      COMMIT_MSG="🚑 !BREAKING CHANGE:${COMMIT_MSG#breaking:}"
+      ;;
+    merge*)
+      COMMIT_MSG="🔔 Merge Request:${COMMIT_MSG#merge:}"
+      ;;
+    perf*)
+      COMMIT_MSG="⚡️ Perf:${COMMIT_MSG#perf:}"
+      ;;
+    ci*)
+      COMMIT_MSG="💚 CI:${COMMIT_MSG#ci:}"
+      ;;
+  esac
+
+  echo "$COMMIT_MSG" > "$COMMIT_MSG_FILE"
+fi
