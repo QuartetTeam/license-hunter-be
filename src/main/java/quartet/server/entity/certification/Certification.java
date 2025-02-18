@@ -18,7 +18,6 @@ public class Certification extends IdentifiableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="authority_id")
-    @Column(nullable = false, length = 100)
     @Comment("시행 기관")
     private Authority authority;
 
