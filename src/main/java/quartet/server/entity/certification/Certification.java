@@ -23,19 +23,19 @@ public class Certification extends IdentifiableEntity {
     private Authority authority;
 
     //TODO: 카테고리 엔티티 생성 후, 참조 관계로 변경해야함
-    private long category_id;
+    private long categoryId;
 
     //TODO: 카테고리 엔티티 생성 후, 참조 관계로 변경해야함
     // 외부 클래스에서 엔티티 직접 생성을 막습니다.
-    private Certification(String name, Authority  authority, long category_id){
+    private Certification(String name, Authority  authority, long categoryId){
         this.name = name;
         this.authority = authority;
-        this.category_id = category_id;
+        this.categoryId = categoryId;
     }
 
      // of()를 통해서 mapper가 엔티티를 생성할 수 있도록 합니다.
-    public static Certification of(String name, Authority  authority, long category_id){
+    public static Certification of(String name, Authority  authority, long categoryId){
         // 이후 엔티티를 생성과 관련된 비즈니스 로직이 생기는 경우 이곳에 추가합니다.
-        return new Certification(name, authority, category_id);
+        return new Certification(name, authority, categoryId);
     }
 }
