@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 public class Authority extends IdentifiableEntity {
     @Column(nullable = false, length = 100)
     @Comment("시행기관 이름")
-    String name;
+    private String name;
 
     @Column(nullable = false, length = 100)
     @Comment("시행기관 홈페이지")
