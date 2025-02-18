@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+import quartet.server.core.entity.BaseTimeEntity;
 import quartet.server.core.entity.IdentifiableEntity;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "authority")
-public class Authority extends IdentifiableEntity {
+public class Authority extends BaseTimeEntity {
     @Column(nullable = false, length = 100)
     @Comment("시행기관 이름")
     private String name;
