@@ -1,4 +1,4 @@
-package quartet.server.entity.certification;
+package quartet.server.domain.certification.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

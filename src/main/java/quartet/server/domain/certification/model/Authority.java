@@ -1,4 +1,4 @@
-package quartet.server.entity.certification;
+package quartet.server.domain.certification.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,9 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.BaseTimeEntity;
-import quartet.server.core.entity.IdentifiableEntity;
-
-import java.math.BigDecimal;
 
 @Entity
 @Getter
