@@ -2,8 +2,10 @@ package quartet.server.core.code;
 
 import org.springframework.http.HttpStatus;
 
-public interface CommonCode {
+public interface ResponseCode {
     HttpStatus getHttpStatus();
     String getMessage();
-    int getStatusValue();
+    default int getStatusValue() {
+        return getHttpStatus().value();
+    }
 }
