@@ -17,24 +17,40 @@ public class Certification extends IdentifiableEntity {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="authority_id")
+    @JoinColumn(name="authority_id", nullable = false)
     @Comment("시행 기관")
     private Authority authority;
 
-    //TODO: 카테고리 엔티티 생성 후, 참조 관계로 변경해야함
+    //TODO 최지희: 카테고리 엔티티 생성되면, 참조 관계로 변경해야함
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name="category_id",  nullable = false)
+//    @Comment("자격증 카테고리 대분류")
     private long categoryId;
 
-    //TODO: 카테고리 엔티티 생성 후, 참조 관계로 변경해야함
-    // 외부 클래스에서 엔티티 직접 생성을 막습니다.
-    private Certification(String name, Authority  authority, long categoryId){
+    //TODO 최지희: 카테고리 엔티티 생성되면, 참조 관계로 변경해야함
+    //@ManyToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(name="sub_category_id",  nullable = false)
+    //@Comment("자격증 카테고리 소분류")
+    private long subCategoryId;
+
+    @Column(nullable = false)
+    @Comment("상세 페이지 조회 수")
+    private int viewCount = 0;
+
+
+    //TODO 최지희: 카테고리 엔티티 생성 후, 참조 관계로 변경해야함
+    private Certification(String name, Authority  authority, long categoryId, long subCategoryId){
         this.name = name;
         this.authority = authority;
         this.categoryId = categoryId;
+        this.subCategoryId = subCategoryId;
     }
 
-     // of()를 통해서 mapper가 엔티티를 생성할 수 있도록 합니다.
-    public static Certification of(String name, Authority  authority, long categoryId){
-        // 이후 엔티티를 생성과 관련된 비즈니스 로직이 생기는 경우 이곳에 추가합니다.
-        return new Certification(name, authority, categoryId);
+    public static Certification of(String name, Authority  authority, long categoryId, long subCategoryId){
+        return new Certification(name, authority, categoryId, subCategoryId);
+    }
+
+     public void incrementViewCount() {
+        this.viewCount++;
     }
 }
