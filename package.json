@@ -6,5 +6,10 @@
   },
   "scripts": {
     "prepare": "husky install"
+  },
+  "jira-prepare-commit-msg": {
+    "messagePattern": "[$J] $M",
+    "allowEmptyCommitMessage": false,
+    "ignoredBranchesPattern": "^(master|main|dev|develop|development|release)$"
   }
 }
