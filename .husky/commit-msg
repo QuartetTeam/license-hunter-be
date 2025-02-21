@@ -1,0 +1,11 @@
+#!/bin/sh
+# .husky/commit-msg
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+if ! echo "$COMMIT_MSG" | grep -qE '^(\[[A-Z]+-[0-9]+\] )?(✨ Feat|🎯 Fix|🚧 Progress|🐛 Bug|🎨 Design|💄 Style|♻️ Refactor|💡 Comment|📋 Docs|✅ Test|🔖 Chore|📝 Rename|🔥 Rename|📌 Init|🚑 !BREAKING CHANGE|🔔 Merge Request|⚡️ Perf|💚 CI): .+'; then
+  echo "ERROR: 커밋 메시지는 [티켓번호](생략가능) + 깃모지 + 타입 + 콜론(:) 형식을 따라야 합니다."
+  echo "예: [QUAR-1] ✨ Feat: 새로운 기능 추가"
+  exit 1
+fi

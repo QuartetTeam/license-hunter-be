@@ -66,3 +66,5 @@ if [ "$COMMIT_SOURCE" = "message" ]; then
 
   echo "$COMMIT_MSG" > "$COMMIT_MSG_FILE"
 fi
+
+npx jira-prepare-commit-msg $1
