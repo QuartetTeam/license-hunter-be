@@ -15,10 +15,10 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
-      - name: Checkout main code
+      - name: Checkout develop code
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: develop
 
       - name: Issue Parser
         uses: stefanbuck/github-issue-praser@v3
@@ -89,21 +89,6 @@ jobs:
           ISSUE_NUMBER="${{ steps.create.outputs.issue }}"
           echo "ISSUE_NUMBER: ${ISSUE_NUMBER}"
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
-
-      - name: Create branch from main for hotfix
-        if: ${{ env.PREFIX == 'hotfix' }}
-        run: |
-          BRANCH_NAME="${PREFIX}/${ISSUE_NUMBER}-${SUFFIX}"
-          echo "BRANCH_NAME: ${BRANCH_NAME}"
-          git checkout -b "${BRANCH_NAME}"
-          git push origin "${BRANCH_NAME}"
-          echo "'hotfix' 브랜치를 생성합니다."
-          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-          
-      - name: Checkout develop branch
-        uses: actions/checkout@v4
-        with:
-          ref: develop
       
       - name: Create branch from develop for feature
         if: ${{ env.PREFIX == 'feature' }}
@@ -113,6 +98,21 @@ jobs:
           git checkout -b "${BRANCH_NAME}"
           git push origin "${BRANCH_NAME}"
           echo "'feature' 브랜치를 생성합니다."
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+
+      - name: Checkout main code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      
+      - name: Create branch from main for hotfix
+        if: ${{ env.PREFIX == 'hotfix' }}
+        run: |
+          BRANCH_NAME="${PREFIX}/${ISSUE_NUMBER}-${SUFFIX}"
+          echo "BRANCH_NAME: ${BRANCH_NAME}"
+          git checkout -b "${BRANCH_NAME}"
+          git push origin "${BRANCH_NAME}"
+          echo "'hotfix' 브랜치를 생성합니다."
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
 
       - name: Append new branch name to update UPDATED_BODY
@@ -152,4 +152,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: 'Jira Issue Created: [${{ steps.create.outputs.issue }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.create.outputs.issue }})'
-      
