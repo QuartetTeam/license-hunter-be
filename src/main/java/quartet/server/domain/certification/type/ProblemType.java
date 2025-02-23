@@ -7,7 +7,7 @@ public enum ProblemType {
 
     private final String value;
 
-    ProblemType(String value) {
+    ProblemType(final String value) {
         this.value = value;
     }
 
