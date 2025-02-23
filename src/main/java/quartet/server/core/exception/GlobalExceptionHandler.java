@@ -55,13 +55,13 @@ public class GlobalExceptionHandler {
         return ApiResponse.fail(e.getErrorCode());
     }
     @ExceptionHandler(CalendarException.class)
-    protected ApiResponse<Void> handleExampleException(final CalendarException e) {
+    protected ApiResponse<Void> handleCalendarException(final CalendarException e) {
         log.warn("[CalendarException] : {}", e.getMessage(), e);
         return ApiResponse.fail(e.getErrorCode());
     }
 
     @ExceptionHandler(MailException.class)
-    protected ApiResponse<Void> handleExampleException(final MailException e) {
+    protected ApiResponse<Void> handleMailException(final MailException e) {
         log.warn("[MailException] : {}", e.getMessage(), e);
         return ApiResponse.fail(e.getErrorCode());
     }
