@@ -15,13 +15,6 @@ import java.time.Instant;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "refresh_token")
 public class RefreshToken extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @Comment("리프레시 토큰 ID")
-    private Long id;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     @Comment("회원 ID")
@@ -35,17 +28,17 @@ public class RefreshToken extends BaseTimeEntity {
     @Comment("토큰 만료 시간")
     private Instant expiredAt;
 
-    private RefreshToken(Member member, String token, Instant expiredAt) {
+    private RefreshToken(final Member member, final String token, final Instant expiredAt) {
         this.member = member;
         this.token = token;
         this.expiredAt = expiredAt;
     }
 
-    public static RefreshToken of(Member member, String token, Instant expiredAt) {
+    public static RefreshToken of(final Member member, final String token, final Instant expiredAt) {
         return new RefreshToken(member, token, expiredAt);
     }
 
-    public void updateToken(String token, Instant expiredAt) {
+    public void updateToken(final String token, final Instant expiredAt) {
         this.token = token;
         this.expiredAt = expiredAt;
     }

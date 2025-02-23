@@ -30,12 +30,12 @@ public class MemberCategory extends BaseTimeEntity {
     @Comment("카테고리 ID")
     private Category category;
 
-    private MemberCategory(Member member, Category category) {
+    private MemberCategory(final Member member, final Category category) {
         this.member = member;
         this.category = category;
     }
 
-    public static MemberCategory of(Member member, Category category) {
+    public static MemberCategory of(final Member member, final Category category) {
         return new MemberCategory(member, category);
     }
 }

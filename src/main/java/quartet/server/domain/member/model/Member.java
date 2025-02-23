@@ -19,13 +19,6 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "member")
 public class Member extends BaseAuditEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @Comment("회원 ID")
-    private Long id;
-
     @Column(name = "social_id", length = 100, nullable = false, unique = true)
     @Comment("소셜 로그인 아이디")
     private String socialId;
@@ -75,8 +68,8 @@ public class Member extends BaseAuditEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MailAlarm> mailAlarms = new ArrayList<>();
 
-    private Member(String socialId, String socialProvider, String email, String nickname,
-                   String profileImageUrl, String introduction) {
+    private Member(final String socialId, final String socialProvider, final String email, final String nickname,
+                   final String profileImageUrl, final String introduction) {
         this.socialId = socialId;
         this.socialProvider = socialProvider;
         this.email = email;
@@ -86,13 +79,12 @@ public class Member extends BaseAuditEntity {
         this.createdAt = LocalDateTime.now();
     }
 
-    public static Member of(String socialId, String socialProvider, String email, String nickname,
-                          String profileImageUrl, String introduction) {
+    public static Member of(final String socialId, final String socialProvider, final String email, final String nickname,
+                            final String profileImageUrl, final String introduction) {
         return new Member(socialId, socialProvider, email, nickname, profileImageUrl, introduction);
     }
 
-    // 업데이트 메서드
-    public void updateProfile(String nickname, String profileImageUrl, String introduction) {
+    public void updateProfile(final String nickname, final String profileImageUrl, final String introduction) {
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
         this.introduction = introduction;
