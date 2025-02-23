@@ -42,8 +42,8 @@ public class CertificationExamDetail extends IdentifiableEntity {
     private Integer duration;
 
 
-    private CertificationExamDetail(Certification certification, ExamType examType, String subject,
-                                   ProblemType problemType, Integer totalProblemsCount, Integer duration) {
+    private CertificationExamDetail(final Certification certification, final ExamType examType, final String subject,
+                                   final ProblemType problemType, final Integer totalProblemsCount, final Integer duration) {
         this.certification = certification;
         this.examType = examType;
         this.subject = subject;
@@ -52,8 +52,8 @@ public class CertificationExamDetail extends IdentifiableEntity {
         this.duration = duration;
     }
 
-    public static CertificationExamDetail of(Certification certification, ExamType examType, String subject,
-                                             ProblemType problemType, Integer totalProblemsCount, Integer duration) {
+    public static CertificationExamDetail of(final Certification certification, final ExamType examType, final String subject,
+                                             final ProblemType problemType, final Integer totalProblemsCount, final Integer duration) {
         return new CertificationExamDetail(certification, examType, subject, problemType, totalProblemsCount, duration);
     }
 
