@@ -6,7 +6,7 @@ public enum ExamType {
 
     private final String value;
 
-    ExamType(String value){
+    ExamType(final String value){
         this.value = value;
     }
 

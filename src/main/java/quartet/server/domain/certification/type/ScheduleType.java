@@ -7,7 +7,7 @@ public enum ScheduleType {
 
     private final String value;
 
-    ScheduleType(String value){
+    ScheduleType(final String value){
         this.value = value;
     }
 
