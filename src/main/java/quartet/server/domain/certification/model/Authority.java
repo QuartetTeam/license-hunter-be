@@ -30,14 +30,14 @@ public class Authority extends IdentifiableEntity {
     @Comment("시행기관 아이콘 이미지")
     private String iconImageUrl;
 
-    private Authority(String name, String websiteUrl, String applicationUrl, String iconImageUrl) {
+    private Authority(final String name, final String websiteUrl, final String applicationUrl, final String iconImageUrl) {
         this.name = name;
         this.websiteUrl = websiteUrl;
         this.applicationUrl = applicationUrl;
         this.iconImageUrl = iconImageUrl;
     }
 
-    public static Authority of(String name, String websiteUrl, String applicationUrl, String iconImageUrl){
+    public static Authority of(final String name, final String websiteUrl, final String applicationUrl, final String iconImageUrl){
         return new Authority(name, websiteUrl, applicationUrl, iconImageUrl);
     }
 }
