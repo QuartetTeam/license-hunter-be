@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import quartet.server.core.entity.IdentifiableEntity;
+import quartet.server.domain.member.model.Member;
 
 import java.time.Instant;
 
@@ -15,10 +16,9 @@ import java.time.Instant;
 @Table(name = "certification_view_log")
 public class CertificationViewLog extends IdentifiableEntity {
 
-    //@Todo 최지희: user 엔티티 생성된 후, 참조 관계 설정
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "user_id", nullable = false)
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certification_id", nullable = false)
@@ -28,12 +28,12 @@ public class CertificationViewLog extends IdentifiableEntity {
     @Column(name = "created_at",nullable = false, updatable = false)
     private Instant createdAt;
 
-    private CertificationViewLog(final Integer userId, final Certification certification) {
-        this.userId = userId;
+    private CertificationViewLog(final Member member, final Certification certification) {
+        this.member = member;
         this.certification = certification;
     }
 
-    public static CertificationViewLog of(final Integer userId, final Certification certification) {
-        return new CertificationViewLog(userId, certification);
+    public static CertificationViewLog of(final Member member, final Certification certification) {
+        return new CertificationViewLog(member, certification);
     }
 }
