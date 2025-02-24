@@ -22,12 +22,12 @@ public class Category extends IdentifiableEntity {
     @Comment("부모 카테고리 ID")
     private Category parentCategory;
 
-    private Category(String name, Category parentCategory) {
+    private Category(final String name, final Category parentCategory) {
         this.name = name;
         this.parentCategory = parentCategory;
     }
 
-    public static Category of(String name, Category parentCategory) {
+    public static Category of(final String name, final Category parentCategory) {
         return new Category(name, parentCategory);
     }
 }
