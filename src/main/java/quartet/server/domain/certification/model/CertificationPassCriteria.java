@@ -26,13 +26,13 @@ public class CertificationPassCriteria extends IdentifiableEntity {
     @Comment("합격 기준")
     private String criteria;
 
-    private CertificationPassCriteria(Certification certification, ExamType examType, String criteria) {
+    private CertificationPassCriteria(final Certification certification, final ExamType examType, final String criteria) {
         this.certification = certification;
         this.examType = examType;
         this.criteria = criteria;
     }
 
-     public static CertificationPassCriteria of(Certification certification, ExamType examType, String criteria) {
+     public static CertificationPassCriteria of(final Certification certification, final ExamType examType, final String criteria) {
         return new CertificationPassCriteria(certification, examType, criteria);
     }
 }

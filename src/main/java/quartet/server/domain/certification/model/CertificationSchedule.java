@@ -27,13 +27,13 @@ public class CertificationSchedule extends BaseTimeEntity {
     @Comment("일정 종류")
     private ScheduleType scheduleType;
 
-    private CertificationSchedule(Certification certification, ExamType examType, ScheduleType scheduleType) {
+    private CertificationSchedule(final Certification certification, final ExamType examType, final ScheduleType scheduleType) {
         this.certification = certification;
         this.examType = examType;
         this.scheduleType = scheduleType;
     }
 
-    public static CertificationSchedule of(Certification certification, ExamType examType, ScheduleType scheduleType) {
+    public static CertificationSchedule of(final Certification certification, final ExamType examType, final ScheduleType scheduleType) {
         return new CertificationSchedule(certification, examType, scheduleType);
     }
 

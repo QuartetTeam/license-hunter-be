@@ -28,12 +28,12 @@ public class CertificationViewLog extends IdentifiableEntity {
     @Column(name = "created_at",nullable = false, updatable = false)
     private Instant createdAt;
 
-    private CertificationViewLog(Integer userId, Certification certification) {
+    private CertificationViewLog(final Integer userId, final Certification certification) {
         this.userId = userId;
         this.certification = certification;
     }
 
-    public static CertificationViewLog of(Integer userId, Certification certification) {
+    public static CertificationViewLog of(final Integer userId, final Certification certification) {
         return new CertificationViewLog(userId, certification);
     }
 }
