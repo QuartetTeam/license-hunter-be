@@ -39,14 +39,14 @@ public class Certification extends IdentifiableEntity {
 
 
     //TODO 최지희: 카테고리 엔티티 생성 후, 참조 관계로 변경해야함
-    private Certification(String name, Authority  authority, long categoryId, long subCategoryId){
+    private Certification(final String name, final Authority  authority, final long categoryId, final long subCategoryId){
         this.name = name;
         this.authority = authority;
         this.categoryId = categoryId;
         this.subCategoryId = subCategoryId;
     }
 
-    public static Certification of(String name, Authority  authority, long categoryId, long subCategoryId){
+    public static Certification of(final String name, final Authority  authority, final long categoryId, final long subCategoryId){
         return new Certification(name, authority, categoryId, subCategoryId);
     }
 
