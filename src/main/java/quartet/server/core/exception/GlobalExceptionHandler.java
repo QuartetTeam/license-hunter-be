@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import quartet.server.api.common.response.ApiResponse;
 import quartet.server.core.code.CommonErrorCode;
+import quartet.server.domain.calender.exception.CalendarException;
 import quartet.server.domain.example.exception.ExampleException;
+import quartet.server.domain.mail.exception.MailException;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -50,6 +52,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ExampleException.class)
     protected ApiResponse<Void> handleExampleException(final ExampleException e) {
         log.warn("[ExampleException] : {}", e.getMessage(), e);
+        return ApiResponse.fail(e.getErrorCode());
+    }
+    @ExceptionHandler(CalendarException.class)
+    protected ApiResponse<Void> handleCalendarException(final CalendarException e) {
+        log.warn("[CalendarException] : {}", e.getMessage(), e);
+        return ApiResponse.fail(e.getErrorCode());
+    }
+
+    @ExceptionHandler(MailException.class)
+    protected ApiResponse<Void> handleMailException(final MailException e) {
+        log.warn("[MailException] : {}", e.getMessage(), e);
         return ApiResponse.fail(e.getErrorCode());
     }
 
