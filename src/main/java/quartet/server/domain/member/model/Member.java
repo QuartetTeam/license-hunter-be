@@ -43,14 +43,6 @@ public class Member extends BaseAuditEntity {
     @Comment("프로필 한 줄 소개")
     private String introduction;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Comment("가입 날짜")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    @Comment("정보 수정 날짜")
-    private LocalDateTime updatedAt;
-
     @Column(name = "deleted_at")
     @Comment("계정 삭제 날짜")
     private LocalDateTime deletedAt;
@@ -76,7 +68,6 @@ public class Member extends BaseAuditEntity {
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
         this.introduction = introduction;
-        this.createdAt = LocalDateTime.now();
     }
 
     public static Member of(final String socialId, final String socialProvider, final String email, final String nickname,
@@ -88,7 +79,6 @@ public class Member extends BaseAuditEntity {
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
         this.introduction = introduction;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void delete() {
