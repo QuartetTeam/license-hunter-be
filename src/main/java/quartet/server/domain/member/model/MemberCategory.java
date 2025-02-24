@@ -14,12 +14,6 @@ import quartet.server.domain.category.model.Category;
 @Table(name = "member_category")
 public class MemberCategory extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @Comment("회원-카테고리 매핑 ID")
-    private Long id;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     @Comment("회원 ID")
