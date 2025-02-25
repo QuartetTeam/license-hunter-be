@@ -1,0 +1,48 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:mysql://${DATABASE_HOST:localhost}:${DATABASE_PORT:3306}/${DATABASE_NAME:quartet_db}?useSSL=false&serverTimezone=Asia/Seoul
+    username: ${DATABASE_USER:user}
+    password: ${DATABASE_PASSWORD:1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 30000
+
+  jpa:
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format-sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  logging:
+    level:
+      org:
+        springframework:
+          web: DEBUG
+      hibernate:
+        type: TRACE
+  web:
+    resources:
+      add-mappings: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+server:
+  port: 8080
