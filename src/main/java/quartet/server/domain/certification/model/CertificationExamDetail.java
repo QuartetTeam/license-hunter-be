@@ -22,6 +22,7 @@ public class CertificationExamDetail extends IdentifiableEntity {
 
     @Column(nullable = false)
     @Comment("시험 종류")
+    @Enumerated(EnumType.STRING)
     private ExamType examType;
 
     @Column(nullable = false, length = 30)
@@ -30,8 +31,8 @@ public class CertificationExamDetail extends IdentifiableEntity {
 
     @Column(nullable = false)
     @Comment("문제 유형")
+    @Enumerated(EnumType.STRING)
     private ProblemType problemType;
-
 
     @Column(nullable = false)
     @Comment("총 문제수")
