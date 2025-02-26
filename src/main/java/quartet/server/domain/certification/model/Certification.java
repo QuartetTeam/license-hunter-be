@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.IdentifiableEntity;
+import quartet.server.domain.category.model.Category;
 
 @Entity
 @Getter
@@ -21,33 +22,29 @@ public class Certification extends IdentifiableEntity {
     @Comment("시행 기관")
     private Authority authority;
 
-    //TODO 최지희: 카테고리 엔티티 생성되면, 참조 관계로 변경해야함
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name="category_id",  nullable = false)
-//    @Comment("자격증 카테고리 대분류")
-    private long categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="category_id",  nullable = false)
+    @Comment("자격증 카테고리 대분류")
+    private Category category;
 
-    //TODO 최지희: 카테고리 엔티티 생성되면, 참조 관계로 변경해야함
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name="sub_category_id",  nullable = false)
-    //@Comment("자격증 카테고리 소분류")
-    private long subCategoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="sub_category_id",  nullable = true)
+    @Comment("자격증 카테고리 소분류")
+    private Category subCategory;
 
     @Column(nullable = false)
     @Comment("상세 페이지 조회 수")
     private int viewCount = 0;
 
-
-    //TODO 최지희: 카테고리 엔티티 생성 후, 참조 관계로 변경해야함
-    private Certification(final String name, final Authority  authority, final long categoryId, final long subCategoryId){
+    private Certification(final String name, final Authority  authority, final Category category, final Category subCategory){
         this.name = name;
         this.authority = authority;
-        this.categoryId = categoryId;
-        this.subCategoryId = subCategoryId;
+        this.category = category;
+        this.subCategory = subCategory;
     }
 
-    public static Certification of(final String name, final Authority  authority, final long categoryId, final long subCategoryId){
-        return new Certification(name, authority, categoryId, subCategoryId);
+    public static Certification of(final String name, final Authority  authority, final Category category, final Category subCategory){
+        return new Certification(name, authority, category, subCategory);
     }
 
      public void incrementViewCount() {

@@ -9,6 +9,8 @@ import quartet.server.core.entity.BaseTimeEntity;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ScheduleType;
 
+import java.time.Instant;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,20 +23,28 @@ public class CertificationSchedule extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Comment("시험 종류")
+    @Enumerated(EnumType.STRING)
     private ExamType examType;
 
     @Column(nullable = false)
     @Comment("일정 종류")
+    @Enumerated(EnumType.STRING)
     private ScheduleType scheduleType;
 
-    private CertificationSchedule(final Certification certification, final ExamType examType, final ScheduleType scheduleType) {
+    @Column(nullable = false)
+    @Comment("일자")
+    private Instant scheduledDate;
+
+
+    private CertificationSchedule(final Certification certification, final ExamType examType, final ScheduleType scheduleType, final Instant scheduledDate) {
         this.certification = certification;
         this.examType = examType;
         this.scheduleType = scheduleType;
+        this.scheduledDate = scheduledDate;
     }
 
-    public static CertificationSchedule of(final Certification certification, final ExamType examType, final ScheduleType scheduleType) {
-        return new CertificationSchedule(certification, examType, scheduleType);
+    public static CertificationSchedule of(final Certification certification, final ExamType examType, final ScheduleType scheduleType, final Instant scheduledDate) {
+        return new CertificationSchedule(certification, examType, scheduleType,scheduledDate);
     }
 
 }
