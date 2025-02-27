@@ -12,7 +12,13 @@ import quartet.server.domain.member.model.Member;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "calendar")
+@Table(name = "calendar",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"member_id", "certification_id"},
+                        name = "uk_member_certification"
+                )
+        })
 public class Calendar extends BaseAuditEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memeber_id", nullable = false)
