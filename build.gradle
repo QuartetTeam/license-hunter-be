@@ -33,8 +33,11 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+  	testImplementation 'com.h2database:h2'	// TODO 최지희: 임시
 
 	// querydsl
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
