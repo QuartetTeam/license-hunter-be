@@ -22,6 +22,9 @@ public class Category extends IdentifiableEntity {
     @Comment("부모 카테고리 ID")
     private Category parentCategory;
 
+    @Comment("디폴트 디스플레이 여부")
+    private Boolean isDefault = false;
+
     private Category(final String name, final Category parentCategory) {
         this.name = name;
         this.parentCategory = parentCategory;

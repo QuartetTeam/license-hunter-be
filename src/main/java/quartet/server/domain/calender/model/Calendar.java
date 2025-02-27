@@ -12,10 +12,16 @@ import quartet.server.domain.member.model.Member;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "calendar")
+@Table(name = "calendar",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"member_id", "certification_id"},
+                        name = "uk_member_certification"
+                )
+        })
 public class Calendar extends BaseAuditEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "memeber_id", nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     @Comment("캘린더를 구독한 사용자")
     private Member member;
 
@@ -23,4 +29,13 @@ public class Calendar extends BaseAuditEntity {
     @JoinColumn(name = "certification_id", nullable = false)
     @Comment("구독한 자격증")
     private Certification certification;
+
+    private Calendar(final Member member, final Certification certification) {
+        this.member = member;
+        this.certification = certification;
+    }
+
+    public static Calendar of(final Member member, final Certification certification) {
+        return new Calendar(member, certification);
+    }
 }
