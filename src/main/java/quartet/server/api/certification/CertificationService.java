@@ -1,10 +1,19 @@
 package quartet.server.api.certification;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
 import quartet.server.api.certification.dto.response.CertificationRes;
+import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;
 import quartet.server.api.certification.query.CertificationQueryRepository;
+import quartet.server.domain.category.model.Category;
+import quartet.server.domain.category.repository.CategoryRepository;
 import quartet.server.domain.certification.repository.*;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,9 +24,49 @@ public class CertificationService {
     private final CertificationPassCriteriaRepository certificationPassCriteriaRepository;
     private final CertificationScheduleRepository certificationScheduleRepository;
     private final CertificationViewLogRepository certificationViewLogRepository;
+    private final CategoryRepository categoryRepository;
+
     private final CertificationQueryRepository certificationQueryRepository;
 
+    @Transactional(readOnly = true)
     public CertificationRes getCertification(long certificationId) {
         return certificationQueryRepository.getCertification(certificationId);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CertificationsByCategoryRes> getAllCertificationsByCategory(
+            long categoryId, boolean isSubCategory, Pageable pageable){
+
+        // 대분류 카테고리가 주어질 경우 -> 디폴트 서브 카테고리로 변경한 후, 검색
+        if (!isSubCategory) categoryId = certificationQueryRepository.getDefaultSubCategoryId(categoryId);
+
+        return certificationQueryRepository.findAllCertificationByCategory(categoryId,pageable);
+    }
+
+    // TODO 최지희 - 리뷰
+    // 소분류 카테고리 조회
+    @Transactional(readOnly = true)
+    public List<CertificationCategoriesRes> getCategories(long parentId){
+        List<Category> subCategoryList = categoryRepository.findByParentCategory_Id(parentId);
+
+        return subCategoryList.stream()
+                .map(category -> new CertificationCategoriesRes(category.getId(), category.getName()))
+                .toList();
+    }
+
+    // TODO 최지희 - 리뷰
+    // 대분류 카테고리 조회
+    @Transactional(readOnly = true)
+    public List<CertificationCategoriesRes> getCategories(boolean isDefault){
+        List<Category> categoryList;
+        if (isDefault) {
+            categoryList = categoryRepository.findByIsDefaultTrue();
+        } else {
+            categoryList = categoryRepository.findByIsDefaultFalseAndParentCategoryIsNull();
+        }
+
+        return categoryList.stream()
+                .map(category -> new CertificationCategoriesRes(category.getId(), category.getName()))
+                .toList();
     }
 }

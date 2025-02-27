@@ -24,27 +24,21 @@ public class Certification extends IdentifiableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="category_id",  nullable = false)
-    @Comment("자격증 카테고리 대분류")
+    @Comment("자격증 카테고리(소분류 기준)")
     private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="sub_category_id",  nullable = true)
-    @Comment("자격증 카테고리 소분류")
-    private Category subCategory;
 
     @Column(nullable = false)
     @Comment("상세 페이지 조회 수")
     private int viewCount = 0;
 
-    private Certification(final String name, final Authority  authority, final Category category, final Category subCategory){
+    private Certification(final String name, final Authority  authority, final Category category){
         this.name = name;
         this.authority = authority;
         this.category = category;
-        this.subCategory = subCategory;
     }
 
-    public static Certification of(final String name, final Authority  authority, final Category category, final Category subCategory){
-        return new Certification(name, authority, category, subCategory);
+    public static Certification of(final String name, final Authority  authority, final Category category){
+        return new Certification(name, authority, category);
     }
 
      public void incrementViewCount() {

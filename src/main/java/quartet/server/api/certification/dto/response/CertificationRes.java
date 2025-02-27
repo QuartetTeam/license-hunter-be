@@ -7,13 +7,13 @@ import quartet.server.domain.certification.type.ScheduleType;
 
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 public record CertificationRes (
+        long id,
         String name,
         String authorityName,
-        String authorityIconImagePath,
+        String authorityIconImageUrl,
         String applicationUrl,
         String description,
         String qualification,
@@ -22,18 +22,20 @@ public record CertificationRes (
 ){
     @QueryProjection
     public CertificationRes(
+        long id,
         String name,
         String authorityName,
-        String authorityIconImagePath,
+        String authorityIconImageUrl,
         String applicationUrl,
         String description,
         String qualification,
         Set<CertificationScheduleRes> scheduleSet,
         Set<CertificationExamDetailRes> examDetailSet
     ) {
+        this.id = id;
         this.name = name;
         this.authorityName = authorityName;
-        this.authorityIconImagePath = authorityIconImagePath;
+        this.authorityIconImageUrl = authorityIconImageUrl;
         this.applicationUrl = applicationUrl;
         this.description = description;
         this.qualification = qualification;
