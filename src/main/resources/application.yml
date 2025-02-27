@@ -1,41 +1,4 @@
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/quartet_db?useSSL=false&serverTimezone=Asia/Seoul
-    username: user
-    password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      idle-timeout: 30000
-      connection-timeout: 30000
-
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format-sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
-
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    web:
-    resources:
-      add-mappings: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info
-  endpoint:
-    health:
-      show-details: always
-
-server:
-  port: 8080
+  profiles:
+    active:
+      - develop

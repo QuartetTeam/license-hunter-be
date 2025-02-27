@@ -7,16 +7,17 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.BaseAuditEntity;
 import quartet.server.domain.certification.model.Certification;
+import quartet.server.domain.member.model.Member;
 
 @Entity
-@Table(name = "calendar")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Calendar extends BaseAuditEntity { // todo: User 엔티티 생성후 주석 해제 예정
-//    @ManyToOne(fetch = FetchType.LAZY) //
-//    @JoinColumn(name = "user_id", nullable = false)
-//    @Comment("캘린더를 구독한 사용자")
-//    private User user;
+@Table(name = "calendar")
+public class Calendar extends BaseAuditEntity {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "memeber_id", nullable = false)
+    @Comment("캘린더를 구독한 사용자")
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certification_id", nullable = false)

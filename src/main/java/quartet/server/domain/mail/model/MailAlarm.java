@@ -7,17 +7,26 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.BaseAuditEntity;
 import quartet.server.domain.certification.model.Certification;
+import quartet.server.domain.mail.type.MailAlarmStatus;
+import quartet.server.domain.member.model.Member;
 
 @Entity
-@Table(name = "mail_alarm")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MailAlarm extends BaseAuditEntity { // todo: User 엔티티 생성후 주석 해제 예정
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    @Comment("알림을 구독한 사용자")
-//    private User user;
-//
+@Table(name = "mail_alarm",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_mail_alarm_member_certification",
+                        columnNames = {"member_id", "certification_id"}
+                )
+        }
+)
+public class MailAlarm extends BaseAuditEntity {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    @Comment("알림을 구독한 사용자")
+    private Member member;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certification_id", nullable = false)
     @Comment("알림 대상 자격증")
