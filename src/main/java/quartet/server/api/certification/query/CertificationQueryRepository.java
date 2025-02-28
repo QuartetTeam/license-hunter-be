@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import quartet.server.api.certification.dto.response.*;
-import quartet.server.domain.category.exception.CategoryNotFoundException;
 import quartet.server.domain.category.model.QCategory;
 import quartet.server.domain.certification.model.*;
 import quartet.server.domain.certification.type.ExamType;
@@ -74,17 +73,15 @@ public class CertificationQueryRepository {
         return Optional.ofNullable(result.get(certificationId));
     }
 
-    public long getDefaultSubCategoryId(long categoryId){
+    public Optional<Long> getDefaultSubCategoryId(long categoryId){
         QCategory category = QCategory.category;
 
         // TODO 최지희: default 서브 카테고리 선정 기준 논의 필요
-        return Optional.ofNullable(
-                        queryFactory
-                        .select(category.id)
-                        .from(category)
-                        .where(category.parentCategory.id.eq(categoryId))
-                        .fetchFirst())
-                .orElseThrow(CategoryNotFoundException::new);
+        return Optional.ofNullable(queryFactory
+                    .select(category.id)
+                    .from(category)
+                    .where(category.parentCategory.id.eq(categoryId))
+                    .fetchFirst());
     }
 
     private JPAQuery<Long> findAllCertificationsByCategoryBaseQuery(long subCategoryId){
