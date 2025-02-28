@@ -16,11 +16,14 @@ import quartet.server.api.certification.dto.response.CertificationsByCategoryRes
 import quartet.server.api.certification.query.CertificationQueryRepository;
 import quartet.server.domain.category.model.Category;
 import quartet.server.domain.category.repository.CategoryRepository;
+import quartet.server.domain.certification.exception.CertificationNotFoundException;
 import quartet.server.utils.fixture.CertificationFixture;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 
@@ -191,8 +194,7 @@ class CertificationServiceTest {
             // given
             long certificationId = 1L;
             CertificationRes certificationRes = CertificationFixture.certificationRes(certificationId);
-
-            when(certificationQueryRepository.getCertification(certificationId)).thenReturn(certificationRes);
+            when(certificationQueryRepository.getCertification(certificationId)).thenReturn(Optional.of(certificationRes));
 
             // when
             CertificationRes result = certificationService.getCertification(certificationId);
@@ -201,6 +203,17 @@ class CertificationServiceTest {
             assertThat(result).isEqualTo(certificationRes);
             verify(certificationQueryRepository, times(1)).getCertification(certificationId);
 
+        }
+
+        @Test
+        public void fail_notFoundCertification(){
+            // given
+            long certificationId = 99L;
+            when(certificationQueryRepository.getCertification(certificationId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(CertificationNotFoundException.class, () -> {certificationService.getCertification(certificationId);});
+            verify(certificationQueryRepository, times(1)).getCertification(certificationId);
         }
     }
 

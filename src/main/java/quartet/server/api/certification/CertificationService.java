@@ -12,6 +12,7 @@ import quartet.server.api.certification.query.CertificationQueryRepository;
 import quartet.server.domain.category.model.Category;
 import quartet.server.domain.category.repository.CategoryRepository;
 import quartet.server.domain.certification.repository.*;
+import quartet.server.domain.certification.exception.CertificationNotFoundException;
 
 import java.util.List;
 
@@ -30,7 +31,8 @@ public class CertificationService {
 
     @Transactional(readOnly = true)
     public CertificationRes getCertification(long certificationId) {
-        return certificationQueryRepository.getCertification(certificationId);
+        return certificationQueryRepository.getCertification(certificationId)
+                 .orElseThrow(CertificationNotFoundException::new);
     }
 
     @Transactional(readOnly = true)
@@ -41,9 +43,9 @@ public class CertificationService {
         if (!isSubCategory) categoryId = certificationQueryRepository.getDefaultSubCategoryId(categoryId);
 
         return certificationQueryRepository.findAllCertificationByCategory(categoryId,pageable);
+
     }
 
-    // TODO 최지희 - 리뷰
     // 소분류 카테고리 조회
     @Transactional(readOnly = true)
     public List<CertificationCategoriesRes> getCategories(long parentId){
@@ -54,7 +56,6 @@ public class CertificationService {
                 .toList();
     }
 
-    // TODO 최지희 - 리뷰
     // 대분류 카테고리 조회
     @Transactional(readOnly = true)
     public List<CertificationCategoriesRes> getCategories(boolean isDefault){

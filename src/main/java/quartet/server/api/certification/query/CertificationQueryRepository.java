@@ -28,14 +28,14 @@ import static com.querydsl.core.types.dsl.Expressions.cases;
 public class CertificationQueryRepository {
     private final JPAQueryFactory queryFactory;
 
-    public CertificationRes getCertification(Long certificationId) {
+    public Optional<CertificationRes> getCertification(Long certificationId) {
         QCertification certification = QCertification.certification;
         QAuthority authority = QAuthority.authority;
         QCertificationDescription description = QCertificationDescription.certificationDescription;
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
         QCertificationExamDetail examDetail = QCertificationExamDetail.certificationExamDetail;
 
-        Map<Long, CertificationRes> transformResult =
+        Map<Long, CertificationRes> result =
                 queryFactory
                     .from(certification)
                     .leftJoin(certification.authority, authority)
@@ -71,7 +71,7 @@ public class CertificationQueryRepository {
                         )
                     ));
 
-        return transformResult.get(certificationId);
+        return Optional.ofNullable(result.get(certificationId));
     }
 
     public long getDefaultSubCategoryId(long categoryId){
