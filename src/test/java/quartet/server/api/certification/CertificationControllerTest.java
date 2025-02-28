@@ -12,8 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
 import quartet.server.api.certification.dto.response.CertificationRes;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;
-import quartet.server.utils.fixture.CertificationFixture;
-import quartet.server.utils.fixture.CertificationCategoryFixture;
+import quartet.server.utils.fixture.Certification.CertificationFixture;
+import quartet.server.utils.fixture.Certification.CertificationCategoryFixture;
 import java.util.*;
 import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.hasSize;
@@ -111,7 +111,6 @@ public class CertificationControllerTest {
 
         when(certificationService.getAllCertificationsByCategory(
                 eq(categoryId),
-                eq(true),
                 any(PageRequest.class)
         )).thenReturn(certificationPage);
 
