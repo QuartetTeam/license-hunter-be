@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/data")
 @RequiredArgsConstructor
 @Slf4j
-public class DataGeneratorController {
+public class DataGeneratorController { // TODO 박현제: 추후에 삭제 예정
 
     private final DataGeneratorService dataGeneratorService;
 
