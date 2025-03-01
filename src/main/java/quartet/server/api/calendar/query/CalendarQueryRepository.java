@@ -40,7 +40,7 @@ public class CalendarQueryRepository {
                         new QCalendarResponse(
                                 c.id,
                                 c.name,
-                                GroupBy.set(
+                                GroupBy.list(
                                         new QCalendarResponse_CalendarScheduleResponse(
                                                 cs.scheduleType,
                                                 cs.examType,

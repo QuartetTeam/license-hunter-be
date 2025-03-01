@@ -5,18 +5,18 @@ import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ScheduleType;
 
 import java.time.Instant;
-import java.util.Set;
+import java.util.List;
 
 public record CalendarResponse(
-        Long certificationId,
+        long certificationId,
         String certificationName,
-        Set<CalendarScheduleResponse> schedules
+        List<CalendarScheduleResponse> schedules
 ) {
         @QueryProjection
         public CalendarResponse(
-                Long certificationId,
+                long certificationId,
                 String certificationName,
-                Set<CalendarScheduleResponse> schedules
+                List<CalendarScheduleResponse> schedules
         ) {
                 this.certificationId = certificationId;
                 this.certificationName = certificationName;
