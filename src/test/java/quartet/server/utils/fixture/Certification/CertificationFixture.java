@@ -1,4 +1,4 @@
-package quartet.server.utils.fixture;
+package quartet.server.utils.fixture.Certification;
 
 import quartet.server.api.certification.dto.response.CertificationRes;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;

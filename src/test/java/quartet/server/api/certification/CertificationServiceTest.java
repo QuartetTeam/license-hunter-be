@@ -14,13 +14,20 @@ import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
 import quartet.server.api.certification.dto.response.CertificationRes;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;
 import quartet.server.api.certification.query.CertificationQueryRepository;
+import quartet.server.domain.category.exception.CategoryNotFoundException;
+import quartet.server.domain.category.exception.SubCategoryNotFoundException;
 import quartet.server.domain.category.model.Category;
 import quartet.server.domain.category.repository.CategoryRepository;
-import quartet.server.utils.fixture.CertificationFixture;
+import quartet.server.domain.certification.exception.CertificationNotFoundException;
+import quartet.server.utils.fixture.Certification.CertificationCategoryFixture;
+import quartet.server.utils.fixture.Certification.CertificationFixture;
+import quartet.server.utils.fixture.Pageable.PageableFixture;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 
@@ -133,24 +140,25 @@ class CertificationServiceTest {
 
     @Nested
     class getAllCertificationByCategory{
-        /* 특정 대분류 카테고리에 접속했을때, 디폴트로 보여지는 서브 카테고리에 대한 자격증 */
+        /* 특정 대분류 카테고리 id -> 디폴트 소분류에 대한 자격증 조회(모든 자격증은 소분류 id만 참조합니다) */
         @Test
         void success_withParentCategoryId(){
             // given
-            boolean isSubCategory = false;
             long categoryId = 1L;
             long subCategoryId = 2L;
-            Pageable pageable = PageRequest.of(0, 10);
+            Pageable pageable = PageableFixture.pageable();
+            Category category = CertificationCategoryFixture.parentCategory();
             List<CertificationsByCategoryRes> certificationList = CertificationFixture.certificationsByCategoryRes();
             Page<CertificationsByCategoryRes> certificationPage = new PageImpl<>(certificationList);
 
-            when(certificationQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(subCategoryId);
+            when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+            when(certificationQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(Optional.of(subCategoryId));
             when(certificationQueryRepository.findAllCertificationByCategory(subCategoryId,pageable))
                     .thenReturn(certificationPage);
 
             // when
             Page<CertificationsByCategoryRes> result = certificationService.getAllCertificationsByCategory(
-                    categoryId, isSubCategory, pageable);
+                    categoryId, pageable);
 
             // then
             assertThat(result).isEqualTo(certificationPage);
@@ -159,27 +167,56 @@ class CertificationServiceTest {
             verify(certificationQueryRepository, times(1)).findAllCertificationByCategory(subCategoryId, pageable);
         }
 
-        /* 특정 서브 카테고리를 선택했을때 조회되는 자격증 */
+        /* 특정 소분류 카테고리 id로 자격증 조회 */
         @Test
         void success_withSubCategoryId(){
             // given
-            boolean isSubCategory = true;
             long categoryId = 1L;
-            Pageable pageable = PageRequest.of(0, 10);
+            Pageable pageable = PageableFixture.pageable();
+            Category category = CertificationCategoryFixture.subCategory();
             List<CertificationsByCategoryRes> certificationList = CertificationFixture.certificationsByCategoryRes();
             Page<CertificationsByCategoryRes> certificationPage = new PageImpl<>(certificationList);
 
+            when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
             when(certificationQueryRepository.findAllCertificationByCategory(categoryId,pageable))
                     .thenReturn(certificationPage);
 
             // when
             Page<CertificationsByCategoryRes> result = certificationService.getAllCertificationsByCategory(
-                    categoryId, isSubCategory, pageable);
+                    categoryId, pageable);
 
             // then
             assertThat(result).isEqualTo(certificationPage);
             verify(certificationQueryRepository, never()).getDefaultSubCategoryId(anyLong());
             verify(certificationQueryRepository, times(1)).findAllCertificationByCategory(categoryId, pageable);
+        }
+
+        @Test
+        void fail_notFoundCategoryException(){
+            // given
+            long categoryId = 1L;
+            Pageable pageable = PageableFixture.pageable();
+            when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(CategoryNotFoundException.class, () -> {certificationService.getAllCertificationsByCategory(categoryId, pageable);});
+            verify(certificationQueryRepository, never()).getDefaultSubCategoryId(anyLong());
+            verify(certificationQueryRepository, never()).findAllCertificationByCategory(categoryId, pageable);
+        }
+
+        @Test
+        void fail_notFoundSubCategoryException(){
+            // given
+            long categoryId = 1L;
+            Pageable pageable = PageableFixture.pageable();
+            Category category = CertificationCategoryFixture.parentCategory();
+            when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+            when(certificationQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(SubCategoryNotFoundException.class, () -> {certificationService.getAllCertificationsByCategory(categoryId, pageable);});
+            verify(certificationQueryRepository, times(1)).getDefaultSubCategoryId(anyLong());
+            verify(certificationQueryRepository, never()).findAllCertificationByCategory(categoryId, pageable);
         }
     }
 
@@ -191,8 +228,7 @@ class CertificationServiceTest {
             // given
             long certificationId = 1L;
             CertificationRes certificationRes = CertificationFixture.certificationRes(certificationId);
-
-            when(certificationQueryRepository.getCertification(certificationId)).thenReturn(certificationRes);
+            when(certificationQueryRepository.getCertification(certificationId)).thenReturn(Optional.of(certificationRes));
 
             // when
             CertificationRes result = certificationService.getCertification(certificationId);
@@ -201,6 +237,17 @@ class CertificationServiceTest {
             assertThat(result).isEqualTo(certificationRes);
             verify(certificationQueryRepository, times(1)).getCertification(certificationId);
 
+        }
+
+        @Test
+        public void fail_notFoundCertification(){
+            // given
+            long certificationId = 99L;
+            when(certificationQueryRepository.getCertification(certificationId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(CertificationNotFoundException.class, () -> {certificationService.getCertification(certificationId);});
+            verify(certificationQueryRepository, times(1)).getCertification(certificationId);
         }
     }
 

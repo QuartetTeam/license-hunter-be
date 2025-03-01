@@ -12,6 +12,9 @@ import quartet.server.api.certification.query.CertificationQueryRepository;
 import quartet.server.domain.category.model.Category;
 import quartet.server.domain.category.repository.CategoryRepository;
 import quartet.server.domain.certification.repository.*;
+import quartet.server.domain.certification.exception.CertificationNotFoundException;
+import quartet.server.domain.category.exception.CategoryNotFoundException;
+import quartet.server.domain.category.exception.SubCategoryNotFoundException;
 
 import java.util.List;
 
@@ -30,20 +33,25 @@ public class CertificationService {
 
     @Transactional(readOnly = true)
     public CertificationRes getCertification(long certificationId) {
-        return certificationQueryRepository.getCertification(certificationId);
+        return certificationQueryRepository.getCertification(certificationId)
+                 .orElseThrow(CertificationNotFoundException::new);
     }
 
     @Transactional(readOnly = true)
     public Page<CertificationsByCategoryRes> getAllCertificationsByCategory(
-            long categoryId, boolean isSubCategory, Pageable pageable){
+            long categoryId,Pageable pageable){
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(CategoryNotFoundException::new);
 
         // 대분류 카테고리가 주어질 경우 -> 디폴트 서브 카테고리로 변경한 후, 검색
-        if (!isSubCategory) categoryId = certificationQueryRepository.getDefaultSubCategoryId(categoryId);
+        if (category.getParentCategory() == null) categoryId = certificationQueryRepository.getDefaultSubCategoryId(categoryId)
+                .orElseThrow(SubCategoryNotFoundException::new);
 
         return certificationQueryRepository.findAllCertificationByCategory(categoryId,pageable);
+
     }
 
-    // TODO 최지희 - 리뷰
     // 소분류 카테고리 조회
     @Transactional(readOnly = true)
     public List<CertificationCategoriesRes> getCategories(long parentId){
@@ -54,7 +62,6 @@ public class CertificationService {
                 .toList();
     }
 
-    // TODO 최지희 - 리뷰
     // 대분류 카테고리 조회
     @Transactional(readOnly = true)
     public List<CertificationCategoriesRes> getCategories(boolean isDefault){

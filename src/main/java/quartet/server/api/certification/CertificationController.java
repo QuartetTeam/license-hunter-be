@@ -44,13 +44,12 @@ public class CertificationController {
     @GetMapping("")
     public ApiResponse<Page<CertificationsByCategoryRes>>  getAllCertificationByCategory(
             @RequestParam long categoryId,
-            @RequestParam boolean isSubCategory,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int pageSize
     ){
         PageRequest pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("id")));
         Page<CertificationsByCategoryRes> certificationList = certificationService.getAllCertificationsByCategory(
-                categoryId, isSubCategory, pageable);
+                categoryId, pageable);
         return ApiResponse.success(OK,certificationList);
     }
 }
