@@ -1,4 +1,4 @@
-package quartet.server.core.exception;
+package quartet.server.core.advice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,11 +6,14 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import quartet.server.api.common.response.ApiResponse;
 import quartet.server.core.code.CommonErrorCode;
+import quartet.server.core.exception.BaseException;
 import quartet.server.domain.calender.exception.CalendarException;
 import quartet.server.domain.example.exception.ExampleException;
 import quartet.server.domain.mail.exception.MailException;
@@ -41,6 +44,18 @@ public class GlobalExceptionHandler {
     protected ApiResponse<Void> handleHttpRequestMethodNotSupportedException(final HttpRequestMethodNotSupportedException e) {
         log.warn("[HttpRequestMethodNotSupportedException]", e);
         return ApiResponse.fail(CommonErrorCode.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    protected ApiResponse<Void> handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
+        log.warn("[MethodArgumentTypeMismatchException]", e);
+        return ApiResponse.fail(CommonErrorCode.INVALID_INPUT_VALUE);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    protected ApiResponse<Void> handleMissingServletRequestParameter(final MissingServletRequestParameterException e) {
+        log.warn("[MissingServletRequestParameterException]", e);
+        return ApiResponse.fail(CommonErrorCode.INVALID_INPUT_VALUE);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)

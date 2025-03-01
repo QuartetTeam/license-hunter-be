@@ -19,20 +19,20 @@ public class CalendarController {
 
     @GetMapping("/calendars")
     public ApiResponse<List<CalendarResponse>> getCurrentMemberCalendars() {
-        Long memberId = 1L; // TODO 박현제: @AuthenticationPrincipal 로 변경 예정
+        long memberId = 1L; // TODO 박현제: @AuthenticationPrincipal 로 변경 예정
         return ApiResponse.success(OK, calendarService.getCalendarsByMemberId(memberId));
     }
 
     @PostMapping("/calendar/certifications/{certificationId}")
-    public ApiResponse<Void> subscribeCalendar(@PathVariable("certificationId") Long certificationId) {
-        Long memberId = 1L; // TODO 박현제: @AuthenticationPrincipal 로 변경 예정
+    public ApiResponse<Void> subscribeCalendar(@PathVariable("certificationId") long certificationId) {
+        long memberId = 1L; // TODO 박현제: @AuthenticationPrincipal 로 변경 예정
         calendarService.subscribeCalendar(memberId, certificationId);
         return ApiResponse.success(CREATED);
     }
 
     @DeleteMapping("/calendar/certifications/{certificationId}")
-    public ApiResponse<Void> unsubscribeCalendar(@PathVariable("certificationId") Long certificationId) {
-        Long memberId = 1L; // TODO: @AuthenticationPrincipal로 변경 예정
+    public ApiResponse<Void> unsubscribeCalendar(@PathVariable("certificationId") long certificationId) {
+        long memberId = 1L; // TODO: @AuthenticationPrincipal로 변경 예정
         calendarService.unsubscribeCalendar(memberId, certificationId);
         return ApiResponse.success(NO_CONTENT);
     }

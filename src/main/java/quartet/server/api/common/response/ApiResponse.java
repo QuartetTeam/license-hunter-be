@@ -22,19 +22,19 @@ public class ApiResponse<T> {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final List<FieldErrorResponse> errors;
 
-    public static <T> ApiResponse<T> success(ResponseCode successCode) {
+    public static <T> ApiResponse<T> success(final ResponseCode successCode) {
         return new ApiResponse<>(successCode.getStatusValue(), successCode.getMessage(), null, List.of());
     }
 
-    public static <T> ApiResponse<T> success(ResponseCode successCode, T data) {
+    public static <T> ApiResponse<T> success(final ResponseCode successCode, T data) {
         return new ApiResponse<>(successCode.getStatusValue(), successCode.getMessage(), data, List.of());
     }
 
-    public static <T> ApiResponse<T> fail(ResponseCode errorCode) {
+    public static <T> ApiResponse<T> fail(final ResponseCode errorCode) {
         return new ApiResponse<>(errorCode.getStatusValue(), errorCode.getMessage(), null, List.of());
     }
 
-    public static <T> ApiResponse<T> fail(ResponseCode errorCode, BindingResult bindingResult) {
+    public static <T> ApiResponse<T> fail(final ResponseCode errorCode, final BindingResult bindingResult) {
         return new ApiResponse<>(errorCode.getStatusValue(), errorCode.getMessage(), null, FieldErrorResponse.of(bindingResult));
     }
 

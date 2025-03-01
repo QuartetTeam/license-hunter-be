@@ -9,9 +9,9 @@ import quartet.server.domain.calender.exception.CalendarAlreadyExistsException;
 import quartet.server.domain.calender.exception.CalendarNotFoundException;
 import quartet.server.domain.calender.model.Calendar;
 import quartet.server.domain.calender.repository.CalendarRepository;
+import quartet.server.domain.certification.exception.CertificationNotFoundException;
 import quartet.server.domain.certification.model.Certification;
 import quartet.server.domain.certification.repository.CertificationRepository;
-import quartet.server.domain.example.exception.ExampleNotFoundException;
 import quartet.server.domain.member.exception.MemberNotFoundException;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
@@ -28,12 +28,13 @@ public class CalendarService {
     private final CertificationRepository certificationRepository;
     private final CalendarQueryRepository calendarQueryRepository;
 
-    public List<CalendarResponse> getCalendarsByMemberId(Long memberId) {
+    public List<CalendarResponse> getCalendarsByMemberId(final long memberId) {
+
         return calendarQueryRepository.findCalendarsByMemberId(memberId);
     }
 
     @Transactional
-    public void subscribeCalendar(final Long memberId, final Long certificationId) {
+    public void subscribeCalendar(final long memberId, final long certificationId) {
         final Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
 
@@ -50,12 +51,12 @@ public class CalendarService {
     }
 
     @Transactional
-    public void unsubscribeCalendar(Long memberId, Long certificationId) {
+    public void unsubscribeCalendar(final long memberId, final long certificationId) {
         final Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
 
         final Certification certification = certificationRepository.findById(certificationId)
-                .orElseThrow(ExampleNotFoundException::new); // TODO 박현제: 추후에 CertificationNotFoundException 으로 변경
+                .orElseThrow(CertificationNotFoundException::new);
 
         final Calendar calendar = calendarRepository.findByMemberIdAndCertificationId(member.getId(), certification.getId())
                 .orElseThrow(CalendarNotFoundException::new);
