@@ -1,5 +1,6 @@
 package quartet.server.api.certification;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,7 @@ class CertificationServiceTest {
     @Nested
     class getCategories{
         @Test
+        @DisplayName("메인페이지에 기본으로 나타나는 상위 자격증 카테고리를 조회한다")
         void success_withDefault(){
             // given
             boolean isDefault = true;
@@ -76,6 +78,7 @@ class CertificationServiceTest {
         }
 
         @Test
+        @DisplayName("메인페이지에 더보기 클릭시 나타나는 기타 상위 자격증 카테고리를 조회한다")
         void success_withExtra(){
             // given
             boolean isDefault = false;
@@ -105,7 +108,8 @@ class CertificationServiceTest {
         }
 
         @Test
-        void success_withSub(){
+        @DisplayName("특정 상위 카테고리에 속하는 하위 자격증 카테고리를 조회한다")
+        void success_byParentCategory(){
             // given
             long parentId = 1L;
             Category parentCategory = Category.of("IT", null);
@@ -140,8 +144,9 @@ class CertificationServiceTest {
 
     @Nested
     class getAllCertificationByCategory{
-        /* 특정 대분류 카테고리 id -> 디폴트 소분류에 대한 자격증 조회(모든 자격증은 소분류 id만 참조합니다) */
+        
         @Test
+        @DisplayName("특정 자격증 카테고리에 속하는 자격증들을 조회한다. 이때, 상위 카테고리 id가 제공되면, 디폴트 하위에 대한 자격증을 조회한다")
         void success_withParentCategoryId(){
             // given
             long categoryId = 1L;
@@ -166,9 +171,9 @@ class CertificationServiceTest {
             verify(certificationQueryRepository, never()).findAllCertificationByCategory(categoryId, pageable);
             verify(certificationQueryRepository, times(1)).findAllCertificationByCategory(subCategoryId, pageable);
         }
-
-        /* 특정 소분류 카테고리 id로 자격증 조회 */
+        
         @Test
+        @DisplayName("특정 자격증 카테고리에 속하는 자격증들을 조회한다. 이때, 하위 카테고리 id가 제공되면, 해당 하위에 대한 자격증을 조회한다")
         void success_withSubCategoryId(){
             // given
             long categoryId = 1L;
@@ -192,6 +197,7 @@ class CertificationServiceTest {
         }
 
         @Test
+        @DisplayName("존재하지 않는 자격증 카테고리 id가 제공되면 예외를 반환한다")
         void fail_notFoundCategoryException(){
             // given
             long categoryId = 1L;
@@ -205,6 +211,7 @@ class CertificationServiceTest {
         }
 
         @Test
+        @DisplayName("상위 자격증 카테고리에 대한 하위 카테고리가 없으면, 예외를 반환한다")
         void fail_notFoundSubCategoryException(){
             // given
             long categoryId = 1L;
@@ -224,6 +231,7 @@ class CertificationServiceTest {
     @Nested
     class getCertification{
         @Test
+        @DisplayName("자격증에 대한 상세 정보를 조회한다")
         public void success(){
             // given
             long certificationId = 1L;
@@ -240,6 +248,7 @@ class CertificationServiceTest {
         }
 
         @Test
+        @DisplayName("존재하지 않는 자격증이면, 예외를 반환한다")
         public void fail_notFoundCertification(){
             // given
             long certificationId = 99L;
