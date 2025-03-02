@@ -1,5 +1,6 @@
 package quartet.server.api.certification;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,8 +33,8 @@ public class CertificationControllerTest {
     @MockitoBean
     CertificationService certificationService;
 
-    /*메인 페이지에 디폴트로 나오는 대분류 카테고리 */
     @Test
+    @DisplayName("메인페이지에 기본으로 나타나는 상위 자격증 카테고리를 조회한다")
     void success_getCategories_withDefault() throws Exception {
         // given
         boolean isDefault = true;
@@ -55,8 +56,8 @@ public class CertificationControllerTest {
         verify(certificationService, times(1)).getCategories(isDefault);
     }
 
-    /*메인 페이지에 '기타' 항목에 나오는 대분류 카테고리 */
     @Test
+    @DisplayName("메인페이지에 더보기 클릭시 나타나는 기타 상위 자격증 카테고리를 조회한다")
     void success_getCategories_withExtra() throws Exception {
         // given
         boolean isDefault = false;
@@ -80,7 +81,8 @@ public class CertificationControllerTest {
     }
 
     @Test
-    void success_getCategories_withSub() throws Exception {
+    @DisplayName("특정 상위 카테고리에 속하는 하위 자격증 카테고리를 조회한다")
+    void success_getCategories_byParentCategory() throws Exception {
         // given
         long parentCategoryId = 1L;
         List<CertificationCategoriesRes> categoryList = CertificationCategoryFixture.categoryResList();
@@ -103,6 +105,7 @@ public class CertificationControllerTest {
     }
 
     @Test
+    @DisplayName("특정 자격증 카테고리에 속하는 자격증들을 조회한다")
     void success_getAllCertificationByCategoryTest() throws Exception {
         // given
         long categoryId = 1L;
@@ -117,9 +120,7 @@ public class CertificationControllerTest {
         // when
         mockMvc.perform(
                 get("/certification")
-                        // RequestParam 설정
                         .param("categoryId", String.valueOf(categoryId))
-                        .param("isSubCategory", "true")
                         .param("page", "0")
                         .param("pageSize", "2")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -132,6 +133,7 @@ public class CertificationControllerTest {
     }
 
     @Test
+    @DisplayName("자격증에 대한 상세 정보를 조회한다")
     void success_getCertification() throws Exception {
         // given
         long certificationId  = 1L;
