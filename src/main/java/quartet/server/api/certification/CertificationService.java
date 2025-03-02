@@ -32,14 +32,14 @@ public class CertificationService {
     private final CertificationQueryRepository certificationQueryRepository;
 
     @Transactional(readOnly = true)
-    public CertificationRes getCertification(long certificationId) {
+    public CertificationRes getCertification(final long certificationId) {
         return certificationQueryRepository.getCertification(certificationId)
                  .orElseThrow(CertificationNotFoundException::new);
     }
 
     @Transactional(readOnly = true)
     public Page<CertificationsByCategoryRes> getAllCertificationsByCategory(
-            long categoryId,Pageable pageable){
+            long categoryId, final Pageable pageable){
 
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(CategoryNotFoundException::new);
@@ -54,7 +54,7 @@ public class CertificationService {
 
     // 소분류 카테고리 조회
     @Transactional(readOnly = true)
-    public List<CertificationCategoriesRes> getCategories(long parentId){
+    public List<CertificationCategoriesRes> getCategories(final long parentId){
         List<Category> subCategoryList = categoryRepository.findByParentCategory_Id(parentId);
 
         return subCategoryList.stream()
@@ -64,7 +64,7 @@ public class CertificationService {
 
     // 대분류 카테고리 조회
     @Transactional(readOnly = true)
-    public List<CertificationCategoriesRes> getCategories(boolean isDefault){
+    public List<CertificationCategoriesRes> getCategories(final boolean isDefault){
         List<Category> categoryList;
         if (isDefault) {
             categoryList = categoryRepository.findByIsDefaultTrue();

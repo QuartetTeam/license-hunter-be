@@ -27,7 +27,7 @@ import static com.querydsl.core.types.dsl.Expressions.cases;
 public class CertificationQueryRepository {
     private final JPAQueryFactory queryFactory;
 
-    public Optional<CertificationRes> getCertification(Long certificationId) {
+    public Optional<CertificationRes> getCertification(final Long certificationId) {
         QCertification certification = QCertification.certification;
         QAuthority authority = QAuthority.authority;
         QCertificationDescription description = QCertificationDescription.certificationDescription;
@@ -73,7 +73,7 @@ public class CertificationQueryRepository {
         return Optional.ofNullable(result.get(certificationId));
     }
 
-    public Optional<Long> getDefaultSubCategoryId(long categoryId){
+    public Optional<Long> getDefaultSubCategoryId(final long categoryId){
         QCategory category = QCategory.category;
 
         // TODO 최지희: default 서브 카테고리 선정 기준 논의 필요
@@ -84,7 +84,7 @@ public class CertificationQueryRepository {
                     .fetchFirst());
     }
 
-    private JPAQuery<Long> findAllCertificationsByCategoryBaseQuery(long subCategoryId){
+    private JPAQuery<Long> findAllCertificationsByCategoryBaseQuery(final long subCategoryId){
             QCertification certification = QCertification.certification;
             return queryFactory
                 .select(certification.id)
@@ -92,7 +92,7 @@ public class CertificationQueryRepository {
                 .where(certification.category.id.eq(subCategoryId));
     }
 
-    public Page<CertificationsByCategoryRes> findAllCertificationByCategory(long subCategoryId, Pageable pageable){
+    public Page<CertificationsByCategoryRes> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
             QCertification certification = QCertification.certification;
             QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
