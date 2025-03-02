@@ -1,5 +1,6 @@
 package quartet.server.api.certification;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
 import quartet.server.api.certification.dto.response.CertificationRes;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;
+import quartet.server.api.common.response.ApiResponse;
+import quartet.server.core.code.CommonSuccessCode;
 import quartet.server.utils.fixture.Certification.CertificationFixture;
 import quartet.server.utils.fixture.Certification.CertificationCategoryFixture;
 import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +34,9 @@ public class CertificationControllerTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     CertificationService certificationService;
@@ -151,5 +159,30 @@ public class CertificationControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.data").exists())
         .andExpect(jsonPath("$.data.id").value(certificationId));
+    }
+
+    @Test
+    @DisplayName("추천 자격증을 조회한다")
+    void success_getRecommendedCertifications() throws Exception {
+        // given
+        final long memberId = 1L;
+        final List<CertificationsByCategoryRes> responses = CertificationFixture.certificationsByCategoryRes();
+        final ApiResponse<List<CertificationsByCategoryRes>> expectedResponse = ApiResponse.success(
+                CommonSuccessCode.OK, responses);
+        when(certificationService.getRecommendedCertifications(eq(memberId))).thenReturn(responses);
+
+        // when
+        final String result = mockMvc.perform(
+                        get("/certification/recommendation")
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // then
+        final String expectedJson = objectMapper.writeValueAsString(expectedResponse);
+        assertThat(result).isEqualTo(expectedJson);
+        verify(certificationService, times(1)).getRecommendedCertifications(memberId);
     }
 }

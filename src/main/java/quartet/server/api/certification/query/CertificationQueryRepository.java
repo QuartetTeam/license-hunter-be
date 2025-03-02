@@ -73,16 +73,6 @@ public class CertificationQueryRepository {
         return Optional.ofNullable(result.get(certificationId));
     }
 
-    public Optional<Long> getDefaultSubCategoryId(final long categoryId){
-        QCategory category = QCategory.category;
-
-        // TODO 최지희: default 서브 카테고리 선정 기준 논의 필요
-        return Optional.ofNullable(queryFactory
-                    .select(category.id)
-                    .from(category)
-                    .where(category.parentCategory.id.eq(categoryId))
-                    .fetchFirst());
-    }
 
     private JPAQuery<Long> findAllCertificationsByCategoryBaseQuery(final long subCategoryId){
             QCertification certification = QCertification.certification;
@@ -92,26 +82,17 @@ public class CertificationQueryRepository {
                 .where(certification.category.id.eq(subCategoryId));
     }
 
-    public Page<CertificationsByCategoryRes> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
+    public List<CertificationsByCategoryRes> getAllCertificationsByIds(final List<Long> certificationIds){
             QCertification certification = QCertification.certification;
             QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
-            List<Long> certificationIds =
-                        findAllCertificationsByCategoryBaseQuery(subCategoryId)
-                        .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize())
-                        .fetch();
-
-            if (certificationIds.isEmpty()) return Page.empty(pageable);
-
-            List<CertificationsByCategoryRes> certificationList =
-                queryFactory
+            return queryFactory
                         .from(certification)
                         .leftJoin(schedule).on(schedule.certification.eq(certification)
                                 .and(schedule.examType.eq(ExamType.WRITTEN))
                                 .and(schedule.scheduleType.in(ScheduleType.APPLICATION_DATE,ScheduleType.EXAM_DATE))
                         )
-                        .where(certification.category.id.eq(subCategoryId))
+                        .where(certification.id.in(certificationIds))
                         .transform(GroupBy.groupBy(certification.id).list(
                             new QCertificationsByCategoryRes(
                                     certification.id,
@@ -126,6 +107,32 @@ public class CertificationQueryRepository {
                                             .otherwise((Instant) null),
                                     Expressions.constant(0)
                             )));
+    }
+
+    public List<CertificationsByCategoryRes> findAllCertificationByCategory(final long subCategoryId, int count){
+
+        List<Long> certificationIds =
+                findAllCertificationsByCategoryBaseQuery(subCategoryId)
+                .limit(count)
+                .fetch();
+
+        if (certificationIds.isEmpty()) return List.of();
+
+        return getAllCertificationsByIds(certificationIds);
+    }
+
+    public Page<CertificationsByCategoryRes> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
+            QCertification certification = QCertification.certification;
+
+            List<Long> certificationIds =
+                        findAllCertificationsByCategoryBaseQuery(subCategoryId)
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize())
+                        .fetch();
+
+            if (certificationIds.isEmpty()) return Page.empty(pageable);
+
+            List<CertificationsByCategoryRes> certificationList = getAllCertificationsByIds(certificationIds);
 
             JPAQuery<Long> countQuery = findAllCertificationsByCategoryBaseQuery(subCategoryId)
                                         .select(certification.count());

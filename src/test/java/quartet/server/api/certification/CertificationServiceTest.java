@@ -6,15 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
 import quartet.server.api.certification.dto.response.CertificationRes;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;
 import quartet.server.api.certification.query.CertificationQueryRepository;
+import quartet.server.api.certification.query.CategoryQueryRepository;
+import quartet.server.core.utils.RandomGenerator;
 import quartet.server.domain.category.exception.CategoryNotFoundException;
 import quartet.server.domain.category.exception.SubCategoryNotFoundException;
 import quartet.server.domain.category.model.Category;
@@ -24,10 +26,13 @@ import quartet.server.utils.fixture.Certification.CertificationCategoryFixture;
 import quartet.server.utils.fixture.Certification.CertificationFixture;
 import quartet.server.utils.fixture.Pageable.PageableFixture;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -35,6 +40,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class CertificationServiceTest {
+    @Spy
     @InjectMocks
     private CertificationService certificationService;
 
@@ -44,6 +50,12 @@ class CertificationServiceTest {
 
     @Mock
     private  CertificationQueryRepository certificationQueryRepository;
+
+    @Mock
+    private CategoryQueryRepository categoryQueryRepository;
+
+    @Mock
+    private RandomGenerator randomGenerator;
 
     @Nested
     class getCategories{
@@ -157,7 +169,7 @@ class CertificationServiceTest {
             Page<CertificationsByCategoryRes> certificationPage = new PageImpl<>(certificationList);
 
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-            when(certificationQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(Optional.of(subCategoryId));
+            when(categoryQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(Optional.of(subCategoryId));
             when(certificationQueryRepository.findAllCertificationByCategory(subCategoryId,pageable))
                     .thenReturn(certificationPage);
 
@@ -167,7 +179,7 @@ class CertificationServiceTest {
 
             // then
             assertThat(result).isEqualTo(certificationPage);
-            verify(certificationQueryRepository, times(1)).getDefaultSubCategoryId(anyLong());
+            verify(categoryQueryRepository, times(1)).getDefaultSubCategoryId(anyLong());
             verify(certificationQueryRepository, never()).findAllCertificationByCategory(categoryId, pageable);
             verify(certificationQueryRepository, times(1)).findAllCertificationByCategory(subCategoryId, pageable);
         }
@@ -192,7 +204,7 @@ class CertificationServiceTest {
 
             // then
             assertThat(result).isEqualTo(certificationPage);
-            verify(certificationQueryRepository, never()).getDefaultSubCategoryId(anyLong());
+            verify(categoryQueryRepository, never()).getDefaultSubCategoryId(anyLong());
             verify(certificationQueryRepository, times(1)).findAllCertificationByCategory(categoryId, pageable);
         }
 
@@ -206,7 +218,7 @@ class CertificationServiceTest {
 
             // when & then
             assertThrows(CategoryNotFoundException.class, () -> {certificationService.getAllCertificationsByCategory(categoryId, pageable);});
-            verify(certificationQueryRepository, never()).getDefaultSubCategoryId(anyLong());
+            verify(categoryQueryRepository, never()).getDefaultSubCategoryId(anyLong());
             verify(certificationQueryRepository, never()).findAllCertificationByCategory(categoryId, pageable);
         }
 
@@ -218,11 +230,11 @@ class CertificationServiceTest {
             Pageable pageable = PageableFixture.pageable();
             Category category = CertificationCategoryFixture.parentCategory();
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-            when(certificationQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(Optional.empty());
+            when(categoryQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(Optional.empty());
 
             // when & then
             assertThrows(SubCategoryNotFoundException.class, () -> {certificationService.getAllCertificationsByCategory(categoryId, pageable);});
-            verify(certificationQueryRepository, times(1)).getDefaultSubCategoryId(anyLong());
+            verify(categoryQueryRepository, times(1)).getDefaultSubCategoryId(anyLong());
             verify(certificationQueryRepository, never()).findAllCertificationByCategory(categoryId, pageable);
         }
     }
@@ -260,5 +272,126 @@ class CertificationServiceTest {
         }
     }
 
+    @Nested
+    class getRecommendedCategoryId{
+        @Test
+        @DisplayName("비로그인 유저일때 기본 추천 자격증을 반환한다")
+        public void success_whenMemberIdIsNull(){
+            // given
+            final long defaultCategoryId = 1L;
+            when(categoryQueryRepository.getDefaultRecommendedCategoryId()).thenReturn(defaultCategoryId);
+
+            // when
+            final Long result = certificationService.getRecommendedCategoryId(null);
+
+            // then
+            assertThat(result).isEqualTo(defaultCategoryId);
+            verify(categoryQueryRepository, times(1)).getDefaultRecommendedCategoryId();
+            verify(categoryQueryRepository, never()).findInterestedCategoryIds(anyLong());
+            verify(randomGenerator, never()).getRandomItem(anyList());
+
+        }
+
+        @Test
+        @DisplayName("로그인 유저의 관심 카테고리 목록이 비어 있으면 기본 추천 자격증을 반환한다")
+        public void success_whenMemberWithoutInterestedCategories() {
+            // given
+            final long memberId = 1L;
+            final long defaultCategoryId = 1L;
+            when(categoryQueryRepository.findInterestedCategoryIds(memberId)).thenReturn(Collections.emptyList());
+            when(categoryQueryRepository.getDefaultRecommendedCategoryId()).thenReturn(defaultCategoryId);
+
+            // when
+            final long result = certificationService.getRecommendedCategoryId(memberId);
+
+            // then
+            assertThat(result).isEqualTo(defaultCategoryId);
+            verify(categoryQueryRepository, times(1)).findInterestedCategoryIds(memberId);
+            verify(categoryQueryRepository, times(1)).getDefaultRecommendedCategoryId();
+            verify(randomGenerator, never()).getRandomItem(anyList());
+        }
+
+        @Test
+        @DisplayName("로그인 유저의 관심 카테고리가 1개만 있으면 해당 카테고리의 추천 자격증을 반환한다")
+        public void success_whenMemberHasSingleInterestedCategory() {
+            // given
+            final long memberId = 1L;
+            final long categoryId = 1L;
+            when(categoryQueryRepository.findInterestedCategoryIds(memberId)).thenReturn(List.of(categoryId));
+
+            // when
+            final long result = certificationService.getRecommendedCategoryId(memberId);
+
+            // then
+            assertThat(result).isEqualTo(categoryId);
+            verify(categoryQueryRepository, times(1)).findInterestedCategoryIds(memberId);
+            verify(categoryQueryRepository, never()).getDefaultRecommendedCategoryId();
+            verify(randomGenerator, never()).getRandomItem(anyList());
+        }
+
+        @Test
+        @DisplayName("로그인 유저의 관심 카테고리가 여러 개 있으면 랜덤으로 선택된 카테고리를 반환한다")
+        public void success_whenMemberHasMultipleInterestedCategory() {
+            // given
+            final long memberId = 1L;
+            final List<Long> interestedCategoryIds = List.of(10L, 20L, 30L);
+            final long randomCategoryId = 20L; // 랜덤으로 선택될 값
+
+            when(categoryQueryRepository.findInterestedCategoryIds(memberId)).thenReturn(interestedCategoryIds);
+            when(randomGenerator.getRandomItem(interestedCategoryIds)).thenReturn(randomCategoryId);
+
+            // when
+            final long result = certificationService.getRecommendedCategoryId(memberId);
+
+            // then
+            assertThat(result).isEqualTo(randomCategoryId);
+            verify(categoryQueryRepository, times(1)).findInterestedCategoryIds(memberId);
+            verify(randomGenerator, times(1)).getRandomItem(interestedCategoryIds);
+            verify(categoryQueryRepository, never()).getDefaultRecommendedCategoryId();
+        }
+    }
+    @Nested
+    class getRecommendedCertifications{
+
+        @Test
+        @DisplayName("관심 카테고리가 있는 로그인 유저에게, 관심 분야에 대한 추천 자격증을 조회한다")
+        public void success(){
+            // given
+            final long memberId = 1L;
+            final long randomCategoryId = 1L;
+            final long defaultSubCategoryId = 3L;
+            final List<CertificationsByCategoryRes> certificationList = CertificationFixture.certificationsByCategoryRes();
+            doReturn(randomCategoryId).when(certificationService).getRecommendedCategoryId(memberId);
+            when(categoryQueryRepository.getDefaultSubCategoryId(randomCategoryId)).thenReturn(Optional.of(defaultSubCategoryId));
+            when(certificationQueryRepository.findAllCertificationByCategory(defaultSubCategoryId,6)).thenReturn(certificationList);
+
+            // when
+            final List<CertificationsByCategoryRes> result = certificationService.getRecommendedCertifications(memberId);
+
+            // then
+            assertThat(result).isEqualTo(certificationList);
+            verify(certificationService, times(1)).getRecommendedCategoryId(memberId);
+            verify(categoryQueryRepository, times(1)).getDefaultSubCategoryId(randomCategoryId);
+            verify(certificationQueryRepository,times(1)).findAllCertificationByCategory(defaultSubCategoryId, 6);
+        }
+
+        @Test
+        @DisplayName("하위 카테고리 id에 대한 카테고리가 없을때 예외를 반환한다")
+        public void fail_notFoundSubCategoryException() {
+            // given
+            final long memberId = 1L;
+            final long categoryId = 1L;
+            final long subCategoryId = 2L;
+            doReturn(categoryId).when(certificationService).getRecommendedCategoryId(memberId);
+            when(categoryQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(Optional.empty());
+
+            // when & then (예외 발생 검증)
+            assertThatThrownBy(() -> certificationService.getRecommendedCertifications(memberId))
+                    .isInstanceOf(SubCategoryNotFoundException.class);
+            verify(certificationService, times(1)).getRecommendedCategoryId(memberId);
+            verify(categoryQueryRepository, times(1)).getDefaultSubCategoryId(categoryId);
+            verify(certificationQueryRepository, never()).findAllCertificationByCategory(anyLong(), anyInt());
+        }
+    }
 
 }

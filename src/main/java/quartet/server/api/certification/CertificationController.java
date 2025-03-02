@@ -52,4 +52,12 @@ public class CertificationController {
                 categoryId, pageable);
         return ApiResponse.success(OK,certificationList);
     }
+
+    @GetMapping("/recommendation")
+    public ApiResponse<List<CertificationsByCategoryRes>> getRecommendedCertifications(){
+        // @TODO 최지희: @AuthenticationPrincipal로 변경 예정
+        long memberId = 1L;
+        List<CertificationsByCategoryRes> recommendedCertifications = certificationService.getRecommendedCertifications(memberId);
+        return ApiResponse.success(OK,recommendedCertifications);
+    }
 }
