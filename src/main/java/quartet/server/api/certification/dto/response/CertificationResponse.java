@@ -9,7 +9,7 @@ import quartet.server.domain.certification.type.ScheduleType;
 import java.time.Instant;
 import java.util.Set;
 
-public record CertificationRes (
+public record CertificationResponse(
         long id,
         String name,
         String authorityName,
@@ -17,11 +17,11 @@ public record CertificationRes (
         String applicationUrl,
         String description,
         String qualification,
-        Set<CertificationScheduleRes> scheduleSet,
-        Set<CertificationRes.CertificationExamDetailRes> examDetailSet
+        Set<CertificationScheduleResponse> scheduleSet,
+        Set<CertificationExamDetailResponse> examDetailSet
 ){
     @QueryProjection
-    public CertificationRes(
+    public CertificationResponse(
         long id,
         String name,
         String authorityName,
@@ -29,8 +29,8 @@ public record CertificationRes (
         String applicationUrl,
         String description,
         String qualification,
-        Set<CertificationScheduleRes> scheduleSet,
-        Set<CertificationExamDetailRes> examDetailSet
+        Set<CertificationScheduleResponse> scheduleSet,
+        Set<CertificationExamDetailResponse> examDetailSet
     ) {
         this.id = id;
         this.name = name;
@@ -43,13 +43,13 @@ public record CertificationRes (
         this.examDetailSet = examDetailSet;
     }
 
-    public record CertificationScheduleRes(
+    public record CertificationScheduleResponse(
             ScheduleType scheduleType,
             ExamType examType,
             Instant  date
     ){
         @QueryProjection
-        public CertificationScheduleRes(
+        public CertificationScheduleResponse(
                 ScheduleType scheduleType,
                 ExamType examType,
                 Instant  date)
@@ -59,7 +59,7 @@ public record CertificationRes (
             this.date = date;
         }
     }
-    public record CertificationExamDetailRes(
+    public record CertificationExamDetailResponse(
             ExamType examType,
             String subject,
             ProblemType problemType,
@@ -67,7 +67,7 @@ public record CertificationRes (
             Integer timeLimit
     ){
         @QueryProjection
-        public CertificationExamDetailRes(
+        public CertificationExamDetailResponse(
                  ExamType examType,
                 String subject,
                 ProblemType problemType,

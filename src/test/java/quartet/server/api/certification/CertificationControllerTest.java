@@ -1,5 +1,6 @@
 package quartet.server.api.certification;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +11,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
-import quartet.server.api.certification.dto.response.CertificationRes;
-import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;
+import quartet.server.api.certification.controller.CertificationController;
+import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
+import quartet.server.api.certification.dto.response.CertificationResponse;
+import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
+import quartet.server.api.certification.service.CertificationService;
+import quartet.server.api.common.response.ApiResponse;
+import quartet.server.core.code.CommonSuccessCode;
 import quartet.server.utils.fixture.Certification.CertificationFixture;
 import quartet.server.utils.fixture.Certification.CertificationCategoryFixture;
 import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,6 +37,9 @@ public class CertificationControllerTest {
     @Autowired
     MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockitoBean
     CertificationService certificationService;
 
@@ -38,7 +48,7 @@ public class CertificationControllerTest {
     void success_getCategories_withDefault() throws Exception {
         // given
         boolean isDefault = true;
-        List<CertificationCategoriesRes> categoryList = CertificationCategoryFixture.categoryResList();
+        List<CertificationCategoriesResponse> categoryList = CertificationCategoryFixture.categoryResList();
         when(certificationService.getCategories(eq(isDefault))).thenReturn(categoryList);
 
         // when
@@ -61,7 +71,7 @@ public class CertificationControllerTest {
     void success_getCategories_withExtra() throws Exception {
         // given
         boolean isDefault = false;
-        List<CertificationCategoriesRes> categoryList = CertificationCategoryFixture.categoryResList();
+        List<CertificationCategoriesResponse> categoryList = CertificationCategoryFixture.categoryResList();
 
         when(certificationService.getCategories(eq(isDefault))).thenReturn(categoryList);
 
@@ -85,7 +95,7 @@ public class CertificationControllerTest {
     void success_getCategories_byParentCategory() throws Exception {
         // given
         long parentCategoryId = 1L;
-        List<CertificationCategoriesRes> categoryList = CertificationCategoryFixture.categoryResList();
+        List<CertificationCategoriesResponse> categoryList = CertificationCategoryFixture.categoryResList();
 
         when(certificationService.getCategories(eq(parentCategoryId))).thenReturn(categoryList);
 
@@ -109,8 +119,8 @@ public class CertificationControllerTest {
     void success_getAllCertificationByCategoryTest() throws Exception {
         // given
         long categoryId = 1L;
-        List<CertificationsByCategoryRes> certificationList = CertificationFixture.certificationsByCategoryRes();
-        Page<CertificationsByCategoryRes> certificationPage = new PageImpl<>(certificationList);
+        List<CertificationsByCategoryResponse> certificationList = CertificationFixture.certificationsByCategoryRes();
+        Page<CertificationsByCategoryResponse> certificationPage = new PageImpl<>(certificationList);
 
         when(certificationService.getAllCertificationsByCategory(
                 eq(categoryId),
@@ -137,8 +147,8 @@ public class CertificationControllerTest {
     void success_getCertification() throws Exception {
         // given
         long certificationId  = 1L;
-        CertificationRes certificationRes = CertificationFixture.certificationRes(certificationId);
-        when(certificationService.getCertification(eq(certificationId))).thenReturn(certificationRes);
+        CertificationResponse certificationResponse = CertificationFixture.certificationRes(certificationId);
+        when(certificationService.getCertification(eq(certificationId))).thenReturn(certificationResponse);
 
         // when
         mockMvc.perform(
@@ -151,5 +161,30 @@ public class CertificationControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.data").exists())
         .andExpect(jsonPath("$.data.id").value(certificationId));
+    }
+
+    @Test
+    @DisplayName("추천 자격증을 조회한다")
+    void success_getRecommendedCertifications() throws Exception {
+        // given
+        final long memberId = 1L;
+        final List<CertificationsByCategoryResponse> responses = CertificationFixture.certificationsByCategoryRes();
+        final ApiResponse<List<CertificationsByCategoryResponse>> expectedResponse = ApiResponse.success(
+                CommonSuccessCode.OK, responses);
+        when(certificationService.getRecommendedCertifications(eq(memberId))).thenReturn(responses);
+
+        // when
+        final String result = mockMvc.perform(
+                        get("/certification/recommendation")
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // then
+        final String expectedJson = objectMapper.writeValueAsString(expectedResponse);
+        assertThat(result).isEqualTo(expectedJson);
+        verify(certificationService, times(1)).getRecommendedCertifications(memberId);
     }
 }
