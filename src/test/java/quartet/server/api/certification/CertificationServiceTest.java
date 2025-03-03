@@ -11,11 +11,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
-import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
-import quartet.server.api.certification.dto.response.CertificationRes;
-import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;
+import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
+import quartet.server.api.certification.dto.response.CertificationResponse;
+import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.api.certification.query.CertificationQueryRepository;
 import quartet.server.api.certification.query.CategoryQueryRepository;
+import quartet.server.api.certification.service.CertificationService;
 import quartet.server.core.utils.RandomGenerator;
 import quartet.server.domain.category.exception.CategoryNotFoundException;
 import quartet.server.domain.category.exception.SubCategoryNotFoundException;
@@ -29,7 +30,6 @@ import quartet.server.utils.fixture.Pageable.PageableFixture;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,15 +71,15 @@ class CertificationServiceTest {
             ReflectionTestUtils.setField(category2, "id", 2L);
 
             List<Category> categoryList =  List.of(category1, category2);
-            List<CertificationCategoriesRes> categoryResList = List.of(
-                    new CertificationCategoriesRes(category1.getId(),category1.getName()),
-                    new CertificationCategoriesRes(category2.getId(), category2.getName())
+            List<CertificationCategoriesResponse> categoryResList = List.of(
+                    new CertificationCategoriesResponse(category1.getId(),category1.getName()),
+                    new CertificationCategoriesResponse(category2.getId(), category2.getName())
             );
 
             when(categoryRepository.findByIsDefaultTrue()).thenReturn(categoryList);
 
             // when
-            List<CertificationCategoriesRes> result = certificationService.getCategories(isDefault);
+            List<CertificationCategoriesResponse> result = certificationService.getCategories(isDefault);
 
             // then
             assertThat(result).hasSize(categoryList.size());
@@ -101,15 +101,15 @@ class CertificationServiceTest {
             ReflectionTestUtils.setField(category2, "id", 2L);
 
             List<Category> categoryList =  List.of(category1, category2);
-            List<CertificationCategoriesRes> categoryResList = List.of(
-                    new CertificationCategoriesRes(category1.getId(),category1.getName()),
-                    new CertificationCategoriesRes(category2.getId(), category2.getName())
+            List<CertificationCategoriesResponse> categoryResList = List.of(
+                    new CertificationCategoriesResponse(category1.getId(),category1.getName()),
+                    new CertificationCategoriesResponse(category2.getId(), category2.getName())
             );
 
             when(categoryRepository.findByIsDefaultFalseAndParentCategoryIsNull()).thenReturn(categoryList);
 
             // when
-            List<CertificationCategoriesRes> result = certificationService.getCategories(isDefault);
+            List<CertificationCategoriesResponse> result = certificationService.getCategories(isDefault);
 
             // then
             assertThat(result).hasSize(categoryList.size());
@@ -133,15 +133,15 @@ class CertificationServiceTest {
             ReflectionTestUtils.setField(category2, "id", 3L);
 
             List<Category> categoryList =  List.of(category1, category2);
-            List<CertificationCategoriesRes> categoryResList = List.of(
-                    new CertificationCategoriesRes(category1.getId(),category1.getName()),
-                    new CertificationCategoriesRes(category2.getId(), category2.getName())
+            List<CertificationCategoriesResponse> categoryResList = List.of(
+                    new CertificationCategoriesResponse(category1.getId(),category1.getName()),
+                    new CertificationCategoriesResponse(category2.getId(), category2.getName())
             );
 
             when(categoryRepository.findByParentCategory_Id(parentId)).thenReturn(categoryList);
 
             // when
-            List<CertificationCategoriesRes> result = certificationService.getCategories(parentId);
+            List<CertificationCategoriesResponse> result = certificationService.getCategories(parentId);
 
             // then
             assertThat(result).hasSize(categoryList.size());
@@ -165,8 +165,8 @@ class CertificationServiceTest {
             long subCategoryId = 2L;
             Pageable pageable = PageableFixture.pageable();
             Category category = CertificationCategoryFixture.parentCategory();
-            List<CertificationsByCategoryRes> certificationList = CertificationFixture.certificationsByCategoryRes();
-            Page<CertificationsByCategoryRes> certificationPage = new PageImpl<>(certificationList);
+            List<CertificationsByCategoryResponse> certificationList = CertificationFixture.certificationsByCategoryRes();
+            Page<CertificationsByCategoryResponse> certificationPage = new PageImpl<>(certificationList);
 
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
             when(categoryQueryRepository.getDefaultSubCategoryId(categoryId)).thenReturn(Optional.of(subCategoryId));
@@ -174,7 +174,7 @@ class CertificationServiceTest {
                     .thenReturn(certificationPage);
 
             // when
-            Page<CertificationsByCategoryRes> result = certificationService.getAllCertificationsByCategory(
+            Page<CertificationsByCategoryResponse> result = certificationService.getAllCertificationsByCategory(
                     categoryId, pageable);
 
             // then
@@ -191,15 +191,15 @@ class CertificationServiceTest {
             long categoryId = 1L;
             Pageable pageable = PageableFixture.pageable();
             Category category = CertificationCategoryFixture.subCategory();
-            List<CertificationsByCategoryRes> certificationList = CertificationFixture.certificationsByCategoryRes();
-            Page<CertificationsByCategoryRes> certificationPage = new PageImpl<>(certificationList);
+            List<CertificationsByCategoryResponse> certificationList = CertificationFixture.certificationsByCategoryRes();
+            Page<CertificationsByCategoryResponse> certificationPage = new PageImpl<>(certificationList);
 
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
             when(certificationQueryRepository.findAllCertificationByCategory(categoryId,pageable))
                     .thenReturn(certificationPage);
 
             // when
-            Page<CertificationsByCategoryRes> result = certificationService.getAllCertificationsByCategory(
+            Page<CertificationsByCategoryResponse> result = certificationService.getAllCertificationsByCategory(
                     categoryId, pageable);
 
             // then
@@ -247,14 +247,14 @@ class CertificationServiceTest {
         public void success(){
             // given
             long certificationId = 1L;
-            CertificationRes certificationRes = CertificationFixture.certificationRes(certificationId);
-            when(certificationQueryRepository.getCertification(certificationId)).thenReturn(Optional.of(certificationRes));
+            CertificationResponse certificationResponse = CertificationFixture.certificationRes(certificationId);
+            when(certificationQueryRepository.getCertification(certificationId)).thenReturn(Optional.of(certificationResponse));
 
             // when
-            CertificationRes result = certificationService.getCertification(certificationId);
+            CertificationResponse result = certificationService.getCertification(certificationId);
 
             // then
-            assertThat(result).isEqualTo(certificationRes);
+            assertThat(result).isEqualTo(certificationResponse);
             verify(certificationQueryRepository, times(1)).getCertification(certificationId);
 
         }
@@ -360,13 +360,13 @@ class CertificationServiceTest {
             final long memberId = 1L;
             final long randomCategoryId = 1L;
             final long defaultSubCategoryId = 3L;
-            final List<CertificationsByCategoryRes> certificationList = CertificationFixture.certificationsByCategoryRes();
+            final List<CertificationsByCategoryResponse> certificationList = CertificationFixture.certificationsByCategoryRes();
             doReturn(randomCategoryId).when(certificationService).getRecommendedCategoryId(memberId);
             when(categoryQueryRepository.getDefaultSubCategoryId(randomCategoryId)).thenReturn(Optional.of(defaultSubCategoryId));
             when(certificationQueryRepository.findAllCertificationByCategory(defaultSubCategoryId,6)).thenReturn(certificationList);
 
             // when
-            final List<CertificationsByCategoryRes> result = certificationService.getRecommendedCertifications(memberId);
+            final List<CertificationsByCategoryResponse> result = certificationService.getRecommendedCertifications(memberId);
 
             // then
             assertThat(result).isEqualTo(certificationList);

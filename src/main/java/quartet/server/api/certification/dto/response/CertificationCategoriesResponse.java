@@ -1,6 +1,6 @@
 package quartet.server.api.certification.dto.response;
 
-public record CertificationCategoriesRes(
+public record CertificationCategoriesResponse(
         long id,
         String name
 ) {

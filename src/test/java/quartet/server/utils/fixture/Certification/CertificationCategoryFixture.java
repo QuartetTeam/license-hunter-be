@@ -1,6 +1,6 @@
 package quartet.server.utils.fixture.Certification;
 
-import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
+import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
 import quartet.server.domain.category.model.Category;
 import java.util.List;
 
@@ -12,10 +12,10 @@ public class CertificationCategoryFixture {
     public static Category subCategory(){
         return Category.of("데이터분석",parentCategory());
     }
-    public static List<CertificationCategoriesRes> categoryResList(){
+    public static List<CertificationCategoriesResponse> categoryResList(){
         return List.of(
-                new CertificationCategoriesRes(1L,"정보통신"),
-                new CertificationCategoriesRes(2L, "데이터분석")
+                new CertificationCategoriesResponse(1L,"정보통신"),
+                new CertificationCategoriesResponse(2L, "데이터분석")
         );
     }
 }

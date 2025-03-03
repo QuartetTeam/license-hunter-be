@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import quartet.server.api.certification.dto.response.*;
-import quartet.server.domain.category.model.QCategory;
 import quartet.server.domain.certification.model.*;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ScheduleType;
@@ -27,14 +26,14 @@ import static com.querydsl.core.types.dsl.Expressions.cases;
 public class CertificationQueryRepository {
     private final JPAQueryFactory queryFactory;
 
-    public Optional<CertificationRes> getCertification(final Long certificationId) {
+    public Optional<CertificationResponse> getCertification(final Long certificationId) {
         QCertification certification = QCertification.certification;
         QAuthority authority = QAuthority.authority;
         QCertificationDescription description = QCertificationDescription.certificationDescription;
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
         QCertificationExamDetail examDetail = QCertificationExamDetail.certificationExamDetail;
 
-        Map<Long, CertificationRes> result =
+        Map<Long, CertificationResponse> result =
                 queryFactory
                     .from(certification)
                     .leftJoin(certification.authority, authority)
@@ -43,7 +42,7 @@ public class CertificationQueryRepository {
                     .leftJoin(examDetail).on(examDetail.certification.eq(certification))
                     .where(certification.id.eq(certificationId))
                     .transform(GroupBy.groupBy(certification.id).as(
-                        new QCertificationRes(
+                        new QCertificationResponse(
                                 certification.id,
                                 certification.name,
                                 authority.name,
@@ -52,14 +51,14 @@ public class CertificationQueryRepository {
                                 description.description,
                                 description.qualification,
                                 GroupBy.set(
-                                        new QCertificationRes_CertificationScheduleRes(
+                                        new QCertificationResponse_CertificationScheduleResponse(
                                             schedule.scheduleType,
                                             schedule.examType,
                                             schedule.scheduledDate
                                         )
                                 ),
                                 GroupBy.set(
-                                    new QCertificationRes_CertificationExamDetailRes(
+                                    new QCertificationResponse_CertificationExamDetailResponse(
                                         examDetail.examType,
                                         examDetail.subject,
                                         examDetail.problemType,
@@ -82,7 +81,7 @@ public class CertificationQueryRepository {
                 .where(certification.category.id.eq(subCategoryId));
     }
 
-    public List<CertificationsByCategoryRes> getAllCertificationsByIds(final List<Long> certificationIds){
+    public List<CertificationsByCategoryResponse> getAllCertificationsByIds(final List<Long> certificationIds){
             QCertification certification = QCertification.certification;
             QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
@@ -94,7 +93,7 @@ public class CertificationQueryRepository {
                         )
                         .where(certification.id.in(certificationIds))
                         .transform(GroupBy.groupBy(certification.id).list(
-                            new QCertificationsByCategoryRes(
+                            new QCertificationsByCategoryResponse(
                                     certification.id,
                                     certification.name,
                                     cases()
@@ -109,7 +108,7 @@ public class CertificationQueryRepository {
                             )));
     }
 
-    public List<CertificationsByCategoryRes> findAllCertificationByCategory(final long subCategoryId, int count){
+    public List<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, int count){
 
         List<Long> certificationIds =
                 findAllCertificationsByCategoryBaseQuery(subCategoryId)
@@ -121,7 +120,7 @@ public class CertificationQueryRepository {
         return getAllCertificationsByIds(certificationIds);
     }
 
-    public Page<CertificationsByCategoryRes> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
+    public Page<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
             QCertification certification = QCertification.certification;
 
             List<Long> certificationIds =
@@ -132,12 +131,12 @@ public class CertificationQueryRepository {
 
             if (certificationIds.isEmpty()) return Page.empty(pageable);
 
-            List<CertificationsByCategoryRes> certificationList = getAllCertificationsByIds(certificationIds);
+            List<CertificationsByCategoryResponse> certifications = getAllCertificationsByIds(certificationIds);
 
             JPAQuery<Long> countQuery = findAllCertificationsByCategoryBaseQuery(subCategoryId)
                                         .select(certification.count());
 
-            return PageableExecutionUtils.getPage(certificationList, pageable, countQuery::fetchOne);
+            return PageableExecutionUtils.getPage(certifications, pageable, countQuery::fetchOne);
     }
 }
 

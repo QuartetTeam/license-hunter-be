@@ -4,7 +4,7 @@ import com.querydsl.core.annotations.QueryProjection;
 
 import java.time.Instant;
 
-public record CertificationsByCategoryRes(
+public record CertificationsByCategoryResponse(
         long id,
         String name,
         Instant applicationDate,
@@ -12,7 +12,7 @@ public record CertificationsByCategoryRes(
         int CalendarSubscriptionCount
 ) {
     @QueryProjection
-    public CertificationsByCategoryRes(
+    public CertificationsByCategoryResponse(
         long id,
         String name,
         Instant applicationDate,

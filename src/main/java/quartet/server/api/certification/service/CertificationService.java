@@ -1,4 +1,4 @@
-package quartet.server.api.certification;
+package quartet.server.api.certification.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -6,10 +6,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import quartet.server.api.certification.dto.response.CertificationResponse;
+import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.api.certification.query.CategoryQueryRepository;
-import quartet.server.api.certification.dto.response.CertificationCategoriesRes;
-import quartet.server.api.certification.dto.response.CertificationRes;
-import quartet.server.api.certification.dto.response.CertificationsByCategoryRes;
+import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
 import quartet.server.api.certification.query.CertificationQueryRepository;
 import quartet.server.core.utils.RandomGenerator;
 import quartet.server.domain.category.model.Category;
@@ -40,13 +40,13 @@ public class CertificationService {
     private final RandomGenerator randomGenerator;
 
     @Transactional(readOnly = true)
-    public CertificationRes getCertification(final long certificationId) {
+    public CertificationResponse getCertification(final long certificationId) {
         return certificationQueryRepository.getCertification(certificationId)
                  .orElseThrow(CertificationNotFoundException::new);
     }
 
     @Transactional(readOnly = true)
-    public Page<CertificationsByCategoryRes> getAllCertificationsByCategory(
+    public Page<CertificationsByCategoryResponse> getAllCertificationsByCategory(
             long categoryId, final Pageable pageable){
 
         Category category = categoryRepository.findById(categoryId)
@@ -61,25 +61,25 @@ public class CertificationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CertificationCategoriesRes> getCategories(final long parentId){
-        List<Category> subCategoryList = categoryRepository.findByParentCategory_Id(parentId);
+    public List<CertificationCategoriesResponse> getCategories(final long parentId){
+        List<Category> subCategories = categoryRepository.findByParentCategory_Id(parentId);
 
-        return subCategoryList.stream()
-                .map(category -> new CertificationCategoriesRes(category.getId(), category.getName()))
+        return subCategories.stream()
+                .map(category -> new CertificationCategoriesResponse(category.getId(), category.getName()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<CertificationCategoriesRes> getCategories(final boolean isDefault){
-        List<Category> categoryList;
+    public List<CertificationCategoriesResponse> getCategories(final boolean isDefault){
+        List<Category> categories;
         if (isDefault) {
-            categoryList = categoryRepository.findByIsDefaultTrue();
+            categories = categoryRepository.findByIsDefaultTrue();
         } else {
-            categoryList = categoryRepository.findByIsDefaultFalseAndParentCategoryIsNull();
+            categories = categoryRepository.findByIsDefaultFalseAndParentCategoryIsNull();
         }
 
-        return categoryList.stream()
-                .map(category -> new CertificationCategoriesRes(category.getId(), category.getName()))
+        return categories.stream()
+                .map(category -> new CertificationCategoriesResponse(category.getId(), category.getName()))
                 .toList();
     }
 
@@ -97,7 +97,7 @@ public class CertificationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CertificationsByCategoryRes> getRecommendedCertifications(final Long memberId){
+    public List<CertificationsByCategoryResponse> getRecommendedCertifications(final Long memberId){
         long categoryId = getRecommendedCategoryId(memberId);
 
         long defaultSubCategoryId = categoryQueryRepository.getDefaultSubCategoryId(categoryId)

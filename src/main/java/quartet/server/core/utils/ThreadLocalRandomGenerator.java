@@ -9,12 +9,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ThreadLocalRandomGenerator implements RandomGenerator {
 
     @Override
-    public int nextInt(int origin, int bound) {
+    public int nextInt(final int origin, final int bound) {
         return ThreadLocalRandom.current().nextInt(origin, bound);
     }
 
     @Override
-    public <T> T getRandomItem(List<T> items){
+    public <T> T getRandomItem(final List<T> items){
         if (items == null || items.isEmpty()) {
             return null;
         }
