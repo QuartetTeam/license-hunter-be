@@ -59,16 +59,17 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-    - name: Get latest running ECS task definition ARN
+    - name: Get the latest running ECS task definition ARN
       id: get-latest-task-def
       run: |
         TASK_DEF_ARN=$(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query "services[0].taskDefinition" --output text)
         echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
 
-    - name: Get most recent ECS task definition JSON file
+    - name: Get the most recent ECS task definition JSON file
       id: get-task-def
       run: |
         aws ecs describe-task-definition --task-definition $TASK_DEF_ARN --query taskDefinition > task-definition.json
+        sed -i '/enableFaultInjection/d' task-definition.json
         cat task-definition.json
         echo "task-def-file=task-definition.json" >> $GITHUB_OUTPUT
         
