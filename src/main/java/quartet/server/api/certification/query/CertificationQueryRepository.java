@@ -89,7 +89,7 @@ public class CertificationQueryRepository {
                         .from(certification)
                         .leftJoin(schedule).on(schedule.certification.eq(certification)
                                 .and(schedule.examType.eq(ExamType.WRITTEN))
-                                .and(schedule.scheduleType.in(ScheduleType.APPLICATION_DATE,ScheduleType.EXAM_DATE))
+                                .and(schedule.scheduleType.in(ScheduleType.APPLICATION_START,ScheduleType.EXAM_START))
                         )
                         .where(certification.id.in(certificationIds))
                         .transform(GroupBy.groupBy(certification.id).list(
@@ -97,11 +97,11 @@ public class CertificationQueryRepository {
                                     certification.id,
                                     certification.name,
                                     cases()
-                                            .when(schedule.scheduleType.eq(ScheduleType.APPLICATION_DATE))
+                                            .when(schedule.scheduleType.eq(ScheduleType.APPLICATION_START))
                                             .then(schedule.scheduledDate)
                                             .otherwise((Instant) null),
                                     cases()
-                                            .when(schedule.scheduleType.eq(ScheduleType.EXAM_DATE))
+                                            .when(schedule.scheduleType.eq(ScheduleType.EXAM_START))
                                             .then(schedule.scheduledDate)
                                             .otherwise((Instant) null),
                                     Expressions.constant(0)

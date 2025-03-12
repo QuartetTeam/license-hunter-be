@@ -13,8 +13,8 @@ import java.util.List;
 public class CertificationFixture {
      public static List<CertificationResponse.CertificationScheduleResponse> certificationScheduleResList() {
         return List.of(
-            new CertificationResponse.CertificationScheduleResponse(ScheduleType.APPLICATION_DATE, ExamType.PRACTICAL, Instant.parse("2025-05-01T09:00:00Z")),
-            new CertificationResponse.CertificationScheduleResponse(ScheduleType.EXAM_DATE, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z")),
+            new CertificationResponse.CertificationScheduleResponse(ScheduleType.APPLICATION_START, ExamType.PRACTICAL, Instant.parse("2025-05-01T09:00:00Z")),
+            new CertificationResponse.CertificationScheduleResponse(ScheduleType.EXAM_END, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z")),
             new CertificationResponse.CertificationScheduleResponse(ScheduleType.PASS_ANNOUNCEMENT, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z"))
         );
     }
