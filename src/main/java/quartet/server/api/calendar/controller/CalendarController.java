@@ -23,17 +23,17 @@ public class CalendarController {
         return ApiResponse.success(OK, calendarService.getCalendarsByMemberId(memberId));
     }
 
-    @PostMapping("/calendar/certifications/{certificationId}")
-    public ApiResponse<Void> subscribeCalendar(@PathVariable("certificationId") long certificationId) {
+    @PostMapping("/certifications/{certificationId}/calendars")
+    public ApiResponse<Void> subscribeCalendar(@PathVariable("certificationId") final long certificationId) {
         long memberId = 1L; // TODO 박현제: @AuthenticationPrincipal 로 변경 예정
         calendarService.subscribeCalendar(memberId, certificationId);
         return ApiResponse.success(CREATED);
     }
 
-    @DeleteMapping("/calendar/certifications/{certificationId}")
-    public ApiResponse<Void> unsubscribeCalendar(@PathVariable("certificationId") long certificationId) {
+    @DeleteMapping("/certifications/{certificationId}/calendars")
+    public ApiResponse<Void> unsubscribeCalendar(@PathVariable("certificationId") final long certificationId) {
         long memberId = 1L; // TODO: @AuthenticationPrincipal로 변경 예정
-        calendarService.unsubscribeCalendar(memberId, certificationId);
+        calendarService.unsubscribeCalendar(certificationId, memberId);
         return ApiResponse.success(NO_CONTENT);
     }
 }

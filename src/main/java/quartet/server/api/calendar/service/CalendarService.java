@@ -52,13 +52,7 @@ public class CalendarService {
 
     @Transactional
     public void unsubscribeCalendar(final long memberId, final long certificationId) {
-        final Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
-
-        final Certification certification = certificationRepository.findById(certificationId)
-                .orElseThrow(CertificationNotFoundException::new);
-
-        final Calendar calendar = calendarRepository.findByMemberIdAndCertificationId(member.getId(), certification.getId())
+        final Calendar calendar = calendarRepository.findByMemberIdAndCertificationId(memberId, certificationId)
                 .orElseThrow(CalendarNotFoundException::new);
 
         calendarRepository.delete(calendar);
