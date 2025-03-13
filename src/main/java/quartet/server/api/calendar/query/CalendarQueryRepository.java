@@ -39,6 +39,7 @@ public class CalendarQueryRepository {
                 .transform(GroupBy.groupBy(c.id).as(
                         new QCalendarResponse(
                                 c.id,
+                                cal.id,
                                 c.name,
                                 GroupBy.list(
                                         new QCalendarResponse_CalendarScheduleResponse(

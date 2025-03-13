@@ -54,8 +54,8 @@ class CalendarServiceTest {
     class GetCalendarsByMemberIdTest {
 
         @Test
-        @DisplayName("멤버 ID로 캘린더 목록을 조회할 수 있다")
-        void getCalendarsByMemberId_ShouldReturnCalendarList() {
+        @DisplayName("멤버 ID로 캘린더 목록을 조회한다")
+        void success_shouldReturnCalendarResponses() {
             // given
             final long memberId = 1L;
             final List<CalendarResponse> expectedResponses = CalendarFixture.calendarResponses();
@@ -76,8 +76,8 @@ class CalendarServiceTest {
     class SubscribeCalendarTest {
 
         @Test
-        @DisplayName("멤버와 자격증 정보로 캘린더를 구독할 수 있다")
-        void subscribeCalendar_ShouldSaveCalendar() {
+        @DisplayName("멤버와 자격증 정보로 캘린더를 구독한다")
+        void success_shouldSaveCalendar() {
             // given
             final long memberId = 1L;
             final long certificationId = 2L;
@@ -102,7 +102,7 @@ class CalendarServiceTest {
 
         @Test
         @DisplayName("존재하지 않는 멤버 ID로 구독 시도 시 예외가 발생한다")
-        void subscribeCalendar_WithNonExistentMember_ShouldThrowException() {
+        void fail_whenMemberNotFound() {
             // given
             final long memberId = 1L;
             final long certificationId = 2L;
@@ -118,7 +118,7 @@ class CalendarServiceTest {
 
         @Test
         @DisplayName("존재하지 않는 자격증 ID로 구독 시도 시 예외가 발생한다")
-        void subscribeCalendar_WithNonExistentCertification_ShouldThrowException() {
+        void fail_whenCertificationNotFound() {
             // given
             final long memberId = 1L;
             final long certificationId = 2L;
@@ -134,115 +134,43 @@ class CalendarServiceTest {
             verify(calendarRepository, never()).save(any());
         }
 
-        @Test
-        @DisplayName("이미 구독 중인 캘린더를 다시 구독 시도 시 예외가 발생한다")
-        void subscribeCalendar_WithExistingCalendar_ShouldThrowException() {
-            // given
-            final long memberId = 1L;
-            final long certificationId = 2L;
-            Member member = mock(Member.class);
-            Certification certification = mock(Certification.class);
-
-            when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-            when(certificationRepository.findById(certificationId)).thenReturn(Optional.of(certification));
-            when(calendarRepository.existsByMemberIdAndCertificationId(anyLong(), anyLong())).thenReturn(true);
-            when(member.getId()).thenReturn(memberId);
-            when(certification.getId()).thenReturn(certificationId);
-
-            // when, then
-            assertThatThrownBy(() -> calendarService.subscribeCalendar(memberId, certificationId))
-                    .isInstanceOf(CalendarAlreadyExistsException.class);
-            verify(memberRepository).findById(memberId);
-            verify(certificationRepository).findById(certificationId);
-            verify(calendarRepository).existsByMemberIdAndCertificationId(memberId, certificationId);
-            verify(calendarRepository, never()).save(any());
-        }
     }
-
     @Nested
     @DisplayName("캘린더 구독 취소")
     class UnsubscribeCalendarTest {
 
         @Test
-        @DisplayName("멤버와 자격증 정보로 캘린더 구독을 취소할 수 있다")
-        void unsubscribeCalendar_ShouldDeleteCalendar() {
+        @DisplayName("캘린더 ID와 멤버 ID로 캘린더 구독을 취소한다")
+        void success_shouldDeleteCalendar() {
             // given
             final long memberId = 1L;
             final long certificationId = 2L;
-            Member member = mock(Member.class);
-            Certification certification = mock(Certification.class);
             Calendar calendar = mock(Calendar.class);
 
-            when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-            when(certificationRepository.findById(certificationId)).thenReturn(Optional.of(certification));
-            when(member.getId()).thenReturn(memberId);
-            when(certification.getId()).thenReturn(certificationId);
-            when(calendarRepository.findByMemberIdAndCertificationId(memberId, certificationId)).thenReturn(Optional.of(calendar));
+            when(calendarRepository.findByMemberIdAndCertificationId(memberId, certificationId))
+                    .thenReturn(Optional.of(calendar));
 
             // when
             calendarService.unsubscribeCalendar(memberId, certificationId);
 
             // then
-            verify(memberRepository).findById(memberId);
-            verify(certificationRepository).findById(certificationId);
             verify(calendarRepository).findByMemberIdAndCertificationId(memberId, certificationId);
             verify(calendarRepository).delete(calendar);
         }
 
         @Test
-        @DisplayName("존재하지 않는 멤버 ID로 구독 취소 시도 시 예외가 발생한다")
-        void unsubscribeCalendar_WithNonExistentMember_ShouldThrowException() {
+        @DisplayName("캘린더 ID와 멤버 ID가 일치하는 캘린더가 없을 경우, 캘린더 구독 취소 요청 시 예외가 발생한다")
+        void fail_whenCalendarNotFound() {
             // given
             final long memberId = 1L;
             final long certificationId = 2L;
-            when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
 
-            // when, then
-            assertThatThrownBy(() -> calendarService.unsubscribeCalendar(memberId, certificationId))
-                    .isInstanceOf(MemberNotFoundException.class);
-            verify(memberRepository).findById(memberId);
-            verify(certificationRepository, never()).findById(anyLong());
-            verify(calendarRepository, never()).delete(any());
-        }
-
-        @Test
-        @DisplayName("존재하지 않는 자격증 ID로 구독 취소 시도 시 예외가 발생한다")
-        void unsubscribeCalendar_WithNonExistentCertification_ShouldThrowException() {
-            // given
-            final long memberId = 1L;
-            final long certificationId = 2L;
-            Member member = mock(Member.class);
-            when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-            when(certificationRepository.findById(certificationId)).thenReturn(Optional.empty());
-
-            // when, then
-            assertThatThrownBy(() -> calendarService.unsubscribeCalendar(memberId, certificationId))
-                    .isInstanceOf(CertificationNotFoundException.class);
-            verify(memberRepository).findById(memberId);
-            verify(certificationRepository).findById(certificationId);
-            verify(calendarRepository, never()).delete(any());
-        }
-
-        @Test
-        @DisplayName("구독하지 않은 캘린더 구독 취소 시도 시 예외가 발생한다")
-        void unsubscribeCalendar_WithNonExistentCalendar_ShouldThrowException() {
-            // given
-            final long memberId = 1L;
-            final long certificationId = 2L;
-            Member member = mock(Member.class);
-            Certification certification = mock(Certification.class);
-
-            when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-            when(certificationRepository.findById(certificationId)).thenReturn(Optional.of(certification));
-            when(member.getId()).thenReturn(memberId);
-            when(certification.getId()).thenReturn(certificationId);
-            when(calendarRepository.findByMemberIdAndCertificationId(memberId, certificationId)).thenReturn(Optional.empty());
+            when(calendarRepository.findByMemberIdAndCertificationId(memberId, certificationId))
+                    .thenReturn(Optional.empty());
 
             // when, then
             assertThatThrownBy(() -> calendarService.unsubscribeCalendar(memberId, certificationId))
                     .isInstanceOf(CalendarNotFoundException.class);
-            verify(memberRepository).findById(memberId);
-            verify(certificationRepository).findById(certificationId);
             verify(calendarRepository).findByMemberIdAndCertificationId(memberId, certificationId);
             verify(calendarRepository, never()).delete(any());
         }

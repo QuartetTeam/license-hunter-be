@@ -9,23 +9,26 @@ import java.util.List;
 
 public record CalendarResponse(
         long certificationId,
+        long calendarId,
         String certificationName,
         List<CalendarScheduleResponse> schedules
 ) {
         @QueryProjection
         public CalendarResponse(
                 long certificationId,
+                long calendarId,
                 String certificationName,
                 List<CalendarScheduleResponse> schedules
         ) {
                 this.certificationId = certificationId;
+                this.calendarId = calendarId;
                 this.certificationName = certificationName;
                 this.schedules = schedules;
         }
 
         public record CalendarScheduleResponse(
-                ScheduleType scheduleType,
-                ExamType examType,
+                String scheduleType,
+                String examType,
                 Instant date
         ) {
                 @QueryProjection
@@ -34,9 +37,11 @@ public record CalendarResponse(
                         ExamType examType,
                         Instant date
                 ) {
-                        this.scheduleType = scheduleType;
-                        this.examType = examType;
-                        this.date = date;
+                        this(
+                                scheduleType.getValue(),
+                                examType.getValue(),
+                                date
+                        );
                 }
         }
 }
