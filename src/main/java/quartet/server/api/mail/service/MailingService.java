@@ -53,12 +53,12 @@ public class MailingService {
         mailingRepository.deleteAll(mailing);
     }
 
-    private Member getMemberById(final Long memberId) {
+    private Member getMemberById(final long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
     }
 
-    private Certification getCertificationById(final Long certificationId) {
+    private Certification getCertificationById(final long certificationId) {
         return certificationRepository.findById(certificationId)
                 .orElseThrow(CertificationNotFoundException::new);
     }
