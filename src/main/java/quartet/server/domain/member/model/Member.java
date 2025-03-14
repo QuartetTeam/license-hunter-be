@@ -8,7 +8,8 @@ import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.BaseAuditEntity;
 import quartet.server.domain.auth.model.RefreshToken;
 import quartet.server.domain.calender.model.Calendar;
-import quartet.server.domain.mail.model.MailAlarm;
+import quartet.server.domain.mail.model.Mailing;
+import quartet.server.domain.mail.type.MailingStatus;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,6 +48,11 @@ public class Member extends BaseAuditEntity {
     @Comment("계정 삭제 날짜")
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mailing_status", nullable = false)
+    @Comment("메일링 상태")
+    private MailingStatus mailingStatus;
+
     // 연관관계 매핑
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RefreshToken> refreshTokens = new ArrayList<>();
@@ -58,7 +64,7 @@ public class Member extends BaseAuditEntity {
     private List<Calendar> calendars = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MailAlarm> mailAlarms = new ArrayList<>();
+    private List<Mailing> mailings = new ArrayList<>();
 
     private Member(final String socialId, final String socialProvider, final String email, final String nickname,
                    final String profileImageUrl, final String introduction) {
@@ -68,6 +74,7 @@ public class Member extends BaseAuditEntity {
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
         this.introduction = introduction;
+        this.mailingStatus = MailingStatus.ACTIVE;
     }
 
     public static Member of(final String socialId, final String socialProvider, final String email, final String nickname,
@@ -83,6 +90,10 @@ public class Member extends BaseAuditEntity {
 
     public void delete() {
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateMailingStatus(final MailingStatus mailAlarmStatus) {
+        this.mailingStatus = mailAlarmStatus;
     }
 }
 

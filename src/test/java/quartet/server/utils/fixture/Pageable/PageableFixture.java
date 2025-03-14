@@ -12,4 +12,5 @@ public class PageableFixture {
     public static Pageable pageable(int page, int pageSize, Sort sort) {
         return PageRequest.of(page, pageSize, sort);
     }
+    public static Pageable pageable(int pageSize) { return PageRequest.of(0, pageSize); }
 }
