@@ -22,7 +22,7 @@ public class MailingQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public Page<MailingResponse> getMailingsByMemberId(long memberId, Pageable pageable) {
+    public Page<MailingResponse> getMailingsByMemberId(final long memberId, final Pageable pageable) {
         QMailing mailing = QMailing.mailing;
         QCertification certification = QCertification.certification;
         QCertificationDescription certDescription = QCertificationDescription.certificationDescription;

@@ -29,7 +29,7 @@ public class MailingService {
     private final CertificationRepository certificationRepository;
     private final MailingQueryRepository mailingQueryRepository;
 
-    public Page<MailingResponse> getMailingsByMemberId(final long memberId, Pageable pageable) {
+    public Page<MailingResponse> getMailingsByMemberId(final long memberId, final Pageable pageable) {
 
         return mailingQueryRepository.getMailingsByMemberId(memberId, pageable);
     }

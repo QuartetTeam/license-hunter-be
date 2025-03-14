@@ -36,7 +36,7 @@ public class MailingController {
     }
 
     @DeleteMapping("/mailings")
-    public ApiResponse<Void> unsubscribeMailings(@RequestParam List<Long> mailingIds) {
+    public ApiResponse<Void> unsubscribeMailings(@RequestParam final List<Long> mailingIds) {
         long memberId = 1L; // TODO: @AuthenticationPrincipal로 변경 예정
         mailingService.unsubscribeMailings(memberId, mailingIds);
         return ApiResponse.success(NO_CONTENT);
