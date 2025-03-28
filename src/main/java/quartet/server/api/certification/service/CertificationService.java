@@ -6,14 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import quartet.server.api.certification.dto.response.CertificationResponse;
-import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
+import quartet.server.api.certification.dto.response.*;
 import quartet.server.api.certification.query.CategoryQueryRepository;
-import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
 import quartet.server.api.certification.query.CertificationQueryRepository;
 import quartet.server.core.utils.RandomGenerator;
-import quartet.server.domain.category.model.Category;
-import quartet.server.domain.category.repository.CategoryRepository;
+import quartet.server.domain.category.model.MainCategory;
+import quartet.server.domain.category.model.SubCategory;
+import quartet.server.domain.category.repository.MainCategoryRepository;
+import quartet.server.domain.category.repository.SubCategoryRepository;
 import quartet.server.domain.certification.repository.*;
 import quartet.server.domain.certification.exception.CertificationNotFoundException;
 import quartet.server.domain.category.exception.CategoryNotFoundException;
@@ -32,7 +32,8 @@ public class CertificationService {
     private final CertificationPassCriteriaRepository certificationPassCriteriaRepository;
     private final CertificationScheduleRepository certificationScheduleRepository;
     private final CertificationViewLogRepository certificationViewLogRepository;
-    private final CategoryRepository categoryRepository;
+    private final MainCategoryRepository mainCategoryRepository;
+    private final SubCategoryRepository subCategoryRepository;
 
     private final CategoryQueryRepository categoryQueryRepository;
     private final CertificationQueryRepository certificationQueryRepository;
@@ -47,44 +48,46 @@ public class CertificationService {
 
     @Transactional(readOnly = true)
     public Page<CertificationsByCategoryResponse> getAllCertificationsByCategory(
-            long categoryId, final Pageable pageable){
-
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(CategoryNotFoundException::new);
-
-
-        if (category.getParentCategory() == null) categoryId = categoryQueryRepository.getDefaultSubCategoryId(categoryId)
+            long categoryId, final Pageable pageable) {
+        SubCategory subCategory = subCategoryRepository.findById(categoryId)
                 .orElseThrow(SubCategoryNotFoundException::new);
 
-        return certificationQueryRepository.findAllCertificationByCategory(categoryId,pageable);
-
+        return certificationQueryRepository.findAllCertificationByCategory(categoryId, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<CertificationCategoriesResponse> getCategories(final long parentId){
-        List<Category> subCategories = categoryRepository.findByParentCategory_Id(parentId);
+    public List<CertificationCategoriesResponse> getCategories(final boolean isDefault) {
+        List<MainCategory> mainCategories;
+        if (isDefault) {
+            mainCategories = mainCategoryRepository.findByIsDefaultTrue();
+        } else {
+            mainCategories = mainCategoryRepository.findByIsDefaultFalse();
+        }
 
-        return subCategories.stream()
-                .map(category -> new CertificationCategoriesResponse(category.getId(), category.getName()))
+        return mainCategories.stream()
+                .map(category -> new CertificationCategoriesResponse(
+                    category.getId(), 
+                    category.getName(),
+                    CertificationCategoriesResponse.CategoryType.MAIN
+                ))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<CertificationCategoriesResponse> getCategories(final boolean isDefault){
-        List<Category> categories;
-        if (isDefault) {
-            categories = categoryRepository.findByIsDefaultTrue();
-        } else {
-            categories = categoryRepository.findByIsDefaultFalseAndParentCategoryIsNull();
-        }
-
-        return categories.stream()
-                .map(category -> new CertificationCategoriesResponse(category.getId(), category.getName()))
+    public List<CertificationCategoriesResponse> getCategories(final long mainCategoryId) {
+        List<SubCategory> subCategories = subCategoryRepository.findByMainCategoryId(mainCategoryId);
+        
+        return subCategories.stream()
+                .map(category -> new CertificationCategoriesResponse(
+                    category.getId(), 
+                    category.getName(),
+                    CertificationCategoriesResponse.CategoryType.SUB
+                ))
                 .toList();
     }
 
     @Transactional(propagation=Propagation.REQUIRED, readOnly = true)
-    public Long getRecommendedCategoryId(final Long memberId){
+    public Long getRecommendedCategoryId(final Long memberId) {
         if (memberId == null) return categoryQueryRepository.getDefaultRecommendedCategoryId();
 
         List<Long> interestedCategoryIds = categoryQueryRepository.findInterestedCategoryIds(memberId);
@@ -97,12 +100,8 @@ public class CertificationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CertificationsByCategoryResponse> getRecommendedCertifications(final Long memberId){
+    public List<CertificationsByCategoryResponse> getRecommendedCertifications(final Long memberId) {
         long categoryId = getRecommendedCategoryId(memberId);
-
-        long defaultSubCategoryId = categoryQueryRepository.getDefaultSubCategoryId(categoryId)
-                .orElseThrow(SubCategoryNotFoundException::new);
-
-        return certificationQueryRepository.findAllCertificationByCategory(defaultSubCategoryId,6);
+        return certificationQueryRepository.findAllCertificationByCategory(categoryId, 6);
     }
 }

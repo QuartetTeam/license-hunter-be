@@ -5,13 +5,16 @@ import quartet.server.api.certification.dto.response.CertificationsByCategoryRes
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ScheduleType;
 import quartet.server.domain.certification.type.ProblemType;
+import quartet.server.domain.category.model.MainCategory;
+import quartet.server.domain.category.model.SubCategory;
 
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CertificationFixture {
-     public static List<CertificationResponse.CertificationScheduleResponse> certificationScheduleResList() {
+    public static List<CertificationResponse.CertificationScheduleResponse> certificationScheduleResList() {
         return List.of(
             new CertificationResponse.CertificationScheduleResponse(ScheduleType.APPLICATION_START, ExamType.PRACTICAL, Instant.parse("2025-05-01T09:00:00Z")),
             new CertificationResponse.CertificationScheduleResponse(ScheduleType.EXAM_END, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z")),
@@ -38,4 +41,27 @@ public class CertificationFixture {
             );
     }
 
+    public static CertificationResponse certificationResponse() {
+        return new CertificationResponse(
+                1L,
+                "정보처리기사",
+                "한국산업인력공단",
+                "https://example.com/icon.png",
+                "https://example.com/apply",
+                "정보처리기사 자격증 설명",
+                "정보처리기사 자격 요건",
+                Set.of(new CertificationResponse.CertificationScheduleResponse(
+                        ScheduleType.APPLICATION_START,
+                        ExamType.PRACTICAL,
+                        Instant.now()
+                )),
+                Set.of(new CertificationResponse.CertificationExamDetailResponse(
+                        ExamType.PRACTICAL,
+                        "정보처리기사 과목",
+                        ProblemType.LONG_ANSWER,
+                        20,
+                        120
+                ))
+        );
+    }
 }

@@ -13,6 +13,8 @@ import quartet.server.api.certification.dto.response.*;
 import quartet.server.domain.certification.model.*;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ScheduleType;
+import quartet.server.domain.category.model.QMainCategory;
+import quartet.server.domain.category.model.QSubCategory;
 
 import java.time.Instant;
 import java.util.List;
@@ -78,7 +80,7 @@ public class CertificationQueryRepository {
             return queryFactory
                 .select(certification.id)
                 .from(certification)
-                .where(certification.category.id.eq(subCategoryId));
+                .where(certification.subCategory.id.eq(subCategoryId));
     }
 
     public List<CertificationsByCategoryResponse> getAllCertificationsByIds(final List<Long> certificationIds){
@@ -137,6 +139,31 @@ public class CertificationQueryRepository {
                                         .select(certification.count());
 
             return PageableExecutionUtils.getPage(certifications, pageable, countQuery::fetchOne);
+    }
+
+    public List<MainCategoryResponse> findAllMainCategories() {
+        QMainCategory mainCategory = QMainCategory.mainCategory;
+        return queryFactory
+                .select(new QMainCategoryResponse(
+                        mainCategory.id,
+                        mainCategory.name,
+                        mainCategory.isDefault
+                ))
+                .from(mainCategory)
+                .fetch();
+    }
+
+    public List<SubCategoryResponse> findAllSubCategoriesByMainCategoryId(final long mainCategoryId) {
+        QSubCategory subCategory = QSubCategory.subCategory;
+        return queryFactory
+                .select(new QSubCategoryResponse(
+                        subCategory.id,
+                        subCategory.name,
+                        subCategory.mainCategory.id
+                ))
+                .from(subCategory)
+                .where(subCategory.mainCategory.id.eq(mainCategoryId))
+                .fetch();
     }
 }
 

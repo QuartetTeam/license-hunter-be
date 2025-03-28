@@ -5,14 +5,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
-import quartet.server.core.entity.BaseTimeEntity;
-import quartet.server.domain.category.model.Category;
+import quartet.server.core.entity.IdentifiableEntity;
+import quartet.server.domain.category.model.SubCategory;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "member_category")
-public class MemberCategory extends BaseTimeEntity {
+public class MemberCategory extends IdentifiableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -20,16 +20,16 @@ public class MemberCategory extends BaseTimeEntity {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    @Comment("카테고리 ID")
-    private Category category;
+    @JoinColumn(name = "sub_category_id", nullable = false)
+    @Comment("소분류 카테고리 ID")
+    private SubCategory subCategory;
 
-    private MemberCategory(final Member member, final Category category) {
+    private MemberCategory(final Member member, final SubCategory subCategory) {
         this.member = member;
-        this.category = category;
+        this.subCategory = subCategory;
     }
 
-    public static MemberCategory of(final Member member, final Category category) {
-        return new MemberCategory(member, category);
+    public static MemberCategory of(final Member member, final SubCategory subCategory) {
+        return new MemberCategory(member, subCategory);
     }
 }
