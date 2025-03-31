@@ -16,9 +16,9 @@ import java.util.Set;
 public class CertificationFixture {
     public static List<CertificationResponse.CertificationScheduleResponse> certificationScheduleResList() {
         return List.of(
-            new CertificationResponse.CertificationScheduleResponse(ScheduleType.APPLICATION_START, ExamType.PRACTICAL, Instant.parse("2025-05-01T09:00:00Z")),
-            new CertificationResponse.CertificationScheduleResponse(ScheduleType.EXAM_END, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z")),
-            new CertificationResponse.CertificationScheduleResponse(ScheduleType.PASS_ANNOUNCEMENT, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z"))
+            new CertificationResponse.CertificationScheduleResponse(ScheduleType.APPLICATION_START, ExamType.PRACTICAL, Instant.parse("2025-05-01T09:00:00Z"), "1회차"),
+            new CertificationResponse.CertificationScheduleResponse(ScheduleType.EXAM_END, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z"), "1회차"),
+            new CertificationResponse.CertificationScheduleResponse(ScheduleType.PASS_ANNOUNCEMENT, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z"), "1회차")
         );
     }
 
@@ -53,7 +53,8 @@ public class CertificationFixture {
                 Set.of(new CertificationResponse.CertificationScheduleResponse(
                         ScheduleType.APPLICATION_START,
                         ExamType.PRACTICAL,
-                        Instant.now()
+                        Instant.now(),
+                        "1회차"
                 )),
                 Set.of(new CertificationResponse.CertificationExamDetailResponse(
                         ExamType.PRACTICAL,

@@ -29,18 +29,21 @@ public record CalendarResponse(
         public record CalendarScheduleResponse(
                 String scheduleType,
                 String examType,
-                Instant date
+                Instant date,
+                String examRound
         ) {
                 @QueryProjection
                 public CalendarScheduleResponse(
                         ScheduleType scheduleType,
                         ExamType examType,
-                        Instant date
+                        Instant date,
+                        String examRound
                 ) {
                         this(
                                 scheduleType.getValue(),
                                 examType.getValue(),
-                                date
+                                date,
+                                examRound
                         );
                 }
         }

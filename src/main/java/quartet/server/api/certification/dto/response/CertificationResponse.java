@@ -5,7 +5,6 @@ import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ProblemType;
 import quartet.server.domain.certification.type.ScheduleType;
 
-
 import java.time.Instant;
 import java.util.Set;
 
@@ -46,17 +45,20 @@ public record CertificationResponse(
     public record CertificationScheduleResponse(
             ScheduleType scheduleType,
             ExamType examType,
-            Instant  date
+            Instant date,
+            String examRound
     ){
         @QueryProjection
         public CertificationScheduleResponse(
                 ScheduleType scheduleType,
                 ExamType examType,
-                Instant  date)
+                Instant date,
+                String examRound)
         {
             this.scheduleType = scheduleType;
             this.examType = examType;
             this.date = date;
+            this.examRound = examRound;
         }
     }
     public record CertificationExamDetailResponse(
