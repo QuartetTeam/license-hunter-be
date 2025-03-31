@@ -32,6 +32,7 @@ public class CertificationQueryRepository {
         QCertification certification = QCertification.certification;
         QAuthority authority = QAuthority.authority;
         QCertificationDescription description = QCertificationDescription.certificationDescription;
+        QCertificationQualification qualification = QCertificationQualification.certificationQualification;
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
         QCertificationExamDetail examDetail = QCertificationExamDetail.certificationExamDetail;
 
@@ -40,6 +41,7 @@ public class CertificationQueryRepository {
                     .from(certification)
                     .leftJoin(certification.authority, authority)
                     .leftJoin(description).on(description.certification.eq(certification))
+                    .leftJoin(qualification).on(qualification.certification.eq(certification))
                     .leftJoin(schedule).on(schedule.certification.eq(certification))
                     .leftJoin(examDetail).on(examDetail.certification.eq(certification))
                     .where(certification.id.eq(certificationId))
@@ -51,7 +53,12 @@ public class CertificationQueryRepository {
                                 authority.iconImageUrl,
                                 authority.applicationUrl,
                                 description.description,
-                                description.qualification,
+                                GroupBy.set(
+                                    new QCertificationResponse_CertificationQualificationResponse(
+                                        qualification.qualification,
+                                        qualification.type
+                                    )
+                                ),
                                 GroupBy.set(
                                         new QCertificationResponse_CertificationScheduleResponse(
                                             schedule.scheduleType,

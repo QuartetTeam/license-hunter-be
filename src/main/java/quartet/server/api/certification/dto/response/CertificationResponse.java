@@ -15,7 +15,7 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
-        String qualification,
+        Set<CertificationQualificationResponse> qualifications,
         Set<CertificationScheduleResponse> scheduleSet,
         Set<CertificationExamDetailResponse> examDetailSet
 ){
@@ -27,7 +27,7 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
-        String qualification,
+        Set<CertificationQualificationResponse> qualifications,
         Set<CertificationScheduleResponse> scheduleSet,
         Set<CertificationExamDetailResponse> examDetailSet
     ) {
@@ -37,9 +37,23 @@ public record CertificationResponse(
         this.authorityIconImageUrl = authorityIconImageUrl;
         this.applicationUrl = applicationUrl;
         this.description = description;
-        this.qualification = qualification;
+        this.qualifications = qualifications;
         this.scheduleSet = scheduleSet;
         this.examDetailSet = examDetailSet;
+    }
+
+    public record CertificationQualificationResponse(
+            String qualification,
+            String type
+    ){
+        @QueryProjection
+        public CertificationQualificationResponse(
+                String qualification,
+                String type
+        ){
+            this.qualification = qualification;
+            this.type = type;
+        }
     }
 
     public record CertificationScheduleResponse(
@@ -61,6 +75,7 @@ public record CertificationResponse(
             this.examRound = examRound;
         }
     }
+
     public record CertificationExamDetailResponse(
             ExamType examType,
             String subject,

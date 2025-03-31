@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.IdentifiableEntity;
 import quartet.server.domain.category.model.SubCategory;
+import quartet.server.domain.certification.type.QualificationType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,14 +47,19 @@ public class Certification extends IdentifiableEntity {
     @Comment("상세 페이지 조회 수")
     private int viewCount = 0;
 
-    private Certification(final String name, final Authority  authority, final SubCategory subCategory){
+    @Column(nullable = false)
+    @Comment("자격증 유형")
+    @Enumerated(EnumType.STRING)
+    private QualificationType qualificationType;
+
+    private Certification(final String name, final Authority  authority, final QualificationType qualificationType){
         this.name = name;
         this.authority = authority;
-        this.subCategory = subCategory;
+        this.qualificationType = qualificationType;
     }
 
-    public static Certification of(final String name, final Authority  authority, final SubCategory subCategory){
-        return new Certification(name, authority, subCategory);
+    public static Certification of(final String name, final Authority  authority, final QualificationType qualificationType){
+        return new Certification(name, authority, qualificationType);
     }
 
     public void incrementViewCount() {

@@ -29,11 +29,19 @@ public class CertificationFixture {
         );
     }
 
+    public static Set<CertificationResponse.CertificationQualificationResponse> certificationQualificationResList() {
+        return Set.of(
+            new CertificationResponse.CertificationQualificationResponse("4년제 학사", "학력"),
+            new CertificationResponse.CertificationQualificationResponse("관련 분야 경력 2년 이상", "경력")
+        );
+    }
+
     public static CertificationResponse certificationRes(long certificationId){
         return new CertificationResponse(certificationId,"정보처리기사", "한국산업인력공단",null,
                  "https://www.q-net.or.kr/man001.do?gSite=Q&gIntro=Y", "정보처리 능력 평가",
-                "자격요건에 준하는 학위 취득", new HashSet<>(certificationScheduleResList()), new HashSet<>(certificationExamDetailResList()));
+                certificationQualificationResList(), new HashSet<>(certificationScheduleResList()), new HashSet<>(certificationExamDetailResList()));
     }
+
     public static List<CertificationsByCategoryResponse> certificationsByCategoryRes(){
             return List.of(
                 new CertificationsByCategoryResponse(1L, "자격증 1", Instant.now(), Instant.now().plusSeconds(3600), 100),
@@ -49,7 +57,10 @@ public class CertificationFixture {
                 "https://example.com/icon.png",
                 "https://example.com/apply",
                 "정보처리기사 자격증 설명",
-                "정보처리기사 자격 요건",
+                Set.of(new CertificationResponse.CertificationQualificationResponse(
+                        "4년제 학사",
+                        "학력"
+                )),
                 Set.of(new CertificationResponse.CertificationScheduleResponse(
                         ScheduleType.APPLICATION_START,
                         ExamType.PRACTICAL,

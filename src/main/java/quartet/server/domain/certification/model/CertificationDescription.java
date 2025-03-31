@@ -21,18 +21,12 @@ public class CertificationDescription extends IdentifiableEntity {
     @Comment("자격증 기본 설명")
     private String description;
 
-    @Lob
-    @Comment("응시 자격")
-    private String qualification;
-
-    private CertificationDescription(final Certification certification, final String description, final String qualification) {
+    private CertificationDescription(final Certification certification, final String description) {
         this.certification = certification;
         this.description = description;
-        this.qualification = qualification;
     }
 
-    public static CertificationDescription of(final Certification certification, final String description, final String qualification) {
-        return new CertificationDescription(certification, description, qualification);
+    public static CertificationDescription of(final Certification certification, final String description) {
+        return new CertificationDescription(certification, description);
     }
-
 }
