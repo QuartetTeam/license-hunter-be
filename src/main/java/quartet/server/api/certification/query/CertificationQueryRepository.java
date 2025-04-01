@@ -13,6 +13,8 @@ import quartet.server.api.certification.dto.response.*;
 import quartet.server.domain.certification.model.*;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ScheduleType;
+import quartet.server.domain.category.model.QMainCategory;
+import quartet.server.domain.category.model.QSubCategory;
 
 import java.time.Instant;
 import java.util.List;
@@ -30,6 +32,7 @@ public class CertificationQueryRepository {
         QCertification certification = QCertification.certification;
         QAuthority authority = QAuthority.authority;
         QCertificationDescription description = QCertificationDescription.certificationDescription;
+        QCertificationQualification qualification = QCertificationQualification.certificationQualification;
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
         QCertificationExamDetail examDetail = QCertificationExamDetail.certificationExamDetail;
 
@@ -38,6 +41,7 @@ public class CertificationQueryRepository {
                     .from(certification)
                     .leftJoin(certification.authority, authority)
                     .leftJoin(description).on(description.certification.eq(certification))
+                    .leftJoin(qualification).on(qualification.certification.eq(certification))
                     .leftJoin(schedule).on(schedule.certification.eq(certification))
                     .leftJoin(examDetail).on(examDetail.certification.eq(certification))
                     .where(certification.id.eq(certificationId))
@@ -49,12 +53,18 @@ public class CertificationQueryRepository {
                                 authority.iconImageUrl,
                                 authority.applicationUrl,
                                 description.description,
-                                description.qualification,
+                                GroupBy.set(
+                                    new QCertificationResponse_CertificationQualificationResponse(
+                                        qualification.qualification,
+                                        qualification.type
+                                    )
+                                ),
                                 GroupBy.set(
                                         new QCertificationResponse_CertificationScheduleResponse(
                                             schedule.scheduleType,
                                             schedule.examType,
-                                            schedule.scheduledDate
+                                            schedule.date,
+                                            schedule.examRound
                                         )
                                 ),
                                 GroupBy.set(
@@ -72,13 +82,12 @@ public class CertificationQueryRepository {
         return Optional.ofNullable(result.get(certificationId));
     }
 
-
     private JPAQuery<Long> findAllCertificationsByCategoryBaseQuery(final long subCategoryId){
             QCertification certification = QCertification.certification;
             return queryFactory
                 .select(certification.id)
                 .from(certification)
-                .where(certification.category.id.eq(subCategoryId));
+                .where(certification.subCategory.id.eq(subCategoryId));
     }
 
     public List<CertificationsByCategoryResponse> getAllCertificationsByIds(final List<Long> certificationIds){
@@ -98,11 +107,11 @@ public class CertificationQueryRepository {
                                     certification.name,
                                     cases()
                                             .when(schedule.scheduleType.eq(ScheduleType.APPLICATION_START))
-                                            .then(schedule.scheduledDate)
+                                            .then(schedule.date)
                                             .otherwise((Instant) null),
                                     cases()
                                             .when(schedule.scheduleType.eq(ScheduleType.EXAM_START))
-                                            .then(schedule.scheduledDate)
+                                            .then(schedule.date)
                                             .otherwise((Instant) null),
                                     Expressions.constant(0)
                             )));
@@ -137,6 +146,31 @@ public class CertificationQueryRepository {
                                         .select(certification.count());
 
             return PageableExecutionUtils.getPage(certifications, pageable, countQuery::fetchOne);
+    }
+
+    public List<MainCategoryResponse> findAllMainCategories() {
+        QMainCategory mainCategory = QMainCategory.mainCategory;
+        return queryFactory
+                .select(new QMainCategoryResponse(
+                        mainCategory.id,
+                        mainCategory.name,
+                        mainCategory.isDefault
+                ))
+                .from(mainCategory)
+                .fetch();
+    }
+
+    public List<SubCategoryResponse> findAllSubCategoriesByMainCategoryId(final long mainCategoryId) {
+        QSubCategory subCategory = QSubCategory.subCategory;
+        return queryFactory
+                .select(new QSubCategoryResponse(
+                        subCategory.id,
+                        subCategory.name,
+                        subCategory.mainCategory.id
+                ))
+                .from(subCategory)
+                .where(subCategory.mainCategory.id.eq(mainCategoryId))
+                .fetch();
     }
 }
 

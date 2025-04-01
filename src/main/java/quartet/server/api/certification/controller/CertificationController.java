@@ -25,40 +25,43 @@ public class CertificationController {
     @GetMapping("/category")
     public ApiResponse<List<CertificationCategoriesResponse>> getCategories(
             @RequestParam(required = false) Boolean isDefault,
-            @RequestParam(required = false) Long parentId
-    ){
+            @RequestParam(required = false) Long mainCategoryId
+    ) {
         List<CertificationCategoriesResponse> categories;
-        if (parentId != null) categories = certificationService.getCategories(parentId);
-        else categories = certificationService.getCategories(isDefault);
+        if (mainCategoryId != null) {
+            categories = certificationService.getCategories(mainCategoryId);
+        } else {
+            categories = certificationService.getCategories(isDefault);
+        }
 
         return ApiResponse.success(OK, categories);
     }
 
     // 자격증 상세 조회
     @GetMapping("/{certificationId}")
-    public ApiResponse<CertificationResponse> getCertification(@PathVariable long certificationId){
+    public ApiResponse<CertificationResponse> getCertification(@PathVariable long certificationId) {
         CertificationResponse certificationResponse = certificationService.getCertification(certificationId);
         return ApiResponse.success(OK, certificationResponse);
     }
 
     // 특정 카테고리 자격증 조회
     @GetMapping("")
-    public ApiResponse<Page<CertificationsByCategoryResponse>>  getAllCertificationByCategory(
+    public ApiResponse<Page<CertificationsByCategoryResponse>> getAllCertificationByCategory(
             @RequestParam long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int pageSize
-    ){
+    ) {
         PageRequest pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("id")));
         Page<CertificationsByCategoryResponse> certifications = certificationService.getAllCertificationsByCategory(
                 categoryId, pageable);
-        return ApiResponse.success(OK,certifications);
+        return ApiResponse.success(OK, certifications);
     }
 
     @GetMapping("/recommendation")
-    public ApiResponse<List<CertificationsByCategoryResponse>> getRecommendedCertifications(){
+    public ApiResponse<List<CertificationsByCategoryResponse>> getRecommendedCertifications() {
         // @TODO 최지희: @AuthenticationPrincipal로 변경 예정
         long memberId = 1L;
         List<CertificationsByCategoryResponse> recommendedCertifications = certificationService.getRecommendedCertifications(memberId);
-        return ApiResponse.success(OK,recommendedCertifications);
+        return ApiResponse.success(OK, recommendedCertifications);
     }
 }

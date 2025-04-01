@@ -5,7 +5,6 @@ import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ProblemType;
 import quartet.server.domain.certification.type.ScheduleType;
 
-
 import java.time.Instant;
 import java.util.Set;
 
@@ -16,7 +15,7 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
-        String qualification,
+        Set<CertificationQualificationResponse> qualifications,
         Set<CertificationScheduleResponse> scheduleSet,
         Set<CertificationExamDetailResponse> examDetailSet
 ){
@@ -28,7 +27,7 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
-        String qualification,
+        Set<CertificationQualificationResponse> qualifications,
         Set<CertificationScheduleResponse> scheduleSet,
         Set<CertificationExamDetailResponse> examDetailSet
     ) {
@@ -38,27 +37,45 @@ public record CertificationResponse(
         this.authorityIconImageUrl = authorityIconImageUrl;
         this.applicationUrl = applicationUrl;
         this.description = description;
-        this.qualification = qualification;
+        this.qualifications = qualifications;
         this.scheduleSet = scheduleSet;
         this.examDetailSet = examDetailSet;
+    }
+
+    public record CertificationQualificationResponse(
+            String qualification,
+            String type
+    ){
+        @QueryProjection
+        public CertificationQualificationResponse(
+                String qualification,
+                String type
+        ){
+            this.qualification = qualification;
+            this.type = type;
+        }
     }
 
     public record CertificationScheduleResponse(
             ScheduleType scheduleType,
             ExamType examType,
-            Instant  date
+            Instant date,
+            String examRound
     ){
         @QueryProjection
         public CertificationScheduleResponse(
                 ScheduleType scheduleType,
                 ExamType examType,
-                Instant  date)
+                Instant date,
+                String examRound)
         {
             this.scheduleType = scheduleType;
             this.examType = examType;
             this.date = date;
+            this.examRound = examRound;
         }
     }
+
     public record CertificationExamDetailResponse(
             ExamType examType,
             String subject,

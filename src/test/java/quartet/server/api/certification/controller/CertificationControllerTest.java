@@ -1,4 +1,4 @@
-package quartet.server.api.certification;
+package quartet.server.api.certification.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +9,6 @@ import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import quartet.server.api.certification.controller.CertificationController;
 import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
 import quartet.server.api.certification.dto.response.CertificationResponse;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
@@ -26,8 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -99,18 +101,18 @@ public class CertificationControllerTest {
 
     @Test
     @DisplayName("특정 상위 카테고리에 속하는 하위 자격증 카테고리를 조회한다")
-    void success_getCategories_byParentCategory() throws Exception {
+    void success_getCategories_byMainCategory() throws Exception {
         // given
-        final long parentCategoryId = 1L;
+        final long mainCategoryId = 1L;
         final List<CertificationCategoriesResponse> responses = CertificationCategoryFixture.categoryResList();
         final ApiResponse<List<CertificationCategoriesResponse>> expectedResponse = ApiResponse.success(
                 CommonSuccessCode.OK, responses);
-        when(certificationService.getCategories(eq(parentCategoryId))).thenReturn(responses);
+        when(certificationService.getCategories(eq(mainCategoryId))).thenReturn(responses);
 
         // when
         final String result = mockMvc.perform(
                 get("/api/v1/certifications/category")
-                        .param("parentId", String.valueOf(parentCategoryId))
+                        .param("mainCategoryId", String.valueOf(mainCategoryId))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -120,7 +122,7 @@ public class CertificationControllerTest {
         // then
         final String expectedJson = objectMapper.writeValueAsString(expectedResponse);
         assertThat(result).isEqualTo(expectedJson);
-        verify(certificationService, times(1)).getCategories(parentCategoryId);
+        verify(certificationService, times(1)).getCategories(mainCategoryId);
         verify(certificationService, never()).getCategories(anyBoolean());
     }
 

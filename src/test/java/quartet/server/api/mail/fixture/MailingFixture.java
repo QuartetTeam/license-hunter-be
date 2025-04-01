@@ -2,6 +2,7 @@ package quartet.server.api.mail.fixture;
 
 import quartet.server.api.mail.dto.response.MailingResponse;
 import quartet.server.domain.certification.model.Certification;
+import quartet.server.domain.certification.type.QualificationType;
 import quartet.server.domain.mail.model.Mailing;
 import quartet.server.domain.member.model.Member;
 
@@ -14,7 +15,7 @@ public class MailingFixture {
     }
 
     public static Certification createCertification() {
-        return Certification.of("정보처리기사", null, null);
+        return Certification.of("정보처리기사", null, QualificationType.T);
     }
 
     public static Mailing createMailing() {

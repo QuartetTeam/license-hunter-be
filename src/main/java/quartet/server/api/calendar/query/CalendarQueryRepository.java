@@ -45,7 +45,8 @@ public class CalendarQueryRepository {
                                         new QCalendarResponse_CalendarScheduleResponse(
                                                 cs.scheduleType,
                                                 cs.examType,
-                                                cs.scheduledDate
+                                                cs.date,
+                                                cs.examRound
                                         )
                                 )
                         )
