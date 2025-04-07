@@ -6,4 +6,5 @@ import quartet.server.domain.member.model.Member;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
+    Member findBySocialId(String socialId);
 }
