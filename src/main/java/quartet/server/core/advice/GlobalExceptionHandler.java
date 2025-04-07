@@ -10,12 +10,14 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import quartet.server.api.common.response.ApiResponse;
 import quartet.server.core.code.CommonErrorCode;
 import quartet.server.core.exception.BaseException;
 import quartet.server.domain.calender.exception.CalendarException;
 import quartet.server.domain.example.exception.ExampleException;
+import quartet.server.domain.image.exception.ImageException;
 import quartet.server.domain.mail.exception.MailException;
 
 @RestControllerAdvice
@@ -64,6 +66,12 @@ public class GlobalExceptionHandler {
         return ApiResponse.fail(CommonErrorCode.URL_NOT_FOUND);
     }
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    protected ApiResponse<Void> handleMaxUploadSizeExceededException(final MaxUploadSizeExceededException e) {
+        log.warn("[MaxUploadSizeExceededException]", e);
+        return ApiResponse.fail(CommonErrorCode.FILE_SIZE_EXCEEDED);
+    }
+
     @ExceptionHandler(ExampleException.class)
     protected ApiResponse<Void> handleExampleException(final ExampleException e) {
         log.warn("[ExampleException] : {}", e.getMessage(), e);
@@ -78,6 +86,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MailException.class)
     protected ApiResponse<Void> handleMailException(final MailException e) {
         log.warn("[MailException] : {}", e.getMessage(), e);
+        return ApiResponse.fail(e.getErrorCode());
+    }
+
+    @ExceptionHandler(ImageException.class)
+    protected ApiResponse<Void> handleImageException(final ImageException e) {
+        log.warn("[ImageException] : {}", e.getMessage(), e);
         return ApiResponse.fail(e.getErrorCode());
     }
 
