@@ -40,6 +40,11 @@ spring:
     resources:
       add-mappings: false
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 management:
   endpoints:
     web:
@@ -59,3 +64,15 @@ security:
 externals:
   public-data:
     service-key: ""
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_S3_ACCESS_KEY}
+      secret-key: ${AWS_S3_SECRET_KEY}
+    region:
+      static: ${AWS_REGION}
+    stack:
+      auto: false
+    s3:
+      bucket: ${AWS_S3_BUCKET}
