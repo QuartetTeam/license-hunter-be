@@ -58,7 +58,7 @@ public class SecurityConfig {
                         .successHandler(oauthLoginSuccessHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue",
-                                "/certifications/**","/calendars/**","/mailings/**").permitAll() // TODO: 나중에 더 추가
+                                "/api/v1/certifications/**","/api/v1/calendars/**","/api/v1/mailings/**").permitAll() // TODO: 나중에 더 추가
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .logout(AbstractHttpConfigurer::disable) // 기본 로그아웃 비활성화
