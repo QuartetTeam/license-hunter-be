@@ -21,7 +21,7 @@ public class CertificationSchedule extends IdentifiableEntity {
     @Comment("자격증 id")
     private Certification certification;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Comment("시험 종류")
     @Enumerated(EnumType.STRING)
     private ExamType examType;

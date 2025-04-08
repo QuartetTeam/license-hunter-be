@@ -22,11 +22,11 @@ public class Authority extends IdentifiableEntity {
     @Comment("시행기관 홈페이지")
     private String websiteUrl;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = true, length = 100)
     @Comment("접수신청 페이지")
     private String applicationUrl;
 
-    @Column(length = 100)
+    @Column(nullable = true, length = 100)
     @Comment("시행기관 아이콘 이미지")
     private String iconImageUrl;
 
