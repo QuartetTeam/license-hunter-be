@@ -11,8 +11,8 @@ import quartet.server.domain.certification.type.TechnicalGradeType;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "technical_qualification")
-public class TechnicalQualification extends IdentifiableEntity {
+@Table(name = "hrd_certification_detail")
+public class HrdCertificationDetail extends IdentifiableEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certification_id", nullable = false)
     @Comment("자격증 id")
@@ -27,13 +27,13 @@ public class TechnicalQualification extends IdentifiableEntity {
     @Comment("종목코드")
     private String jmcd;
 
-    private TechnicalQualification(final Certification certification, final TechnicalGradeType grade, final String jmcd) {
+    private HrdCertificationDetail(final Certification certification, final TechnicalGradeType grade, final String jmcd) {
         this.certification = certification;
         this.grade = grade;
         this.jmcd = jmcd;
     }
 
-    public static TechnicalQualification of(final Certification certification, final TechnicalGradeType grade, final String jmcd) {
-        return new TechnicalQualification(certification, grade, jmcd);
+    public static HrdCertificationDetail of(final Certification certification, final TechnicalGradeType grade, final String jmcd) {
+        return new HrdCertificationDetail(certification, grade, jmcd);
     }
 } 

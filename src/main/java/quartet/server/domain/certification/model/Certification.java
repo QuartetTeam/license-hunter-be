@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.IdentifiableEntity;
 import quartet.server.domain.category.model.SubCategory;
@@ -45,7 +46,8 @@ public class Certification extends IdentifiableEntity {
 
     @Column(nullable = false)
     @Comment("상세 페이지 조회 수")
-    private int viewCount = 0;
+    @ColumnDefault("0")
+    private int viewCount;
 
     @Column(nullable = false)
     @Comment("자격증 유형")
