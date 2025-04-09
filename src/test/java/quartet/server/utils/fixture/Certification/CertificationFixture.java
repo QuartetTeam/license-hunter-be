@@ -17,9 +17,24 @@ import java.util.Set;
 public class CertificationFixture {
     public static List<CertificationResponse.CertificationScheduleResponse> certificationScheduleResList() {
         return List.of(
-            new CertificationResponse.CertificationScheduleResponse(ScheduleType.APPLICATION_START, ExamType.PRACTICAL, Instant.parse("2025-05-01T09:00:00Z"), "1회차"),
-            new CertificationResponse.CertificationScheduleResponse(ScheduleType.EXAM_END, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z"), "1회차"),
-            new CertificationResponse.CertificationScheduleResponse(ScheduleType.PASS_ANNOUNCEMENT, ExamType.PRACTICAL, Instant.parse("2025-06-15T14:00:00Z"), "1회차")
+            new CertificationResponse.CertificationScheduleResponse(
+                "접수일",
+                ExamType.PRACTICAL,
+                "1회차",
+                List.of(Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-02T09:00:00Z"))
+            ),
+            new CertificationResponse.CertificationScheduleResponse(
+                "시험일",
+                ExamType.PRACTICAL,
+                "1회차",
+                List.of(Instant.parse("2025-06-15T14:00:00Z"), Instant.parse("2025-06-16T14:00:00Z"))
+            ),
+            new CertificationResponse.CertificationScheduleResponse(
+                "합격일",
+                ExamType.PRACTICAL,
+                "1회차",
+                List.of(Instant.parse("2025-07-01T09:00:00Z"))
+            )
         );
     }
 
@@ -61,8 +76,11 @@ public class CertificationFixture {
             null,
             "https://www.q-net.or.kr/man001.do?gSite=Q&gIntro=Y",
             "정보처리 능력 평가",
+            0,
+            0,
             certificationQualificationResList(),
-            certificationExamDetailResList()
+            certificationExamDetailResList(),
+            certificationScheduleResList()
         );
     }
 
@@ -93,6 +111,8 @@ public class CertificationFixture {
             "https://example.com/icon.png",
             "https://example.com/apply",
             "정보처리기사 자격증 설명",
+            0,
+            0,
             Set.of(new CertificationResponse.CertificationQualificationResponse(
                 "4년제 학사",
                 List.of("학력")
@@ -105,7 +125,8 @@ public class CertificationFixture {
                     "과목당 20문항",
                     "총 60분"
                 )
-            ))
+            )),
+            certificationScheduleResList()
         );
     }
 }

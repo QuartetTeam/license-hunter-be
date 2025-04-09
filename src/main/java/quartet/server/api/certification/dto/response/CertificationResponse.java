@@ -3,7 +3,6 @@ package quartet.server.api.certification.dto.response;
 import com.querydsl.core.annotations.QueryProjection;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ProblemType;
-import quartet.server.domain.certification.type.ScheduleType;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,9 +15,11 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
+        Integer viewCount,
+        Integer CalendarSubscription,
         Set<CertificationQualificationResponse> qualification,
-        List<CertificationExamDetailResponse> examDetails
-//        Set<CertificationScheduleResponse> scheduleSet,
+        List<CertificationExamDetailResponse> examDetails,
+        List<CertificationScheduleResponse> schedules
 ){
     @QueryProjection
     public CertificationResponse(
@@ -28,9 +29,11 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
+        Integer viewCount,
+        Integer CalendarSubscription,
         Set<CertificationQualificationResponse> qualification,
-        List<CertificationExamDetailResponse> examDetails
-//        Set<CertificationScheduleResponse> scheduleSet,
+        List<CertificationExamDetailResponse> examDetails,
+        List<CertificationScheduleResponse> schedules
     ) {
         this.id = id;
         this.name = name;
@@ -38,9 +41,11 @@ public record CertificationResponse(
         this.authorityIconImageUrl = authorityIconImageUrl;
         this.applicationUrl = applicationUrl;
         this.description = description;
+        this.viewCount = viewCount;
+        this.CalendarSubscription = CalendarSubscription;
         this.qualification = qualification;
         this.examDetails = examDetails;
-//        this.scheduleSet = scheduleSet;
+        this.schedules = schedules;
     }
 
     public record CertificationQualificationResponse(
@@ -58,22 +63,26 @@ public record CertificationResponse(
     }
 
     public record CertificationScheduleResponse(
-            ScheduleType scheduleType,
+            String scheduleType,
             ExamType examType,
-            Instant date,
-            String examRound
+            String examRound,
+            List<Instant> date
     ){
         @QueryProjection
         public CertificationScheduleResponse(
-                ScheduleType scheduleType,
+                String scheduleType,
                 ExamType examType,
-                Instant date,
-                String examRound)
-        {
+                String examRound,
+                List<Instant> date
+        ){
             this.scheduleType = scheduleType;
             this.examType = examType;
-            this.date = date;
             this.examRound = examRound;
+            this.date = date;
+        }
+
+        public String getExamType() {
+            return examType != null ? examType.getValue() : null;
         }
     }
 
@@ -94,25 +103,25 @@ public record CertificationResponse(
         }
 
         public String getExamType() {
-            return examType.getValue();
+            return examType != null ? examType.getValue() : null;
         }
     }
 
     public record CertificationExamProcessResponse(
             ProblemType problemType,
-            String totalProblems,
-            String timeLimit
+            String problemNums,
+            String examTime
     ){
         @QueryProjection
         public CertificationExamProcessResponse(
                 ProblemType problemType,
-                String totalProblems,
-                String timeLimit
+                String problemNums,
+                String examTime
         )
         {
             this.problemType = problemType;
-            this.totalProblems = totalProblems;
-            this.timeLimit = timeLimit;
+            this.problemNums = problemNums;
+            this.examTime = examTime;
         }
 
         public String getProblemType() {
