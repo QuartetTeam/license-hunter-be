@@ -53,7 +53,7 @@ public class CertificationFixture {
                 ExamType.PRACTICAL,
                 "프로그래밍",
                 new CertificationResponse.CertificationExamProcessResponse(
-                    ProblemType.LONG_ANSWER,
+                    ProblemType.SHORT_ANSWER,
                     "20문항",
                     "총 60분"
                 )
@@ -73,11 +73,11 @@ public class CertificationFixture {
             certificationId,
             "정보처리기사",
             "한국산업인력공단",
-            null,
             "https://www.q-net.or.kr/man001.do?gSite=Q&gIntro=Y",
+            null,
             "정보처리 능력 평가",
-            0,
-            0,
+            Integer.valueOf(0),
+            Integer.valueOf(0),
             certificationQualificationResList(),
             certificationExamDetailResList(),
             certificationScheduleResList()
@@ -108,11 +108,11 @@ public class CertificationFixture {
             1L,
             "정보처리기사",
             "한국산업인력공단",
-            "https://example.com/icon.png",
             "https://example.com/apply",
+            "https://example.com/icon.png",
             "정보처리기사 자격증 설명",
-            0,
-            0,
+            Integer.valueOf(0),
+            Integer.valueOf(0),
             Set.of(new CertificationResponse.CertificationQualificationResponse(
                 "4년제 학사",
                 List.of("학력")
@@ -121,7 +121,7 @@ public class CertificationFixture {
                 ExamType.PRACTICAL,
                 "정보처리기사 과목",
                 new CertificationResponse.CertificationExamProcessResponse(
-                    ProblemType.LONG_ANSWER,
+                    ProblemType.SHORT_ANSWER,
                     "과목당 20문항",
                     "총 60분"
                 )
