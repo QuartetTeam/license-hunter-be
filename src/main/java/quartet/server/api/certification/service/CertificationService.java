@@ -47,7 +47,7 @@ public class CertificationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CertificationsByCategoryResponse> getAllCertificationsByCategory(
+    public Page<CertificationSearchResponse> getAllCertificationsByCategory(
             long categoryId, final Pageable pageable) {
         SubCategory subCategory = subCategoryRepository.findById(categoryId)
                 .orElseThrow(SubCategoryNotFoundException::new);
@@ -100,7 +100,7 @@ public class CertificationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CertificationsByCategoryResponse> getRecommendedCertifications(final Long memberId) {
+    public List<CertificationSearchResponse> getRecommendedCertifications(final Long memberId) {
         long categoryId = getRecommendedCategoryId(memberId);
         return certificationQueryRepository.findAllCertificationByCategory(categoryId, 6);
     }

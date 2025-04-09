@@ -181,34 +181,8 @@ public class CertificationQueryRepository {
             .where(certification.subCategory.id.eq(subCategoryId));
     }
 
-    public List<CertificationsByCategoryResponse> getAllCertificationsByIds(final List<Long> certificationIds){
-        QCertification certification = QCertification.certification;
-        QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
-        return queryFactory
-                    .from(certification)
-                    .leftJoin(schedule).on(schedule.certification.eq(certification)
-                            .and(schedule.examType.eq(ExamType.WRITTEN))
-                            .and(schedule.scheduleType.in(ScheduleType.APPLICATION_START,ScheduleType.EXAM_START))
-                    )
-                    .where(certification.id.in(certificationIds))
-                    .transform(GroupBy.groupBy(certification.id).list(
-                        new QCertificationsByCategoryResponse(
-                                certification.id,
-                                certification.name,
-                                cases()
-                                        .when(schedule.scheduleType.eq(ScheduleType.APPLICATION_START))
-                                        .then(schedule.date)
-                                        .otherwise((Instant) null),
-                                cases()
-                                        .when(schedule.scheduleType.eq(ScheduleType.EXAM_START))
-                                        .then(schedule.date)
-                                        .otherwise((Instant) null),
-                                Expressions.constant(0)
-                        )));
-    }
-
-    public List<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, final int count){
+    public List<CertificationSearchResponse> findAllCertificationByCategory(final long subCategoryId, final int count){
 
         List<Long> certificationIds =
                 findAllCertificationsByCategoryBaseQuery(subCategoryId)
@@ -220,7 +194,7 @@ public class CertificationQueryRepository {
         return getAllCertificationsByIds(certificationIds);
     }
 
-    public Page<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
+    public Page<CertificationSearchResponse> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
             QCertification certification = QCertification.certification;
 
             List<Long> certificationIds =
@@ -231,7 +205,7 @@ public class CertificationQueryRepository {
 
             if (certificationIds.isEmpty()) return Page.empty(pageable);
 
-            List<CertificationsByCategoryResponse> certifications = getAllCertificationsByIds(certificationIds);
+            List<CertificationSearchResponse> certifications = getAllCertificationsByIds(certificationIds);
 
             JPAQuery<Long> countQuery = findAllCertificationsByCategoryBaseQuery(subCategoryId)
                                         .select(certification.count());
@@ -266,10 +240,7 @@ public class CertificationQueryRepository {
 
     public List<CertificationSearchResponse> getCertificationsBySearch(final String name) {
         QCertification certification = QCertification.certification;
-        QMainCategory mainCategory = QMainCategory.mainCategory;
-        QSubCategory subCategory = QSubCategory.subCategory;
-        QCertificationSchedule applicationSchedule = new QCertificationSchedule("applicationSchedule");
-        QCertificationSchedule examSchedule = new QCertificationSchedule("examSchedule");
+
 
         List<Long> certificationIds = queryFactory
                 .select(certification.id)
@@ -280,9 +251,18 @@ public class CertificationQueryRepository {
                 )
                 .fetch();
 
-        if (certificationIds.isEmpty()) {
-            return List.of();
-        }
+        if (certificationIds.isEmpty()) return List.of();
+
+        return getAllCertificationsByIds(certificationIds);
+    }
+
+    private List<CertificationSearchResponse> getAllCertificationsByIds (final List<Long> certificationIds){
+        QCertification certification = QCertification.certification;
+        QMainCategory mainCategory = QMainCategory.mainCategory;
+        QSubCategory subCategory = QSubCategory.subCategory;
+        QCertificationSchedule applicationSchedule = new QCertificationSchedule("applicationSchedule");
+        QCertificationSchedule examSchedule = new QCertificationSchedule("examSchedule");
+
         return queryFactory
                 .from(certification)
                 .join(certification.subCategory, subCategory)
