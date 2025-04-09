@@ -75,6 +75,10 @@ public class CertificationService {
 
     @Transactional(readOnly = true)
     public List<CertificationCategoriesResponse> getCategories(final long mainCategoryId) {
+        if (!mainCategoryRepository.existsById(mainCategoryId)) {
+            throw new CategoryNotFoundException();
+        }
+        
         List<SubCategory> subCategories = subCategoryRepository.findByMainCategoryId(mainCategoryId);
         
         return subCategories.stream()

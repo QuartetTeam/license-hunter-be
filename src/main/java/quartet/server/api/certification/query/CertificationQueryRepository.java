@@ -124,7 +124,7 @@ public class CertificationQueryRepository {
                 certificationInfo.getId(),
                 certificationInfo.getName(),
                 certificationInfo.getAuthority().getName(),
-                certificationInfo.getAuthority().getIconImageUrl(),
+                certificationInfo.getAuthority().getWebsiteUrl(),
                 certificationInfo.getAuthority().getApplicationUrl(),
                 certificationDescription,
                 0,
