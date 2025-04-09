@@ -135,7 +135,7 @@ public class CertificationQueryRepository {
         ));
     }
 
-    private List<CertificationResponse.CertificationScheduleResponse> getScheduleDetails(Long certificationId) {
+    private List<CertificationResponse.CertificationScheduleResponse> getScheduleDetails(final long certificationId) {
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
         
         // 일정 정보는 현재 연도 기준만 가져옵니다
@@ -208,7 +208,7 @@ public class CertificationQueryRepository {
                         )));
     }
 
-    public List<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, int count){
+    public List<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, final int count){
 
         List<Long> certificationIds =
                 findAllCertificationsByCategoryBaseQuery(subCategoryId)
