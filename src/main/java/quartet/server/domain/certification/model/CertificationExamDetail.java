@@ -36,15 +36,15 @@ public class CertificationExamDetail extends IdentifiableEntity {
 
     @Column(nullable = false)
     @Comment("총 문제수")
-    private Integer totalProblemsCount;
+    private String totalProblemsCount;
 
     @Column(nullable = false)
-    @Comment("시험시간(분)")
-    private Integer duration;
+    @Comment("시험시간")
+    private String duration;
 
 
     private CertificationExamDetail(final Certification certification, final ExamType examType, final String subject,
-                                   final ProblemType problemType, final Integer totalProblemsCount, final Integer duration) {
+                                   final ProblemType problemType, final String totalProblemsCount, final String duration) {
         this.certification = certification;
         this.examType = examType;
         this.subject = subject;
@@ -54,7 +54,7 @@ public class CertificationExamDetail extends IdentifiableEntity {
     }
 
     public static CertificationExamDetail of(final Certification certification, final ExamType examType, final String subject,
-                                             final ProblemType problemType, final Integer totalProblemsCount, final Integer duration) {
+                                             final ProblemType problemType, final String totalProblemsCount, final String duration) {
         return new CertificationExamDetail(certification, examType, subject, problemType, totalProblemsCount, duration);
     }
 

@@ -12,14 +12,15 @@ import org.springframework.stereotype.Repository;
 import quartet.server.api.certification.dto.response.*;
 import quartet.server.domain.certification.model.*;
 import quartet.server.domain.certification.type.ExamType;
+import quartet.server.domain.certification.type.QualificationType;
 import quartet.server.domain.certification.type.ScheduleType;
 import quartet.server.domain.category.model.QMainCategory;
 import quartet.server.domain.category.model.QSubCategory;
+import quartet.server.domain.certification.type.TechnicalGradeType;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.querydsl.core.types.dsl.Expressions.cases;
 
@@ -32,92 +33,182 @@ public class CertificationQueryRepository {
         QCertification certification = QCertification.certification;
         QAuthority authority = QAuthority.authority;
         QCertificationDescription description = QCertificationDescription.certificationDescription;
-        QCertificationQualification qualification = QCertificationQualification.certificationQualification;
-        QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
         QCertificationExamDetail examDetail = QCertificationExamDetail.certificationExamDetail;
+        QHrdTechnicalQualification hrdTechnicalQualification = QHrdTechnicalQualification.hrdTechnicalQualification;
+        QCertificationQualification normalQualification = QCertificationQualification.certificationQualification;
 
-        Map<Long, CertificationResponse> result =
-                queryFactory
-                    .from(certification)
-                    .leftJoin(certification.authority, authority)
-                    .leftJoin(description).on(description.certification.eq(certification))
-                    .leftJoin(qualification).on(qualification.certification.eq(certification))
-                    .leftJoin(schedule).on(schedule.certification.eq(certification))
-                    .leftJoin(examDetail).on(examDetail.certification.eq(certification))
-                    .where(certification.id.eq(certificationId))
-                    .transform(GroupBy.groupBy(certification.id).as(
-                        new QCertificationResponse(
-                                certification.id,
-                                certification.name,
-                                authority.name,
-                                authority.iconImageUrl,
-                                authority.applicationUrl,
-                                description.description,
-                                GroupBy.set(
-                                    new QCertificationResponse_CertificationQualificationResponse(
-                                        qualification.qualification,
-                                        qualification.type
-                                    )
-                                ),
-                                GroupBy.set(
-                                        new QCertificationResponse_CertificationScheduleResponse(
-                                            schedule.scheduleType,
-                                            schedule.examType,
-                                            schedule.date,
-                                            schedule.examRound
-                                        )
-                                ),
-                                GroupBy.set(
-                                    new QCertificationResponse_CertificationExamDetailResponse(
-                                        examDetail.examType,
-                                        examDetail.subject,
+        // 자격증 기본 정보 조회
+        Certification certificationInfo = queryFactory
+                .selectFrom(certification)
+                .leftJoin(certification.authority, authority).fetchJoin()
+                .where(certification.id.eq(certificationId))
+                .fetchOne();
+
+        if (certificationInfo == null) {
+            return Optional.empty();
+        }
+
+        // 자격 요건 데이터 조회 및 변환
+        Set<CertificationResponse.CertificationQualificationResponse> qualifications;
+        if (certificationInfo.getQualificationType() == QualificationType.T) {
+            // 국가기술자격의 경우(T)
+            QHrdCertificationDetail hrdCertificationDetail = QHrdCertificationDetail.hrdCertificationDetail;
+            
+            // HrdCertificationDetail에서 grade 조회
+            TechnicalGradeType grade = queryFactory
+                    .select(hrdCertificationDetail.grade)
+                    .from(hrdCertificationDetail)
+                    .where(hrdCertificationDetail.certification.id.eq(certificationId))
+                    .fetchOne();
+
+            if (grade == null) {
+                return Optional.empty();
+            }
+
+            // 국가기술자격 자격요건 조회
+            Map<String, List<String>> qualificationMap = queryFactory
+                    .from(hrdTechnicalQualification)
+                    .where(hrdTechnicalQualification.grade.eq(grade))
+                    .transform(GroupBy.groupBy(hrdTechnicalQualification.type)
+                            .as(GroupBy.list(hrdTechnicalQualification.qualification)));
+
+            qualifications = qualificationMap.entrySet().stream()
+                    .map(entry -> new CertificationResponse.CertificationQualificationResponse(
+                            entry.getKey(),
+                            entry.getValue()
+                    ))
+                    .collect(Collectors.toSet());
+        } else {
+            // 그 외 자격증의 경우
+            Map<String, List<String>> qualificationMap = queryFactory
+                    .from(normalQualification)
+                    .where(normalQualification.certification.id.eq(certificationId))
+                    .transform(GroupBy.groupBy(normalQualification.type)
+                            .as(GroupBy.list(normalQualification.qualification)));
+
+            qualifications = qualificationMap.entrySet().stream()
+                    .map(entry -> new CertificationResponse.CertificationQualificationResponse(
+                            entry.getKey(),
+                            entry.getValue()
+                    ))
+                    .collect(Collectors.toSet());
+        }
+
+        // 시험 일정 조회
+        List<CertificationResponse.CertificationScheduleResponse> schedules = getScheduleDetails(certificationId);
+
+        // 시험 상세 정보 조회
+        List<CertificationResponse.CertificationExamDetailResponse> examDetails = queryFactory
+                .from(examDetail)
+                .where(examDetail.certification.id.eq(certificationId))
+                .transform(GroupBy.groupBy(examDetail.id).list(
+                        new QCertificationResponse_CertificationExamDetailResponse(
+                                examDetail.examType,
+                                examDetail.subject,
+                                new QCertificationResponse_CertificationExamProcessResponse(
                                         examDetail.problemType,
                                         examDetail.totalProblemsCount,
                                         examDetail.duration
-                                    )
                                 )
                         )
-                    ));
+                ));
 
-        return Optional.ofNullable(result.get(certificationId));
+        // 자격증 설명 조회
+        String certificationDescription = queryFactory
+                .select(description.description)
+                .from(description)
+                .where(description.certification.id.eq(certificationId))
+                .fetchOne();
+
+        return Optional.of(new CertificationResponse(
+                certificationInfo.getId(),
+                certificationInfo.getName(),
+                certificationInfo.getAuthority().getName(),
+                certificationInfo.getAuthority().getIconImageUrl(),
+                certificationInfo.getAuthority().getApplicationUrl(),
+                certificationDescription,
+                0,
+                0,
+                qualifications,
+                examDetails,
+                schedules
+        ));
+    }
+
+    private List<CertificationResponse.CertificationScheduleResponse> getScheduleDetails(final long certificationId) {
+        QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
+        
+        // 일정 정보는 현재 연도 기준만 가져옵니다
+        int currentYear = Instant.now().atZone(java.time.ZoneId.systemDefault()).getYear();
+        Instant startOfYear = Instant.parse(currentYear + "-01-01T00:00:00Z");
+        Instant endOfYear = Instant.parse(currentYear + "-12-31T23:59:59Z");
+
+        var scheduleTypeExpression = cases()
+            .when(schedule.scheduleType.in(ScheduleType.APPLICATION_START, ScheduleType.APPLICATION_END))
+            .then(Expressions.constant("접수일"))
+            .when(schedule.scheduleType.in(ScheduleType.EXAM_START, ScheduleType.EXAM_END))
+            .then(Expressions.constant("시험일"))
+            .when(schedule.scheduleType.eq(ScheduleType.PASS_ANNOUNCEMENT))
+            .then(Expressions.constant("합격일"))
+            .otherwise(schedule.scheduleType.stringValue());
+
+        // 스케줄 데이터 조회
+        return queryFactory
+            .from(schedule)
+            .where(
+                schedule.certification.id.eq(certificationId),
+                schedule.date.between(startOfYear, endOfYear)
+            )
+            .transform(GroupBy.groupBy(
+                schedule.examRound,
+                schedule.examType,
+                scheduleTypeExpression
+            ).list(
+                new QCertificationResponse_CertificationScheduleResponse(
+                    scheduleTypeExpression,
+                    schedule.examType,
+                    schedule.examRound,
+                    GroupBy.list(schedule.date)
+                )
+            ));
     }
 
     private JPAQuery<Long> findAllCertificationsByCategoryBaseQuery(final long subCategoryId){
-            QCertification certification = QCertification.certification;
-            return queryFactory
-                .select(certification.id)
-                .from(certification)
-                .where(certification.subCategory.id.eq(subCategoryId));
+        QCertification certification = QCertification.certification;
+        return queryFactory
+            .select(certification.id)
+            .from(certification)
+            .where(certification.subCategory.id.eq(subCategoryId));
     }
 
     public List<CertificationsByCategoryResponse> getAllCertificationsByIds(final List<Long> certificationIds){
-            QCertification certification = QCertification.certification;
-            QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
+        QCertification certification = QCertification.certification;
+        QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
-            return queryFactory
-                        .from(certification)
-                        .leftJoin(schedule).on(schedule.certification.eq(certification)
-                                .and(schedule.examType.eq(ExamType.WRITTEN))
-                                .and(schedule.scheduleType.in(ScheduleType.APPLICATION_START,ScheduleType.EXAM_START))
-                        )
-                        .where(certification.id.in(certificationIds))
-                        .transform(GroupBy.groupBy(certification.id).list(
-                            new QCertificationsByCategoryResponse(
-                                    certification.id,
-                                    certification.name,
-                                    cases()
-                                            .when(schedule.scheduleType.eq(ScheduleType.APPLICATION_START))
-                                            .then(schedule.date)
-                                            .otherwise((Instant) null),
-                                    cases()
-                                            .when(schedule.scheduleType.eq(ScheduleType.EXAM_START))
-                                            .then(schedule.date)
-                                            .otherwise((Instant) null),
-                                    Expressions.constant(0)
-                            )));
+        return queryFactory
+                    .from(certification)
+                    .leftJoin(schedule).on(schedule.certification.eq(certification)
+                            .and(schedule.examType.eq(ExamType.WRITTEN))
+                            .and(schedule.scheduleType.in(ScheduleType.APPLICATION_START,ScheduleType.EXAM_START))
+                    )
+                    .where(certification.id.in(certificationIds))
+                    .transform(GroupBy.groupBy(certification.id).list(
+                        new QCertificationsByCategoryResponse(
+                                certification.id,
+                                certification.name,
+                                cases()
+                                        .when(schedule.scheduleType.eq(ScheduleType.APPLICATION_START))
+                                        .then(schedule.date)
+                                        .otherwise((Instant) null),
+                                cases()
+                                        .when(schedule.scheduleType.eq(ScheduleType.EXAM_START))
+                                        .then(schedule.date)
+                                        .otherwise((Instant) null),
+                                Expressions.constant(0)
+                        )));
     }
 
-    public List<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, int count){
+    public List<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, final int count){
 
         List<Long> certificationIds =
                 findAllCertificationsByCategoryBaseQuery(subCategoryId)

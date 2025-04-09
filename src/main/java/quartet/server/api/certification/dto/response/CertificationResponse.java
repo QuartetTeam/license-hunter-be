@@ -3,9 +3,9 @@ package quartet.server.api.certification.dto.response;
 import com.querydsl.core.annotations.QueryProjection;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ProblemType;
-import quartet.server.domain.certification.type.ScheduleType;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 public record CertificationResponse(
@@ -15,9 +15,11 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
-        Set<CertificationQualificationResponse> qualifications,
-        Set<CertificationScheduleResponse> scheduleSet,
-        Set<CertificationExamDetailResponse> examDetailSet
+        Integer viewCount,
+        Integer CalendarSubscription,
+        Set<CertificationQualificationResponse> qualification,
+        List<CertificationExamDetailResponse> examDetails,
+        List<CertificationScheduleResponse> schedules
 ){
     @QueryProjection
     public CertificationResponse(
@@ -27,9 +29,11 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
-        Set<CertificationQualificationResponse> qualifications,
-        Set<CertificationScheduleResponse> scheduleSet,
-        Set<CertificationExamDetailResponse> examDetailSet
+        Integer viewCount,
+        Integer CalendarSubscription,
+        Set<CertificationQualificationResponse> qualification,
+        List<CertificationExamDetailResponse> examDetails,
+        List<CertificationScheduleResponse> schedules
     ) {
         this.id = id;
         this.name = name;
@@ -37,65 +41,91 @@ public record CertificationResponse(
         this.authorityIconImageUrl = authorityIconImageUrl;
         this.applicationUrl = applicationUrl;
         this.description = description;
-        this.qualifications = qualifications;
-        this.scheduleSet = scheduleSet;
-        this.examDetailSet = examDetailSet;
+        this.viewCount = viewCount;
+        this.CalendarSubscription = CalendarSubscription;
+        this.qualification = qualification;
+        this.examDetails = examDetails;
+        this.schedules = schedules;
     }
 
     public record CertificationQualificationResponse(
-            String qualification,
-            String type
+            String type,
+            List<String> data
     ){
         @QueryProjection
         public CertificationQualificationResponse(
-                String qualification,
-                String type
+                String type,
+                List<String> data
         ){
-            this.qualification = qualification;
             this.type = type;
+            this.data = data;
         }
     }
 
     public record CertificationScheduleResponse(
-            ScheduleType scheduleType,
+            String scheduleType,
             ExamType examType,
-            Instant date,
-            String examRound
+            String examRound,
+            List<Instant> date
     ){
         @QueryProjection
         public CertificationScheduleResponse(
-                ScheduleType scheduleType,
+                String scheduleType,
                 ExamType examType,
-                Instant date,
-                String examRound)
-        {
+                String examRound,
+                List<Instant> date
+        ){
             this.scheduleType = scheduleType;
             this.examType = examType;
-            this.date = date;
             this.examRound = examRound;
+            this.date = date;
+        }
+
+        public String getExamType() {
+            return examType != null ? examType.getValue() : null;
         }
     }
 
     public record CertificationExamDetailResponse(
             ExamType examType,
-            String subject,
-            ProblemType problemType,
-            Integer totalProblems,
-            Integer timeLimit
+            String examSubject,
+            CertificationExamProcessResponse examProcess
     ){
         @QueryProjection
         public CertificationExamDetailResponse(
-                 ExamType examType,
-                String subject,
-                ProblemType problemType,
-                Integer totalProblems,
-                Integer timeLimit
+                ExamType examType,
+                String examSubject,
+                CertificationExamProcessResponse examProcess
         ){
             this.examType = examType;
-            this.subject = subject;
+            this.examSubject = examSubject;
+            this.examProcess = examProcess;
+        }
+
+        public String getExamType() {
+            return examType != null ? examType.getValue() : null;
+        }
+    }
+
+    public record CertificationExamProcessResponse(
+            ProblemType problemType,
+            String problemNums,
+            String examTime
+    ){
+        @QueryProjection
+        public CertificationExamProcessResponse(
+                ProblemType problemType,
+                String problemNums,
+                String examTime
+        )
+        {
             this.problemType = problemType;
-            this.totalProblems = totalProblems;
-            this.timeLimit = timeLimit;
+            this.problemNums = problemNums;
+            this.examTime = examTime;
+        }
+
+        public String getProblemType() {
+            return problemType.getValue();
         }
     }
 }
