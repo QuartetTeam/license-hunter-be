@@ -6,6 +6,7 @@ import quartet.server.domain.certification.type.ProblemType;
 import quartet.server.domain.certification.type.ScheduleType;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 public record CertificationResponse(
@@ -15,9 +16,9 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
-        Set<CertificationQualificationResponse> qualifications,
-        Set<CertificationScheduleResponse> scheduleSet,
-        Set<CertificationExamDetailResponse> examDetailSet
+        Set<CertificationQualificationResponse> qualification,
+        List<CertificationExamDetailResponse> examDetails
+//        Set<CertificationScheduleResponse> scheduleSet,
 ){
     @QueryProjection
     public CertificationResponse(
@@ -27,9 +28,9 @@ public record CertificationResponse(
         String authorityIconImageUrl,
         String applicationUrl,
         String description,
-        Set<CertificationQualificationResponse> qualifications,
-        Set<CertificationScheduleResponse> scheduleSet,
-        Set<CertificationExamDetailResponse> examDetailSet
+        Set<CertificationQualificationResponse> qualification,
+        List<CertificationExamDetailResponse> examDetails
+//        Set<CertificationScheduleResponse> scheduleSet,
     ) {
         this.id = id;
         this.name = name;
@@ -37,22 +38,22 @@ public record CertificationResponse(
         this.authorityIconImageUrl = authorityIconImageUrl;
         this.applicationUrl = applicationUrl;
         this.description = description;
-        this.qualifications = qualifications;
-        this.scheduleSet = scheduleSet;
-        this.examDetailSet = examDetailSet;
+        this.qualification = qualification;
+        this.examDetails = examDetails;
+//        this.scheduleSet = scheduleSet;
     }
 
     public record CertificationQualificationResponse(
-            String qualification,
-            String type
+            String type,
+            List<String> data
     ){
         @QueryProjection
         public CertificationQualificationResponse(
-                String qualification,
-                String type
+                String type,
+                List<String> data
         ){
-            this.qualification = qualification;
             this.type = type;
+            this.data = data;
         }
     }
 
@@ -78,24 +79,44 @@ public record CertificationResponse(
 
     public record CertificationExamDetailResponse(
             ExamType examType,
-            String subject,
-            ProblemType problemType,
-            Integer totalProblems,
-            Integer timeLimit
+            String examSubject,
+            CertificationExamProcessResponse examProcess
     ){
         @QueryProjection
         public CertificationExamDetailResponse(
-                 ExamType examType,
-                String subject,
-                ProblemType problemType,
-                Integer totalProblems,
-                Integer timeLimit
+                ExamType examType,
+                String examSubject,
+                CertificationExamProcessResponse examProcess
         ){
             this.examType = examType;
-            this.subject = subject;
+            this.examSubject = examSubject;
+            this.examProcess = examProcess;
+        }
+
+        public String getExamType() {
+            return examType.getValue();
+        }
+    }
+
+    public record CertificationExamProcessResponse(
+            ProblemType problemType,
+            String totalProblems,
+            String timeLimit
+    ){
+        @QueryProjection
+        public CertificationExamProcessResponse(
+                ProblemType problemType,
+                String totalProblems,
+                String timeLimit
+        )
+        {
             this.problemType = problemType;
             this.totalProblems = totalProblems;
             this.timeLimit = timeLimit;
+        }
+
+        public String getProblemType() {
+            return problemType.getValue();
         }
     }
 }

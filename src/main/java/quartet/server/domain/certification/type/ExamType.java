@@ -3,8 +3,7 @@ package quartet.server.domain.certification.type;
 public enum ExamType {
     WRITTEN("필기"),
     PRACTICAL("실기"),
-    INTERVIEW("면접"),
-    NONE("구분 없음");
+    INTERVIEW("면접");
 
     private final String value;
 
