@@ -263,6 +263,59 @@ public class CertificationQueryRepository {
                 .where(subCategory.mainCategory.id.eq(mainCategoryId))
                 .fetch();
     }
+
+    public List<CertificationSearchResponse> getCertificationsBySearch(final String name) {
+        QCertification certification = QCertification.certification;
+        QMainCategory mainCategory = QMainCategory.mainCategory;
+        QSubCategory subCategory = QSubCategory.subCategory;
+        QCertificationSchedule applicationSchedule = new QCertificationSchedule("applicationSchedule");
+        QCertificationSchedule examSchedule = new QCertificationSchedule("examSchedule");
+
+        List<Long> certificationIds = queryFactory
+                .select(certification.id)
+                .from(certification)
+                .where(
+                        certification.name.eq(name)
+                                .or(certification.name.like(name + "(%"))
+                )
+                .fetch();
+
+        if (certificationIds.isEmpty()) {
+            return List.of();
+        }
+        return queryFactory
+                .from(certification)
+                .join(certification.subCategory, subCategory)
+                .join(subCategory.mainCategory, mainCategory)
+                .leftJoin(applicationSchedule).on(
+                        applicationSchedule.certification.eq(certification)
+                                .and(applicationSchedule.date.after(Instant.now()))
+                                .and(applicationSchedule.scheduleType.in(ScheduleType.APPLICATION_START,ScheduleType.APPLICATION_END)
+                ))
+                .leftJoin(examSchedule).on(
+                        examSchedule.certification.eq(certification)
+                                .and(examSchedule.date.after(Instant.now()))
+                                .and(examSchedule.scheduleType.in(ScheduleType.EXAM_START,ScheduleType.EXAM_END)
+                ))
+                .where(certification.id.in(certificationIds))
+                .transform(GroupBy.groupBy(certification.id).list(
+                        new QCertificationSearchResponse(
+                                certification.id,
+                                mainCategory.name,
+                                subCategory.name,
+                                certification.name,
+                                cases()
+                                        .when(applicationSchedule.id.isNotNull())
+                                        .then(GroupBy.min(applicationSchedule.date))
+                                        .otherwise(Expressions.nullExpression(Instant.class)),
+                                cases()
+                                        .when(examSchedule.id.isNotNull())
+                                        .then(GroupBy.min(examSchedule.date))
+                                        .otherwise(Expressions.nullExpression(Instant.class)),
+                                Expressions.constant(0)
+                        )
+                ));
+    }
 }
 
 

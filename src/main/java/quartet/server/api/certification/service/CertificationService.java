@@ -104,4 +104,9 @@ public class CertificationService {
         long categoryId = getRecommendedCategoryId(memberId);
         return certificationQueryRepository.findAllCertificationByCategory(categoryId, 6);
     }
+
+    @Transactional(readOnly = true)
+    public List<CertificationSearchResponse> getCertificationsBySearch(final String name) {
+        return certificationQueryRepository.getCertificationsBySearch(name);
+    }
 }

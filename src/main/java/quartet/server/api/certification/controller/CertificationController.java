@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import quartet.server.api.certification.dto.response.CertificationResponse;
 import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
+import quartet.server.api.certification.dto.response.CertificationSearchResponse;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.api.certification.service.CertificationService;
 import quartet.server.api.common.response.ApiResponse;
@@ -63,5 +64,12 @@ public class CertificationController {
         long memberId = 1L;
         List<CertificationsByCategoryResponse> recommendedCertifications = certificationService.getRecommendedCertifications(memberId);
         return ApiResponse.success(OK, recommendedCertifications);
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<List<CertificationSearchResponse>> getCertificationsBySearch(
+            @RequestParam final String name) {
+        List<CertificationSearchResponse> certifications = certificationService.getCertificationsBySearch(name);
+        return ApiResponse.success(OK, certifications);
     }
 }
