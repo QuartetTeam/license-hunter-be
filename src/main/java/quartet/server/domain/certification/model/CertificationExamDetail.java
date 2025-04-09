@@ -25,7 +25,7 @@ public class CertificationExamDetail extends IdentifiableEntity {
     @Enumerated(EnumType.STRING)
     private ExamType examType;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 150)
     @Comment("과목명")
     private String subject;
 
