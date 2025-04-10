@@ -125,7 +125,7 @@ public record CertificationResponse(
         }
 
         public String getProblemType() {
-            return problemType.getValue();
+            return problemType != null ? problemType.getValue() : null;
         }
     }
 }
