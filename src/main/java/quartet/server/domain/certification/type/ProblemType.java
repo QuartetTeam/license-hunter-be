@@ -9,8 +9,7 @@ public enum ProblemType {
     SHORT_ANSWER_OR_ESSAY("단답형 및 주관식 논술형"),
     THEORETICAL("필답형"),
     PRACTICAL("작업형"),
-    COMPOSITE("복합형"),
-    NONE("해당 없음"); // 임시
+    COMPOSITE("복합형");
 
 
     private final String value;
