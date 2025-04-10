@@ -29,16 +29,16 @@ public class CertificationExamDetail extends IdentifiableEntity {
     @Comment("과목명")
     private String subject;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Comment("문제 유형")
     @Enumerated(EnumType.STRING)
     private ProblemType problemType;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Comment("총 문제수")
     private String totalProblemsCount;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Comment("시험시간")
     private String duration;
 
