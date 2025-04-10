@@ -40,8 +40,8 @@ public record CalendarResponse(
                         String examRound
                 ) {
                         this(
-                                scheduleType.getValue(),
-                                examType.getValue(),
+                                scheduleType != null ? scheduleType.getValue() : null,
+                                examType != null ? examType.getValue() : null,
                                 date,
                                 examRound
                         );
