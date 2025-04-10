@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
 import quartet.server.api.certification.dto.response.CertificationResponse;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
+import quartet.server.api.certification.dto.response.CertificationSearchResponse;
 import quartet.server.api.certification.query.CategoryQueryRepository;
 import quartet.server.api.certification.query.CertificationQueryRepository;
 import quartet.server.core.utils.RandomGenerator;
@@ -30,6 +31,7 @@ import quartet.server.utils.fixture.Certification.CertificationCategoryFixture;
 import quartet.server.utils.fixture.Certification.CertificationFixture;
 import quartet.server.utils.fixture.Pageable.PageableFixture;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -182,15 +184,18 @@ class CertificationServiceTest {
             long subCategoryId = 1L;
             Pageable pageable = PageableFixture.pageable();
             SubCategory subCategory = CertificationCategoryFixture.subCategory(CertificationCategoryFixture.mainCategory());
-            List<CertificationsByCategoryResponse> certificationList = CertificationFixture.certificationsByCategoryRes();
-            Page<CertificationsByCategoryResponse> certificationPage = new PageImpl<>(certificationList);
+            List<CertificationSearchResponse> certificationList = List.of(
+                new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 100),
+                new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", Instant.parse("2025-05-01T08:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 50)
+            );
+            Page<CertificationSearchResponse> certificationPage = new PageImpl<>(certificationList);
 
             when(subCategoryRepository.findById(subCategoryId)).thenReturn(Optional.of(subCategory));
             when(certificationQueryRepository.findAllCertificationByCategory(subCategoryId, pageable))
                     .thenReturn(certificationPage);
 
             // when
-            Page<CertificationsByCategoryResponse> result = certificationService.getAllCertificationsByCategory(
+            Page<CertificationSearchResponse> result = certificationService.getAllCertificationsByCategory(
                     subCategoryId, pageable);
 
             // then
@@ -339,13 +344,16 @@ class CertificationServiceTest {
             // given
             final long memberId = 1L;
             final long categoryId = 1L;
-            final List<CertificationsByCategoryResponse> certificationList = CertificationFixture.certificationsByCategoryRes();
+            final List<CertificationSearchResponse> certificationList = List.of(
+                new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 100),
+                new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", Instant.parse("2025-05-01T08:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 50)
+            );
             doReturn(categoryId).when(certificationService).getRecommendedCategoryId(memberId);
             when(certificationQueryRepository.findAllCertificationByCategory(categoryId, 6))
                     .thenReturn(certificationList);
 
             // when
-            final List<CertificationsByCategoryResponse> result = certificationService.getRecommendedCertifications(memberId);
+            final List<CertificationSearchResponse> result = certificationService.getRecommendedCertifications(memberId);
 
             // then
             assertThat(result).isEqualTo(certificationList);

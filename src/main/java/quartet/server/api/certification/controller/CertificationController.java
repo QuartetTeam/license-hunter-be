@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import quartet.server.api.certification.dto.response.CertificationResponse;
 import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
+import quartet.server.api.certification.dto.response.CertificationSearchResponse;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.api.certification.service.CertificationService;
 import quartet.server.api.common.response.ApiResponse;
@@ -46,22 +47,29 @@ public class CertificationController {
 
     // 특정 카테고리 자격증 조회
     @GetMapping("")
-    public ApiResponse<Page<CertificationsByCategoryResponse>> getAllCertificationByCategory(
+    public ApiResponse<Page<CertificationSearchResponse>> getAllCertificationByCategory(
             @RequestParam long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int pageSize
     ) {
         PageRequest pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("id")));
-        Page<CertificationsByCategoryResponse> certifications = certificationService.getAllCertificationsByCategory(
+        Page<CertificationSearchResponse> certifications = certificationService.getAllCertificationsByCategory(
                 categoryId, pageable);
         return ApiResponse.success(OK, certifications);
     }
 
     @GetMapping("/recommendation")
-    public ApiResponse<List<CertificationsByCategoryResponse>> getRecommendedCertifications() {
+    public ApiResponse<List<CertificationSearchResponse>> getRecommendedCertifications() {
         // @TODO 최지희: @AuthenticationPrincipal로 변경 예정
         long memberId = 1L;
-        List<CertificationsByCategoryResponse> recommendedCertifications = certificationService.getRecommendedCertifications(memberId);
+        List<CertificationSearchResponse> recommendedCertifications = certificationService.getRecommendedCertifications(memberId);
         return ApiResponse.success(OK, recommendedCertifications);
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<List<CertificationSearchResponse>> getCertificationsBySearch(
+            @RequestParam final String name) {
+        List<CertificationSearchResponse> certifications = certificationService.getCertificationsBySearch(name);
+        return ApiResponse.success(OK, certifications);
     }
 }

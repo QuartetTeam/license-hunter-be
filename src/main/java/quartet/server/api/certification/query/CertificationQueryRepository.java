@@ -124,7 +124,7 @@ public class CertificationQueryRepository {
                 certificationInfo.getId(),
                 certificationInfo.getName(),
                 certificationInfo.getAuthority().getName(),
-                certificationInfo.getAuthority().getIconImageUrl(),
+                certificationInfo.getAuthority().getWebsiteUrl(),
                 certificationInfo.getAuthority().getApplicationUrl(),
                 certificationDescription,
                 0,
@@ -181,34 +181,8 @@ public class CertificationQueryRepository {
             .where(certification.subCategory.id.eq(subCategoryId));
     }
 
-    public List<CertificationsByCategoryResponse> getAllCertificationsByIds(final List<Long> certificationIds){
-        QCertification certification = QCertification.certification;
-        QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
-        return queryFactory
-                    .from(certification)
-                    .leftJoin(schedule).on(schedule.certification.eq(certification)
-                            .and(schedule.examType.eq(ExamType.WRITTEN))
-                            .and(schedule.scheduleType.in(ScheduleType.APPLICATION_START,ScheduleType.EXAM_START))
-                    )
-                    .where(certification.id.in(certificationIds))
-                    .transform(GroupBy.groupBy(certification.id).list(
-                        new QCertificationsByCategoryResponse(
-                                certification.id,
-                                certification.name,
-                                cases()
-                                        .when(schedule.scheduleType.eq(ScheduleType.APPLICATION_START))
-                                        .then(schedule.date)
-                                        .otherwise((Instant) null),
-                                cases()
-                                        .when(schedule.scheduleType.eq(ScheduleType.EXAM_START))
-                                        .then(schedule.date)
-                                        .otherwise((Instant) null),
-                                Expressions.constant(0)
-                        )));
-    }
-
-    public List<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, final int count){
+    public List<CertificationSearchResponse> findAllCertificationByCategory(final long subCategoryId, final int count){
 
         List<Long> certificationIds =
                 findAllCertificationsByCategoryBaseQuery(subCategoryId)
@@ -220,7 +194,7 @@ public class CertificationQueryRepository {
         return getAllCertificationsByIds(certificationIds);
     }
 
-    public Page<CertificationsByCategoryResponse> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
+    public Page<CertificationSearchResponse> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
             QCertification certification = QCertification.certification;
 
             List<Long> certificationIds =
@@ -231,7 +205,7 @@ public class CertificationQueryRepository {
 
             if (certificationIds.isEmpty()) return Page.empty(pageable);
 
-            List<CertificationsByCategoryResponse> certifications = getAllCertificationsByIds(certificationIds);
+            List<CertificationSearchResponse> certifications = getAllCertificationsByIds(certificationIds);
 
             JPAQuery<Long> countQuery = findAllCertificationsByCategoryBaseQuery(subCategoryId)
                                         .select(certification.count());
@@ -262,6 +236,65 @@ public class CertificationQueryRepository {
                 .from(subCategory)
                 .where(subCategory.mainCategory.id.eq(mainCategoryId))
                 .fetch();
+    }
+
+    public List<CertificationSearchResponse> getCertificationsBySearch(final String name) {
+        QCertification certification = QCertification.certification;
+
+
+        List<Long> certificationIds = queryFactory
+                .select(certification.id)
+                .from(certification)
+                .where(
+                        certification.name.eq(name)
+                                .or(certification.name.like(name + "(%"))
+                )
+                .fetch();
+
+        if (certificationIds.isEmpty()) return List.of();
+
+        return getAllCertificationsByIds(certificationIds);
+    }
+
+    private List<CertificationSearchResponse> getAllCertificationsByIds (final List<Long> certificationIds){
+        QCertification certification = QCertification.certification;
+        QMainCategory mainCategory = QMainCategory.mainCategory;
+        QSubCategory subCategory = QSubCategory.subCategory;
+        QCertificationSchedule applicationSchedule = new QCertificationSchedule("applicationSchedule");
+        QCertificationSchedule examSchedule = new QCertificationSchedule("examSchedule");
+
+        return queryFactory
+                .from(certification)
+                .join(certification.subCategory, subCategory)
+                .join(subCategory.mainCategory, mainCategory)
+                .leftJoin(applicationSchedule).on(
+                        applicationSchedule.certification.eq(certification)
+                                .and(applicationSchedule.date.after(Instant.now()))
+                                .and(applicationSchedule.scheduleType.in(ScheduleType.APPLICATION_START,ScheduleType.APPLICATION_END)
+                ))
+                .leftJoin(examSchedule).on(
+                        examSchedule.certification.eq(certification)
+                                .and(examSchedule.date.after(Instant.now()))
+                                .and(examSchedule.scheduleType.in(ScheduleType.EXAM_START,ScheduleType.EXAM_END)
+                ))
+                .where(certification.id.in(certificationIds))
+                .transform(GroupBy.groupBy(certification.id).list(
+                        new QCertificationSearchResponse(
+                                certification.id,
+                                mainCategory.name,
+                                subCategory.name,
+                                certification.name,
+                                cases()
+                                        .when(applicationSchedule.id.isNotNull())
+                                        .then(GroupBy.min(applicationSchedule.date))
+                                        .otherwise(Expressions.nullExpression(Instant.class)),
+                                cases()
+                                        .when(examSchedule.id.isNotNull())
+                                        .then(GroupBy.min(examSchedule.date))
+                                        .otherwise(Expressions.nullExpression(Instant.class)),
+                                Expressions.constant(0)
+                        )
+                ));
     }
 }
 

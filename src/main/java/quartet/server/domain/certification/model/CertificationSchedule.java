@@ -35,7 +35,7 @@ public class CertificationSchedule extends IdentifiableEntity {
     @Comment("일자")
     private Instant date;
 
-    @Column(length = 255)
+    @Column(nullable = true, length = 255)
     @Comment("시험 회차")
     private String examRound;
 

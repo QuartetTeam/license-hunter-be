@@ -12,7 +12,7 @@ public record CertificationResponse(
         long id,
         String name,
         String authorityName,
-        String authorityIconImageUrl,
+        String websiteUrl,
         String applicationUrl,
         String description,
         Integer viewCount,
@@ -26,7 +26,7 @@ public record CertificationResponse(
         long id,
         String name,
         String authorityName,
-        String authorityIconImageUrl,
+        String websiteUrl,
         String applicationUrl,
         String description,
         Integer viewCount,
@@ -38,7 +38,7 @@ public record CertificationResponse(
         this.id = id;
         this.name = name;
         this.authorityName = authorityName;
-        this.authorityIconImageUrl = authorityIconImageUrl;
+        this.websiteUrl = websiteUrl;
         this.applicationUrl = applicationUrl;
         this.description = description;
         this.viewCount = viewCount;

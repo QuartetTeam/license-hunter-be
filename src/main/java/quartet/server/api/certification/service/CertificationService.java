@@ -24,6 +24,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CertificationService {
     private final MemberCategoryRepository memberCategoryRepository;
     private final AuthorityRepository authorityRepository;
@@ -40,14 +41,13 @@ public class CertificationService {
 
     private final RandomGenerator randomGenerator;
 
-    @Transactional(readOnly = true)
+
     public CertificationResponse getCertification(final long certificationId) {
         return certificationQueryRepository.getCertification(certificationId)
                  .orElseThrow(CertificationNotFoundException::new);
     }
 
-    @Transactional(readOnly = true)
-    public Page<CertificationsByCategoryResponse> getAllCertificationsByCategory(
+    public Page<CertificationSearchResponse> getAllCertificationsByCategory(
             long categoryId, final Pageable pageable) {
         SubCategory subCategory = subCategoryRepository.findById(categoryId)
                 .orElseThrow(SubCategoryNotFoundException::new);
@@ -55,7 +55,6 @@ public class CertificationService {
         return certificationQueryRepository.findAllCertificationByCategory(categoryId, pageable);
     }
 
-    @Transactional(readOnly = true)
     public List<CertificationCategoriesResponse> getCategories(final boolean isDefault) {
         List<MainCategory> mainCategories;
         if (isDefault) {
@@ -73,8 +72,11 @@ public class CertificationService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<CertificationCategoriesResponse> getCategories(final long mainCategoryId) {
+        if (!mainCategoryRepository.existsById(mainCategoryId)) {
+            throw new CategoryNotFoundException();
+        }
+        
         List<SubCategory> subCategories = subCategoryRepository.findByMainCategoryId(mainCategoryId);
         
         return subCategories.stream()
@@ -86,7 +88,6 @@ public class CertificationService {
                 .toList();
     }
 
-    @Transactional(propagation=Propagation.REQUIRED, readOnly = true)
     public Long getRecommendedCategoryId(final Long memberId) {
         if (memberId == null) return categoryQueryRepository.getDefaultRecommendedCategoryId();
 
@@ -99,9 +100,12 @@ public class CertificationService {
         return randomItem;
     }
 
-    @Transactional(readOnly = true)
-    public List<CertificationsByCategoryResponse> getRecommendedCertifications(final Long memberId) {
+    public List<CertificationSearchResponse> getRecommendedCertifications(final Long memberId) {
         long categoryId = getRecommendedCategoryId(memberId);
         return certificationQueryRepository.findAllCertificationByCategory(categoryId, 6);
+    }
+
+    public List<CertificationSearchResponse> getCertificationsBySearch(final String name) {
+        return certificationQueryRepository.getCertificationsBySearch(name);
     }
 }
