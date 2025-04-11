@@ -9,11 +9,28 @@ public record CertificationSearchResponse(
         String mainCategory,
         String subCategory,
         String name,
-        Instant applicationDate,
-        Instant examDate,
+        String applicationDate,
+        String examDate,
         int calendarSubscription
 ) {
     @QueryProjection
-    public CertificationSearchResponse {
+    public CertificationSearchResponse(
+            long id,
+            String mainCategory,
+            String subCategory,
+            String name,
+            Instant applicationDate,
+            Instant examDate,
+            int calendarSubscription
+    ) {
+        this(
+            id,
+            mainCategory,
+            subCategory,
+            name,
+            applicationDate != null ? applicationDate.toString() : "",
+            examDate != null ? examDate.toString() : "",
+            calendarSubscription
+        );
     }
 } 
