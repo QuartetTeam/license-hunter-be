@@ -6,6 +6,7 @@ import quartet.server.api.calendar.dto.response.CalendarResponse;
 import quartet.server.api.calendar.service.CalendarService;
 import quartet.server.api.common.response.ApiResponse;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static quartet.server.core.code.CommonSuccessCode.*;
@@ -20,7 +21,7 @@ public class CalendarController {
     @GetMapping("/calendars")
     public ApiResponse<List<CalendarResponse>> getCurrentMemberCalendars() {
         long memberId = 1L; // TODO 박현제: @AuthenticationPrincipal 로 변경 예정
-        return ApiResponse.success(OK, calendarService.getCalendarsByMemberId(memberId));
+        return ApiResponse.success(OK, calendarService.getCalendarsByMemberId(memberId, LocalDate.now()));
     }
 
     @PostMapping("/certifications/{certificationId}/calendars")
@@ -36,4 +37,9 @@ public class CalendarController {
         calendarService.unsubscribeCalendar(certificationId, memberId);
         return ApiResponse.success(NO_CONTENT);
     }
+//    @GetMapping("/certifications/by-date")
+//    public ResponseEntity<List<CalendarResponse>> getCalendarsByDate() {
+//        List<CalendarResponse> responses = calendarService.getCalendarDataByMemberIdAndDateRange(1L);
+//        return ResponseEntity.ok(responses);
+//    }
 }
