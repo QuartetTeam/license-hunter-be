@@ -1,6 +1,8 @@
 package quartet.server.api.mail.query;
 
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -9,12 +11,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import quartet.server.api.mail.dto.response.MailingResponse;
 import quartet.server.domain.certification.model.QCertification;
-import quartet.server.domain.certification.model.QCertificationDescription;
+import quartet.server.domain.certification.model.QCertificationSchedule;
+import quartet.server.domain.certification.type.ScheduleType;
 import quartet.server.domain.mail.model.QMailing;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static com.querydsl.core.types.dsl.Expressions.cases;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,12 +28,13 @@ public class MailingQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public Page<MailingResponse> getMailingsByMemberId(final long memberId, final Pageable pageable) {
+    public Page<MailingResponse> getMailingsByMemberId(final long memberId, final Instant startDate, final Pageable pageable) {
         QMailing mailing = QMailing.mailing;
         QCertification certification = QCertification.certification;
-        QCertificationDescription certDescription = QCertificationDescription.certificationDescription;
+        QCertificationSchedule applicationSchedule = new QCertificationSchedule("applicationSchedule");
+        QCertificationSchedule examSchedule = new QCertificationSchedule("examSchedule");
 
-        long total = Optional.ofNullable(queryFactory
+        final long total = Optional.ofNullable(queryFactory
                         .select(mailing.count())
                         .from(mailing)
                         .where(mailing.member.id.eq(memberId))
@@ -39,58 +46,38 @@ public class MailingQueryRepository {
         }
 
         List<MailingResponse> content = queryFactory
-                .select(Projections.constructor(MailingResponse.class,
-                        mailing.id,
-                        certification.id,
-                        certification.name,
-                        certDescription.description))
                 .from(mailing)
                 .join(mailing.certification, certification)
-                .leftJoin(certDescription).on(certification.id.eq(certDescription.certification.id))
+                .leftJoin(applicationSchedule).on(
+                        applicationSchedule.certification.eq(certification)
+                                .and(applicationSchedule.date.after(startDate))
+                                .and(applicationSchedule.scheduleType.eq(ScheduleType.APPLICATION_START))
+                )
+                .leftJoin(examSchedule).on(
+                        examSchedule.certification.eq(certification)
+                                .and(examSchedule.date.after(startDate))
+                                .and(examSchedule.scheduleType.eq(ScheduleType.EXAM_START))
+                )
                 .where(mailing.member.id.eq(memberId))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(mailing.createdAt.desc())
-                .fetch();
+                .transform(GroupBy.groupBy(mailing.id).list(
+                        Projections.constructor(MailingResponse.class,
+                                mailing.id,
+                                certification.id,
+                                certification.name,
+                                cases()
+                                        .when(applicationSchedule.id.isNotNull())
+                                        .then(GroupBy.min(applicationSchedule.date))
+                                        .otherwise(Expressions.nullExpression(Instant.class)),
+                                cases()
+                                        .when(examSchedule.id.isNotNull())
+                                        .then(GroupBy.min(examSchedule.date))
+                                        .otherwise(Expressions.nullExpression(Instant.class))
+                        )
+                ));
 
         return new PageImpl<>(content, pageable, total);
     }
-
-    /**
-     * 곧 접수가 시작되는 자격증 알람 조회 (접수일 포함)
-     */
-//    public List<MailSubscriptionDetailResponse> findUpcomingApplicationAlarms(
-//            final Long memberId,
-//            final MailingStatus status,
-//            final Instant startDate,
-//            final Instant endDate) {
-//
-//        QMailAlarm mailAlarm = QMailAlarm.mailAlarm;
-//        QCertification certification = QCertification.certification;
-//        QAuthority authority = QAuthority.authority;
-//        QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
-//
-//        return queryFactory
-//                .select(Projections.constructor(MailSubscriptionDetailResponse.class,
-//                        mailAlarm.id,
-//                        mailAlarm.member.id,
-//                        certification.id,
-//                        certification.name,
-//                        authority.id,
-//                        authority.name,
-//                        mailAlarm.mailAlarmStatus,
-//                        schedule.scheduledDate))
-//                .from(mailAlarm)
-//                .join(certification).on(mailAlarm.certification.id.eq(certification.id))
-//                .join(authority).on(certification.authority.id.eq(authority.id))
-//                .join(schedule).on(certification.id.eq(schedule.certification.id))
-//                .where(
-//                        mailAlarm.member.id.eq(memberId),
-//                        mailAlarm.mailAlarmStatus.eq(status),
-//                        schedule.scheduleType.eq(ScheduleType.APPLICATION_DATE),
-//                        schedule.scheduledDate.between(startDate, endDate)
-//                )
-//                .orderBy(schedule.scheduledDate.asc())
-//                .fetch();
-//    }
 }
