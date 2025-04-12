@@ -7,26 +7,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import quartet.server.api.calendar.dto.response.CalendarProjection;
 import quartet.server.api.calendar.dto.response.CalendarResponse;
 import quartet.server.api.calendar.fixture.CalendarFixture;
 import quartet.server.api.calendar.query.CalendarQueryRepository;
-import quartet.server.domain.calender.exception.CalendarAlreadyExistsException;
 import quartet.server.domain.calender.exception.CalendarNotFoundException;
 import quartet.server.domain.calender.model.Calendar;
 import quartet.server.domain.calender.repository.CalendarRepository;
-import quartet.server.domain.certification.exception.CertificationNotFoundException;
 import quartet.server.domain.certification.model.Certification;
 import quartet.server.domain.certification.repository.CertificationRepository;
-import quartet.server.domain.example.exception.ExampleNotFoundException;
 import quartet.server.domain.member.exception.MemberNotFoundException;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -54,20 +57,42 @@ class CalendarServiceTest {
     class GetCalendarsByMemberIdTest {
 
         @Test
-        @DisplayName("멤버 ID로 캘린더 목록을 조회한다")
-        void success_shouldReturnCalendarResponses() {
-            // given
-            final long memberId = 1L;
-            final List<CalendarResponse> expectedResponses = CalendarFixture.calendarResponses();
+        public void testGetCalendarsByMemberId() {
+            long memberId = 1L;
 
-            when(calendarQueryRepository.findCalendarsByMemberId(memberId)).thenReturn(expectedResponses);
+            LocalDate baseDate = LocalDate.of(2024, 2, 1);
+            ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+
+            Instant dbStartDate = baseDate.minusMonths(2).atStartOfDay(SEOUL_ZONE).toInstant(); // 2023-12-01T00:00:00Z
+            Instant dbEndDate = baseDate.plusYears(1).plusMonths(2).atStartOfDay(SEOUL_ZONE).toInstant(); // 2025-04-01T00:00:00Z
+
+            List<CalendarProjection> calendarProjections = CalendarFixture.calendarProjections();
+            List<CalendarResponse> expectedResponses = CalendarFixture.calendarResponses();
+
+            when(calendarQueryRepository.findCalendarProjectionsByMemberIdAndDateRange(eq(memberId), eq(dbStartDate), eq(dbEndDate)))
+                    .thenReturn(calendarProjections.stream());
 
             // when
-            final List<CalendarResponse> actualResponses = calendarService.getCalendarsByMemberId(memberId);
+            List<CalendarResponse> actualResponses = calendarService.getCalendarsByMemberId(memberId, baseDate);
 
             // then
-            assertThat(actualResponses).isEqualTo(expectedResponses);
-            verify(calendarQueryRepository).findCalendarsByMemberId(memberId);
+            assertThat(actualResponses)
+                    .usingRecursiveComparison()
+                    .ignoringCollectionOrder()
+                    .isEqualTo(expectedResponses);
+        }
+
+        @Test
+        public void testGetCalendarsByMemberId_withNoProjections() {
+            long memberId = 1L;
+            when(calendarQueryRepository.findCalendarProjectionsByMemberIdAndDateRange(eq(memberId), any(), any()))
+                    .thenReturn(Stream.empty());
+
+            List<CalendarResponse> actualResponses = calendarService.getCalendarsByMemberId(memberId, LocalDate.of(2024, 2, 1));
+
+            assertTrue(actualResponses.isEmpty());
+
+            verify(calendarQueryRepository).findCalendarProjectionsByMemberIdAndDateRange(eq(memberId), any(), any());
         }
     }
 
