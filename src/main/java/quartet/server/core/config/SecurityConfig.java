@@ -2,6 +2,7 @@ package quartet.server.core.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,7 @@ import quartet.server.core.security.filter.CustomLogoutFilter;
 import quartet.server.core.security.filter.JwtAuthenticationFilter;
 import quartet.server.core.security.ouath2.OauthLoginSuccessHandler;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
@@ -29,6 +31,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomLogoutFilter customLogoutFilter;
 
+    @Value("${CORS_ALLOWED_ORIGINS}")
+    private String corsAllowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -37,7 +42,7 @@ public class SecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000/")); // TODO: 나중에 수정하기
+                        configuration.setAllowedOrigins(Arrays.asList(corsAllowedOrigins.split(","))); 
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
