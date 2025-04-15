@@ -1,31 +1,27 @@
 package quartet.server.api.calendar.service;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import quartet.server.api.calendar.dto.response.CalendarProjection;
 import quartet.server.api.calendar.dto.response.CalendarResponse;
+import quartet.server.api.calendar.dto.response.ScheduleKey;
 import quartet.server.api.calendar.query.CalendarQueryRepository;
+import quartet.server.core.utils.DateUtils;
 import quartet.server.domain.calender.exception.CalendarAlreadyExistsException;
 import quartet.server.domain.calender.exception.CalendarNotFoundException;
 import quartet.server.domain.calender.model.Calendar;
 import quartet.server.domain.calender.repository.CalendarRepository;
 import quartet.server.domain.certification.model.Certification;
 import quartet.server.domain.certification.repository.CertificationRepository;
-import quartet.server.domain.certification.type.ScheduleGroup;
 import quartet.server.domain.member.exception.MemberNotFoundException;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,120 +33,119 @@ public class CalendarService {
     private final MemberRepository memberRepository;
     private final CertificationRepository certificationRepository;
     private final CalendarQueryRepository calendarQueryRepository;
-    private final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
 
-    public List<CalendarResponse> getCalendarsByMemberId(final long memberId, final LocalDate baseDate) {
+    public List<CalendarResponse> getCalendarsByMemberId(
+            final long memberId,
+            @NotNull final Instant startDate,
+            @NotNull final Instant endDate) {
+        List<CalendarResponse> calendarResponses = calendarQueryRepository.findCalendarResponsesByMemberId(memberId);
 
-        final Instant dbStartDate = baseDate.minusMonths(2)
-                .atStartOfDay(SEOUL_ZONE)
-                .toInstant();
-        final Instant dbEndDate = baseDate.plusYears(1)
-                .plusMonths(2)
-                .atStartOfDay(SEOUL_ZONE)
-                .toInstant();
+        List<Long> certificationIds = extractCertificationIds(calendarResponses);
 
-        final Instant filterStartDate = baseDate.with(TemporalAdjusters.firstDayOfMonth()) //todo 박현제: dateUtil로 리팩터링 하기
-                .atStartOfDay(SEOUL_ZONE)
-                .toInstant();
-        final Instant filterEndDate = baseDate.plusYears(1)
-                .with(TemporalAdjusters.lastDayOfMonth())
-                .atStartOfDay(SEOUL_ZONE)
-                .toInstant();
-
-        try (Stream<CalendarProjection> projectionStream = calendarQueryRepository
-                .findCalendarProjectionsByMemberIdAndDateRange(memberId, dbStartDate, dbEndDate)) {
-
-            final Map<Long, List<CalendarProjection>> certificationGroups = projectionStream
-                    .collect(Collectors.groupingBy(CalendarProjection::certificationId));
-
-            return convertToCalendarResponses(certificationGroups, filterStartDate, filterEndDate);
-        } catch (Exception e) {
-            log.error("[CalendarService] : 캘린더 오류 - {}", e.getMessage(), e);
-            throw new RuntimeException("캘린더 조회 중 오류가 발생했습니다.");
+        if (certificationIds.isEmpty()) {
+            return Collections.emptyList();
         }
+
+        final Instant dbStartDate = DateUtils.getDateBefore(DateUtils.toLocalDate(startDate),0, 1, 0);
+
+
+        final Instant dbEndDate = DateUtils.getDateAfter(DateUtils.toLocalDate(endDate),0, 1, 0);
+        System.out.println("========================");
+        System.out.println("startDate = " + startDate);
+        System.out.println("endDate = " + endDate);
+        System.out.println("dbStartDate = " + dbStartDate);
+        System.out.println("dbEndDate = " + dbEndDate);
+        final Map<Long, Map<ScheduleKey, List<Instant>>> groupedSchedulesByCertificationId =
+                calendarQueryRepository.findCalendarSchedulesByCertificationIdsAndDateRange(certificationIds, dbStartDate, dbEndDate);
+
+        return convertToCalendarResponses(calendarResponses, groupedSchedulesByCertificationId, startDate, endDate);
     }
 
-    private List<CalendarResponse> convertToCalendarResponses(final Map<Long, List<CalendarProjection>> certificationGroups,
-                                                              final Instant filterStartDate,
-                                                              final Instant filterEndDate) {
-
-        return certificationGroups.entrySet().stream()
-                .map(entry -> createCalendarResponse(entry.getKey(), entry.getValue(), filterStartDate, filterEndDate))
-                .filter(response -> !response.schedules().isEmpty())
+    private List<Long> extractCertificationIds(final List<CalendarResponse> responses) {
+        return responses.stream()
+                .map(CalendarResponse::certificationId)
+                .distinct()
                 .collect(Collectors.toList());
     }
 
-    private CalendarResponse createCalendarResponse(final long certificationId,
-                                                    final List<CalendarProjection> projections,
-                                                    final Instant todayStart,
-                                                    final Instant filterEndDate) {
-        final CalendarProjection firstProj = projections.getFirst();
+    private List<CalendarResponse> convertToCalendarResponses(
+            final List<CalendarResponse> responses,
+            final Map<Long, Map<ScheduleKey, List<Instant>>> groupedSchedulesByCertId,
+            final Instant startDate,
+            final Instant endDate) {
 
-        final List<CalendarResponse.CalendarScheduleResponse> schedules = toCalendarScheduleResponses(projections, todayStart, filterEndDate);
+        return responses.stream()
+                .map(response -> processCalendarResponse(response, groupedSchedulesByCertId, startDate, endDate))
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private CalendarResponse processCalendarResponse(
+            final CalendarResponse response,
+            final Map<Long, Map<ScheduleKey, List<Instant>>> groupedSchedulesByCertId,
+            final Instant startDate,
+            final Instant endDate) {
+
+        final Map<ScheduleKey, List<Instant>> schedulesMap =
+                groupedSchedulesByCertId.getOrDefault(response.certificationId(), Collections.emptyMap());
+
+        final List<CalendarResponse.CalendarScheduleResponse> schedules =
+                createFilteredSchedules(schedulesMap, startDate, endDate);
+
+        if (schedules.isEmpty()) {
+            return null;
+        }
+
         return CalendarResponse.of(
-                certificationId,
-                firstProj.calendarId(),
-                firstProj.certificationName(),
+                response.certificationId(),
+                response.calendarId(),
+                response.name(),
                 schedules
         );
     }
 
-    private ScheduleKey createScheduleKey(final CalendarProjection proj) {
-        return new ScheduleKey(
-                ScheduleGroup.findByScheduleType(proj.scheduleType()).getValue(),
-                proj.examType() != null ? proj.examType().getValue() : null,
-                proj.examRound()
+    private List<CalendarResponse.CalendarScheduleResponse> createFilteredSchedules(
+            final Map<ScheduleKey, List<Instant>> schedulesMap,
+            final Instant startDate,
+            final Instant endDate) {
+
+        return schedulesMap.entrySet().stream()
+                .map(entry -> createScheduleIfInRange(entry, startDate, endDate))
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private CalendarResponse.CalendarScheduleResponse createScheduleIfInRange(
+            final Map.Entry<ScheduleKey, List<Instant>> entry,
+            final Instant startDate,
+            final Instant endDate) {
+
+        final List<Instant> filteredDates = filterDatesByRange(entry.getValue(), startDate, endDate);
+
+        if (filteredDates.isEmpty()) {
+            return null;
+        }
+
+        return CalendarResponse.CalendarScheduleResponse.of(
+                entry.getKey().scheduleType(),
+                entry.getKey().examType().getValue(),
+                entry.getKey().examRound(),
+                filteredDates
         );
     }
 
-    private record ScheduleKey(
-            String scheduleGroup,
-            String examType,
-            String examRound
-    ) {}
+    private List<Instant> filterDatesByRange(
+            final List<Instant> dates,
+            final Instant startDate,
+            final Instant endDate) {
+        boolean hasDateAfterStart = dates.stream().anyMatch(date -> !date.isBefore(startDate));
+        boolean hasDateBeforeEnd = dates.stream().anyMatch(date -> !date.isAfter(endDate));
 
-    public List<CalendarResponse.CalendarScheduleResponse> toCalendarScheduleResponses(final List<CalendarProjection> projections, final Instant todayStart, final Instant filterEndDate) {
-        final Map<ScheduleKey, List<CalendarProjection>> grouped = groupByScheduleKey(projections);
-        final Map<ScheduleKey, List<CalendarProjection>> filtered = filterByDateRange(grouped, todayStart, filterEndDate);
-        return convertToCalendarScheduleResponses(filtered);
-    }
+        if (hasDateAfterStart || hasDateBeforeEnd) {
+            return dates.stream().sorted().toList();
+        }
 
-    private Map<ScheduleKey, List<CalendarProjection>> groupByScheduleKey(final List<CalendarProjection> projections) {
-        return projections.stream()
-                .collect(Collectors.groupingBy(this::createScheduleKey));
-    }
-
-    private Map<ScheduleKey, List<CalendarProjection>> filterByDateRange(
-            final Map<ScheduleKey, List<CalendarProjection>> grouped,
-            final Instant todayStart,
-            final Instant filterEndDate
-    ) {
-        return grouped.entrySet().stream()
-                .filter(entry -> entry.getValue().stream()
-                        .anyMatch(proj -> isWithinRange(proj.date(), todayStart, filterEndDate)))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private boolean isWithinRange(final Instant date, final Instant start, final Instant end) {
-        return (date.equals(start) || date.isAfter(start)) &&
-                (date.equals(end) || date.isBefore(end));
-    }
-
-    private List<CalendarResponse.CalendarScheduleResponse> convertToCalendarScheduleResponses(final Map<ScheduleKey, List<CalendarProjection>> groupedProjections) {
-        return groupedProjections.entrySet().stream()
-                .map(entry -> {
-                    ScheduleKey key = entry.getKey();
-                    List<Instant> dates = entry.getValue().stream()
-                            .map(CalendarProjection::date)
-                            .collect(Collectors.toList());
-                    return CalendarResponse.CalendarScheduleResponse.of(
-                            key.scheduleGroup,
-                            key.examType,
-                            key.examRound,
-                            dates
-                    );
-                })
-                .collect(Collectors.toList());
+        return Collections.emptyList();
     }
 
     @Transactional

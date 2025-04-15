@@ -1,24 +1,30 @@
 package quartet.server.api.calendar.dto.response;
 
+import com.querydsl.core.annotations.QueryProjection;
+import quartet.server.domain.certification.type.ExamType;
+
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 public record CalendarResponse(
         long certificationId,
         long calendarId,
-        String certificationName,
+        String name,
         List<CalendarScheduleResponse> schedules
 ) {
-     public CalendarResponse(
-            long certificationId,
-            long calendarId,
-            String certificationName,
-            List<CalendarScheduleResponse> schedules
+    @QueryProjection
+    public CalendarResponse(
+        long certificationId,
+        long calendarId,
+        String name
     ) {
-        this.certificationId = certificationId;
-        this.calendarId = calendarId;
-        this.certificationName = certificationName;
-        this.schedules = schedules;
+        this(
+                certificationId,
+                calendarId,
+                name,
+                Collections.emptyList()
+        );
     }
 
     public static CalendarResponse of(
@@ -41,16 +47,19 @@ public record CalendarResponse(
             String examRound,
             List<Instant> date
     ) {
+        @QueryProjection
         public CalendarScheduleResponse(
                 String scheduleType,
-                String examType,
+                ExamType examType,
                 String examRound,
                 List<Instant> date
         ) {
-            this.scheduleType = scheduleType;
-            this.examType = examType;
-            this.examRound = examRound;
-            this.date = date;
+            this(
+                    scheduleType,
+                    examType != null ? examType.getValue() : "",
+                    examRound,
+                    date
+            );
         }
 
         public static CalendarScheduleResponse of(

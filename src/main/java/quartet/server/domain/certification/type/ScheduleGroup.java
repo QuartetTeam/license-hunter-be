@@ -18,14 +18,21 @@ public enum ScheduleGroup {
     private final String value;
     private final Set<ScheduleType> scheduleTypes;
 
-    public static ScheduleGroup findByScheduleType(ScheduleType scheduleType) {
+    public static ScheduleGroup findByScheduleType(final ScheduleType scheduleType) {
         return Arrays.stream(ScheduleGroup.values())
                 .filter(group -> group.containsScheduleType(scheduleType))
                 .findAny()
                 .orElse(EMPTY);
     }
 
-    private boolean containsScheduleType(ScheduleType scheduleType) {
+//    public static ScheduleGroup findByValue(final String value) {
+//        return Arrays.stream(ScheduleGroup.values())
+//                .filter(group -> group.value.equals(value))
+//                .findAny()
+//                .orElse(EMPTY);
+//    }
+
+    private boolean containsScheduleType(final ScheduleType scheduleType) {
         return this.scheduleTypes.contains(scheduleType);
     }
 }
