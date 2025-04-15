@@ -13,7 +13,9 @@ import quartet.server.api.calendar.fixture.CalendarFixture;
 import quartet.server.api.calendar.service.CalendarService;
 import quartet.server.api.common.response.ApiResponse;
 import quartet.server.core.code.CommonSuccessCode;
+import quartet.server.core.utils.DateUtils;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -38,17 +40,20 @@ class CalendarControllerTest { // TODO 박현제: 인증/인가 완성 후 추�
 
     @Test
     @DisplayName("현재 사용자의 캘린더 목록을 조회한다")
-    void success_getCurrentMemberCalendars_shouldReturnCalendarResponses() throws Exception {
+    void success_getMemberCalendars_shouldReturnCalendarResponses() throws Exception {
         // given
-
         final long memberId = 1L;
-        final LocalDate baseDate = LocalDate.of(2024, 2, 1); // 테스트 고정 날짜
-        final List<CalendarResponse> responses = CalendarFixture.calendarResponses();
+        final LocalDate baseDate = LocalDate.of(2024, 2, 1);
 
+        final Instant startDate = DateUtils.getFirstDayOfMonth(baseDate);
+        final Instant endDate = DateUtils.getLastDayOfMonth(baseDate);
+
+        final List<CalendarResponse> responses = CalendarFixture.calendarResponses();
         final ApiResponse<List<CalendarResponse>> expectedResponse = ApiResponse.success(CommonSuccessCode.OK, responses);
 
-        when(calendarService.getCalendarsByMemberId(eq(memberId), eq(baseDate)))
+        when(calendarService.getCalendarsByMemberId(eq(memberId), eq(startDate), eq(endDate)))
                 .thenReturn(responses);
+
         // when
         final String result = mockMvc.perform(get("/api/v1/calendars")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -60,7 +65,9 @@ class CalendarControllerTest { // TODO 박현제: 인증/인가 완성 후 추�
         // then
         final String expectedJson = objectMapper.writeValueAsString(expectedResponse);
         assertThat(result).isEqualTo(expectedJson);
-        verify(calendarService, times(1)).getCalendarsByMemberId(1L, baseDate);
+
+        // 변경된 메서드 시그니처에 맞게 verify 업데이트
+        verify(calendarService, times(1)).getCalendarsByMemberId(eq(memberId), eq(startDate), eq(endDate));
     }
 
     @Test

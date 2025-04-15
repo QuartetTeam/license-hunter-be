@@ -7,10 +7,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import quartet.server.api.calendar.dto.response.CalendarProjection;
 import quartet.server.api.calendar.dto.response.CalendarResponse;
+import quartet.server.api.calendar.dto.response.ScheduleKey;
 import quartet.server.api.calendar.fixture.CalendarFixture;
 import quartet.server.api.calendar.query.CalendarQueryRepository;
+import quartet.server.core.utils.DateUtils;
 import quartet.server.domain.calender.exception.CalendarNotFoundException;
 import quartet.server.domain.calender.model.Calendar;
 import quartet.server.domain.calender.repository.CalendarRepository;
@@ -22,8 +23,8 @@ import quartet.server.domain.member.repository.MemberRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -57,42 +58,97 @@ class CalendarServiceTest {
     class GetCalendarsByMemberIdTest {
 
         @Test
+        @DisplayName("멤버 ID로 캘린더 목록을 성공적으로 조회한다")
         public void testGetCalendarsByMemberId() {
-            long memberId = 1L;
+            // given
+            final long memberId = 1L;
 
-            LocalDate baseDate = LocalDate.of(2024, 2, 1);
-            ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+            final Instant startDate = Instant.parse("2024-02-01T00:00:00Z");
+            final Instant endDate = Instant.parse("2024-04-30T23:59:59Z");
 
-            Instant dbStartDate = baseDate.minusMonths(2).atStartOfDay(SEOUL_ZONE).toInstant(); // 2023-12-01T00:00:00Z
-            Instant dbEndDate = baseDate.plusYears(1).plusMonths(2).atStartOfDay(SEOUL_ZONE).toInstant(); // 2025-04-01T00:00:00Z
+            // DateUtils 변경 사항 반영
+            LocalDate startLocalDate = DateUtils.toLocalDate(startDate);
+            LocalDate endLocalDate = DateUtils.toLocalDate(endDate);
+            Instant dbStartDate = DateUtils.getDateBefore(startLocalDate, 0, 1, 0);
+            Instant dbEndDate = DateUtils.getDateAfter(endLocalDate, 0, 1, 0);
 
-            List<CalendarProjection> calendarProjections = CalendarFixture.calendarProjections();
-            List<CalendarResponse> expectedResponses = CalendarFixture.calendarResponses();
+            List<CalendarResponse> mockResponses = CalendarFixture.mockCalendarResponses();
+            List<Long> certificationIds = List.of(1L);
 
-            when(calendarQueryRepository.findCalendarProjectionsByMemberIdAndDateRange(eq(memberId), eq(dbStartDate), eq(dbEndDate)))
-                    .thenReturn(calendarProjections.stream());
+            Map<Long, Map<ScheduleKey, List<Instant>>> mockSchedules = CalendarFixture.mockSchedulesByDateRange();
 
             // when
-            List<CalendarResponse> actualResponses = calendarService.getCalendarsByMemberId(memberId, baseDate);
+            when(calendarQueryRepository.findCalendarResponsesByMemberId(memberId))
+                    .thenReturn(mockResponses);
+            when(calendarQueryRepository.findCalendarSchedulesByCertificationIdsAndDateRange(
+                    eq(certificationIds), eq(dbStartDate), eq(dbEndDate)))
+                    .thenReturn(mockSchedules);
+
+            List<CalendarResponse> actualResponses = calendarService.getCalendarsByMemberId(memberId, startDate, endDate);
 
             // then
+            List<CalendarResponse> expectedResponses = CalendarFixture.calendarResponses();
             assertThat(actualResponses)
                     .usingRecursiveComparison()
                     .ignoringCollectionOrder()
                     .isEqualTo(expectedResponses);
+
+            verify(calendarQueryRepository).findCalendarResponsesByMemberId(eq(memberId));
+            verify(calendarQueryRepository).findCalendarSchedulesByCertificationIdsAndDateRange(
+                    eq(certificationIds), eq(dbStartDate), eq(dbEndDate));
         }
 
         @Test
-        public void testGetCalendarsByMemberId_withNoProjections() {
-            long memberId = 1L;
-            when(calendarQueryRepository.findCalendarProjectionsByMemberIdAndDateRange(eq(memberId), any(), any()))
-                    .thenReturn(Stream.empty());
+        @DisplayName("응답이 없는 경우 빈 리스트를 반환한다")
+        public void testGetCalendarsByMemberId_withNoResponses() {
+            // given
+            final long memberId = 1L;
+            final Instant startDate = Instant.parse("2024-02-01T00:00:00Z");
+            final Instant endDate = Instant.parse("2024-04-30T23:59:59Z");
 
-            List<CalendarResponse> actualResponses = calendarService.getCalendarsByMemberId(memberId, LocalDate.of(2024, 2, 1));
+            // when
+            when(calendarQueryRepository.findCalendarResponsesByMemberId(memberId))
+                    .thenReturn(List.of());
 
+            List<CalendarResponse> actualResponses = calendarService.getCalendarsByMemberId(memberId, startDate, endDate);
+
+            // then
             assertTrue(actualResponses.isEmpty());
+            verify(calendarQueryRepository).findCalendarResponsesByMemberId(eq(memberId));
+            verify(calendarQueryRepository, never()).findCalendarSchedulesByCertificationIdsAndDateRange(any(), any(), any());
+        }
 
-            verify(calendarQueryRepository).findCalendarProjectionsByMemberIdAndDateRange(eq(memberId), any(), any());
+        @Test
+        @DisplayName("일치하는 일정이 없는 경우 빈 리스트를 반환한다")
+        public void testGetCalendarsByMemberId_withNoMatchingSchedules() {
+            // given
+            final long memberId = 1L;
+            final Instant startDate = Instant.parse("2027-01-01T00:00:00Z");
+            final Instant endDate = Instant.parse("2027-02-01T00:00:00Z");
+
+            // DateUtils 변경 사항 반영
+            LocalDate startLocalDate = DateUtils.toLocalDate(startDate);
+            LocalDate endLocalDate = DateUtils.toLocalDate(endDate);
+            Instant dbStartDate = DateUtils.getDateBefore(startLocalDate, 0, 1, 0);
+            Instant dbEndDate = DateUtils.getDateAfter(endLocalDate, 0, 1, 0);
+
+            List<CalendarResponse> mockResponses = CalendarFixture.mockCalendarResponses();
+            List<Long> certificationIds = List.of(1L);
+
+            Map<Long, Map<ScheduleKey, List<Instant>>> mockEmptySchedules =
+                    Map.of(1L, Map.of());
+
+            // when
+            when(calendarQueryRepository.findCalendarResponsesByMemberId(memberId))
+                    .thenReturn(mockResponses);
+            when(calendarQueryRepository.findCalendarSchedulesByCertificationIdsAndDateRange(
+                    eq(certificationIds), eq(dbStartDate), eq(dbEndDate)))
+                    .thenReturn(mockEmptySchedules);
+
+            List<CalendarResponse> actualResponses = calendarService.getCalendarsByMemberId(memberId, startDate, endDate);
+
+            // then
+            assertTrue(actualResponses.isEmpty());
         }
     }
 
