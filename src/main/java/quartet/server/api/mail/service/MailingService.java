@@ -17,6 +17,8 @@ import quartet.server.domain.member.exception.MemberNotFoundException;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -30,8 +32,9 @@ public class MailingService {
     private final MailingQueryRepository mailingQueryRepository;
 
     public Page<MailingResponse> getMailingsByMemberId(final long memberId, final Pageable pageable) {
-
-        return mailingQueryRepository.getMailingsByMemberId(memberId, pageable);
+        return mailingQueryRepository.getMailingsByMemberId(memberId,
+                LocalDate.now().atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant(),
+                pageable);
     }
 
     @Transactional

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import quartet.server.api.calendar.dto.response.CalendarResponse;
 import quartet.server.api.calendar.service.CalendarService;
 import quartet.server.api.common.response.ApiResponse;
+import quartet.server.core.utils.DateUtils;
 
 import java.util.List;
 
@@ -16,11 +17,10 @@ import static quartet.server.core.code.CommonSuccessCode.*;
 public class CalendarController {
 
     private final CalendarService calendarService;
-
     @GetMapping("/calendars")
-    public ApiResponse<List<CalendarResponse>> getCurrentMemberCalendars() {
+    public ApiResponse<List<CalendarResponse>> getMemberCalendars() {
         long memberId = 1L; // TODO 박현제: @AuthenticationPrincipal 로 변경 예정
-        return ApiResponse.success(OK, calendarService.getCalendarsByMemberId(memberId));
+        return ApiResponse.success(OK, calendarService.getCalendarsByMemberId(memberId, DateUtils.getFirstDayOfMonth(DateUtils.now()), DateUtils.getLastDayOfMonth(DateUtils.getDateAfterNow(0,11,0))));
     }
 
     @PostMapping("/certifications/{certificationId}/calendars")
@@ -36,4 +36,9 @@ public class CalendarController {
         calendarService.unsubscribeCalendar(certificationId, memberId);
         return ApiResponse.success(NO_CONTENT);
     }
+//    @GetMapping("/certifications/by-date")
+//    public ResponseEntity<List<CalendarResponse>> getCalendarsByDate() {
+//        List<CalendarResponse> responses = calendarService.getCalendarDataByMemberIdAndDateRange(1L);
+//        return ResponseEntity.ok(responses);
+//    }
 }

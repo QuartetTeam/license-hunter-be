@@ -11,9 +11,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import quartet.server.api.certification.fixture.CertificationFixture;
 import quartet.server.api.mail.dto.response.MailingResponse;
 import quartet.server.api.mail.fixture.MailingFixture;
 import quartet.server.api.mail.query.MailingQueryRepository;
+import quartet.server.api.member.fixture.MemberFixture;
 import quartet.server.domain.certification.exception.CertificationNotFoundException;
 import quartet.server.domain.certification.model.Certification;
 import quartet.server.domain.certification.repository.CertificationRepository;
@@ -24,6 +26,9 @@ import quartet.server.domain.member.exception.MemberNotFoundException;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,15 +69,18 @@ class MailingServiceTest {
             final List<MailingResponse> expectedResponses = MailingFixture.mailingResponses();
             final Page<MailingResponse> expectedPage = new PageImpl<>(expectedResponses, pageable, expectedResponses.size());
 
-            when(mailingQueryRepository.getMailingsByMemberId(memberId, pageable)).thenReturn(expectedPage);
+            final Instant startDate = LocalDate.now().atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant();
+
+            when(mailingQueryRepository.getMailingsByMemberId(eq(memberId), eq(startDate), eq(pageable)))
+                    .thenReturn(expectedPage);
 
             // when
             final Page<MailingResponse> actualPage = mailingService.getMailingsByMemberId(memberId, pageable);
 
             // then
             assertThat(actualPage.getContent()).isEqualTo(expectedResponses);
-            assertThat(actualPage.getTotalElements()).isEqualTo(2);
-            verify(mailingQueryRepository).getMailingsByMemberId(memberId, pageable);
+            assertThat(actualPage.getTotalElements()).isEqualTo(expectedResponses.size());
+            verify(mailingQueryRepository).getMailingsByMemberId(eq(memberId), eq(startDate), eq(pageable));
         }
     }
 
@@ -86,8 +94,8 @@ class MailingServiceTest {
             // given
             final long memberId = 1L;
             final long certificationId = 2L;
-            final Member member = MailingFixture.createMember();
-            final Certification certification = MailingFixture.createCertification();
+            final Member member = MemberFixture.createMember();
+            final Certification certification = CertificationFixture.createCertification();
 
             when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
             when(certificationRepository.findById(certificationId)).thenReturn(Optional.of(certification));
@@ -127,7 +135,7 @@ class MailingServiceTest {
             // given
             final long memberId = 1L;
             final long certificationId = 2L;
-            final Member member = MailingFixture.createMember();
+            final Member member = MemberFixture.createMember();
 
             when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
             when(certificationRepository.findById(certificationId)).thenReturn(Optional.empty());
@@ -146,8 +154,8 @@ class MailingServiceTest {
             // given
             final long memberId = 1L;
             final long certificationId = 2L;
-            final Member member = MailingFixture.createMember();
-            final Certification certification = MailingFixture.createCertification();
+            final Member member = MemberFixture.createMember();
+            final Certification certification = CertificationFixture.createCertification();
 
             when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
             when(certificationRepository.findById(certificationId)).thenReturn(Optional.of(certification));

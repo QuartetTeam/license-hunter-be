@@ -2,49 +2,78 @@ package quartet.server.api.calendar.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
 import quartet.server.domain.certification.type.ExamType;
-import quartet.server.domain.certification.type.ScheduleType;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 public record CalendarResponse(
         long certificationId,
         long calendarId,
-        String certificationName,
+        String name,
         List<CalendarScheduleResponse> schedules
 ) {
+    @QueryProjection
+    public CalendarResponse(
+        long certificationId,
+        long calendarId,
+        String name
+    ) {
+        this(
+                certificationId,
+                calendarId,
+                name,
+                Collections.emptyList()
+        );
+    }
+
+    public static CalendarResponse of(
+            long certificationId,
+            long calendarId,
+            String certificationName,
+            List<CalendarScheduleResponse> schedules
+    ) {
+        return new CalendarResponse(
+                certificationId,
+                calendarId,
+                certificationName,
+                schedules
+        );
+    }
+
+    public record CalendarScheduleResponse(
+            String scheduleType,
+            String examType,
+            String examRound,
+            List<Instant> date
+    ) {
         @QueryProjection
-        public CalendarResponse(
-                long certificationId,
-                long calendarId,
-                String certificationName,
-                List<CalendarScheduleResponse> schedules
+        public CalendarScheduleResponse(
+                String scheduleType,
+                ExamType examType,
+                String examRound,
+                List<Instant> date
         ) {
-                this.certificationId = certificationId;
-                this.calendarId = calendarId;
-                this.certificationName = certificationName;
-                this.schedules = schedules;
+            this(
+                    scheduleType,
+                    examType != null ? examType.getValue() : "",
+                    examRound,
+                    date
+            );
         }
 
-        public record CalendarScheduleResponse(
+        public static CalendarScheduleResponse of(
                 String scheduleType,
                 String examType,
-                Instant date,
-                String examRound
+                String examRound,
+                List<Instant> date
         ) {
-                @QueryProjection
-                public CalendarScheduleResponse(
-                        ScheduleType scheduleType,
-                        ExamType examType,
-                        Instant date,
-                        String examRound
-                ) {
-                        this(
-                                scheduleType != null ? scheduleType.getValue() : null,
-                                examType != null ? examType.getValue() : null,
-                                date,
-                                examRound
-                        );
-                }
+            return new CalendarScheduleResponse(
+                    scheduleType,
+                    examType,
+                    examRound,
+                    date
+            );
         }
+    }
 }
