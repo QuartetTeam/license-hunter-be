@@ -42,7 +42,8 @@ public class SecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Arrays.asList(corsAllowedOrigins.split(","))); 
+//                        configuration.setAllowedOrigins(Arrays.asList(corsAllowedOrigins.split(",")));
+                        configuration.setAllowedOrigins(Arrays.asList("https://license-hunter.vercel.app","http://localhost:5173"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
