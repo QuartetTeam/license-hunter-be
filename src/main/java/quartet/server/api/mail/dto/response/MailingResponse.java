@@ -8,7 +8,7 @@ import java.time.Instant;
 public record MailingResponse(
         long mailingId,
         long certificationId,
-        String certificationName,
+        String name,
         String applicationDate,
         String examDate
 ) {
@@ -16,14 +16,14 @@ public record MailingResponse(
     public MailingResponse(
             long mailingId,
             long certificationId,
-            String certificationName,
+            String name,
             Instant applicationDate,
             Instant examDate
     ) {
         this(
                 mailingId,
                 certificationId,
-                certificationName,
+                name,
                 applicationDate != null ? applicationDate.toString() : "",
                 examDate != null ? examDate.toString() : ""
         );

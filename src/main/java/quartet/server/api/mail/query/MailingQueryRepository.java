@@ -1,7 +1,6 @@
 package quartet.server.api.mail.query;
 
 import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +9,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import quartet.server.api.mail.dto.response.MailingResponse;
+import quartet.server.api.mail.dto.response.QMailingResponse;
 import quartet.server.domain.certification.model.QCertification;
 import quartet.server.domain.certification.model.QCertificationSchedule;
 import quartet.server.domain.certification.type.ScheduleType;
@@ -63,7 +63,7 @@ public class MailingQueryRepository {
                 .limit(pageable.getPageSize())
                 .orderBy(mailing.createdAt.desc())
                 .transform(GroupBy.groupBy(mailing.id).list(
-                        Projections.constructor(MailingResponse.class,
+                        new QMailingResponse(
                                 mailing.id,
                                 certification.id,
                                 certification.name,
