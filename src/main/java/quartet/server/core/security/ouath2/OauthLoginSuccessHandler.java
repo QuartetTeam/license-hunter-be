@@ -1,6 +1,7 @@
 package quartet.server.core.security.ouath2;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -40,45 +41,17 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         RefreshToken newRefreshToken = RefreshToken.of(member, refreshToken);
         refreshTokenRepository.save(newRefreshToken);
 
-        addCookie(request, response, "accessToken", accessToken, 60 * 10);
-        addCookie(request, response, "refreshToken", refreshToken, 60 * 60 * 24);
+        response.addCookie(createCookie("accessToken", accessToken, 60 * 10));
+        response.addCookie(createCookie("refreshToken", refreshToken, 24 * 60 * 60));
 
-        // 로컬 환경에서 테스트 시 localhost로 리다이렉트, 운영 환경에서는 실제 도메인
-        String redirectUrl = request.getRequestURL().toString().contains("localhost")
-                ? "http://localhost:5173/api/v1/oauth2-jwt-header"
-                : "https://license-hunter.vercel.app/api/v1/oauth2-jwt-header";
-        response.sendRedirect(redirectUrl);
+        response.sendRedirect("http://localhost:5173/");
     }
 
-    private void addCookie(HttpServletRequest request, HttpServletResponse response, String name, String value, int maxAgeSeconds) {
-        String domain = request.getRequestURL().toString().contains("localhost") ? "localhost" : "license-hunter.vercel.app";
-        String secure = request.getRequestURL().toString().contains("localhost") ? "" : "; Secure"; // 로컬 환경에서는 Secure를 제외
-        String cookie = name + "=" + value +
-                "; Path=/" +
-                "; Max-Age=" + maxAgeSeconds +
-                "; HttpOnly" +
-                secure +
-                "; SameSite=None" +
-                "; Domain=" + domain;
-
-        response.addHeader("Set-Cookie", cookie);
+    public static Cookie createCookie(String key, String value, Integer expiredS) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(expiredS);
+        return cookie;
     }
-//        addCookie(response, "accessToken", accessToken, 60 * 10);
-//        addCookie(response, "refreshToken", refreshToken, 60 * 60 * 24);
-
-
-//        response.sendRedirect("https://license-hunter.vercel.app/api/v1/oauth2-jwt-header");
-//    }
-//
-//    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
-//        String cookie = name + "=" + value +
-//                "; Path=/" +
-//                "; Max-Age=" + maxAgeSeconds +
-//                "; HttpOnly" +
-//                "; Secure" +
-//                "; SameSite=None" +
-//                "; Domain=license-hunter.vercel.app";
-//
-//        response.addHeader("Set-Cookie", cookie);
-//    }
 }
