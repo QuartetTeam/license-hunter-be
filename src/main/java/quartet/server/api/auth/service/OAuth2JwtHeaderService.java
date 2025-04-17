@@ -31,17 +31,20 @@ public class OAuth2JwtHeaderService {
         jwtUtil.validateAccessToken(accessToken);
 
         // 클라이언트의 access 토큰 쿠키를 만료
-        response.addCookie(createCookie("accessToken", null, 0));
+        addCookie(response, "accessToken", null, 0);
         response.addHeader("accessToken", accessToken);
     }
 
-    private Cookie createCookie(String key, String value, Integer expiredS) {
 
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(expiredS);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
+    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+        String cookie = name + "=" + value +
+                "; Path=/" +
+                "; Max-Age=" + maxAgeSeconds +
+                "; HttpOnly" +
+                "; Secure" +
+                "; SameSite=None" +
+                "; Domain=license-hunter.vercel.app";
 
-        return cookie;
+        response.addHeader("Set-Cookie", cookie);
     }
 }
