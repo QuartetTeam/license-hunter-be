@@ -56,16 +56,19 @@ public class CustomLogoutFilter extends GenericFilterBean {
             refreshRepository.deleteByToken(refreshToken);
         }
 
-        Cookie cookie = createCookie("refreshToken", null, 0);
-        response.addCookie(cookie);
+        addCookie(response, "refreshToken", null, 0);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    public static Cookie createCookie(String key, String value, Integer expiredS) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(expiredS);
-        return cookie;
+    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+        String cookie = name + "=" + value +
+                "; Path=/" +
+                "; Max-Age=" + maxAgeSeconds +
+                "; HttpOnly" +
+                "; Secure" +
+                "; SameSite=None" +
+                "; Domain=license-hunter.vercel.app";
+
+        response.addHeader("Set-Cookie", cookie);
     }
 }

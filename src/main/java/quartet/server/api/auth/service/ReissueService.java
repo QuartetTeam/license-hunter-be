@@ -57,14 +57,19 @@ public class ReissueService {
         refreshTokenRepository.save(newRefreshToken);
 
         response.setHeader("accessToken", newAccessToken);
-        response.addCookie(createCookie("refreshToken", refreshToken, 24 * 60 * 60));
+
+        addCookie(response, "refreshToken", refreshToken, 60 * 60 * 24);
     }
 
-    public static Cookie createCookie(String key, String value, Integer expiredS) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(expiredS);
-        return cookie;
+    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+        String cookie = name + "=" + value +
+                "; Path=/" +
+                "; Max-Age=" + maxAgeSeconds +
+                "; HttpOnly" +
+                "; Secure" +
+                "; SameSite=None" +
+                "; Domain=license-hunter.vercel.app";
+
+        response.addHeader("Set-Cookie", cookie);
     }
 }
