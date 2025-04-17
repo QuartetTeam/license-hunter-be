@@ -62,7 +62,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)) // OAuth2 로그인 설정
                         .successHandler(oauthLoginSuccessHandler))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","/actuator/health", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue",
+                        .requestMatchers("/favicon.ico", "/","/actuator/health", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue",
                                 "/api/v1/certifications/**","/api/v1/calendars/**","/api/v1/mailings/**",     "/v3/api-docs/**",  // OpenAPI 3 문서 엔드포인트
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
