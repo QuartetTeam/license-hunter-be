@@ -60,7 +60,8 @@ public class SecurityConfig {
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService)) // OAuth2 로그인 설정
-                        .successHandler(oauthLoginSuccessHandler))
+                        .successHandler(oauthLoginSuccessHandler)
+                        .defaultSuccessUrl("http://localhost:5173/api/v1/oauth2-jwt-header", true))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/favicon.ico", "/","/actuator/health", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue",
                                 "/api/v1/certifications/**","/api/v1/calendars/**","/api/v1/mailings/**",     "/v3/api-docs/**",  // OpenAPI 3 문서 엔드포인트
