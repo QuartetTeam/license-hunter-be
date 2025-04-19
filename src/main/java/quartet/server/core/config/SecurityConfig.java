@@ -16,7 +16,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import quartet.server.api.auth.service.CustomOAuth2UserService;
 import quartet.server.core.security.filter.CustomLogoutFilter;
 import quartet.server.core.security.filter.JwtAuthenticationFilter;
-import quartet.server.core.security.ouath2.OauthLoginSuccessHandler;
+import quartet.server.core.security.handler.CustomAuthenticationEntryPoint;
+import quartet.server.core.security.handler.OauthLoginSuccessHandler;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final OauthLoginSuccessHandler oauthLoginSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomLogoutFilter customLogoutFilter;
@@ -56,6 +58,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable) // 기본 로그인 UI 제거
                 .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 제거
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 X
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)) // ← 예외 처리 추가
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService)) // OAuth2 로그인 설정
