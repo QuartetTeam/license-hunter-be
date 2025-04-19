@@ -51,8 +51,6 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(expiredS);
-        cookie.setSecure(true);
-        cookie.setDomain("license-hunter.vercel.app");
         return cookie;
     }
 }
