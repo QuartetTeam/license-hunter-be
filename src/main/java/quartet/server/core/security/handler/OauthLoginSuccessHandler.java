@@ -43,7 +43,7 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
         response.addCookie(createCookie("accessToken", accessToken, 60 * 10));
         response.addCookie(createCookie("refreshToken", refreshToken, 24 * 60 * 60));
-        response.sendRedirect("https://license-hunter.vercel.app/api/v1/oauth2-jwt-header");
+        response.sendRedirect("https://license-hunter.vercel.app/");
     }
 
     public static Cookie createCookie(String key, String value, Integer expiredS) {
