@@ -1,4 +1,4 @@
-package quartet.server.core.security.ouath2;
+package quartet.server.core.security.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -43,7 +43,7 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
         response.addCookie(createCookie("accessToken", accessToken, 60 * 10));
         response.addCookie(createCookie("refreshToken", refreshToken, 24 * 60 * 60));
-        response.sendRedirect("http://localhost:5173/");
+        response.sendRedirect("https://license-hunter.vercel.app/api/v1/oauth2-jwt-header");
     }
 
     public static Cookie createCookie(String key, String value, Integer expiredS) {
@@ -51,6 +51,8 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(expiredS);
+        cookie.setSecure(true);
+        cookie.setDomain("license-hunter.vercel.app");
         return cookie;
     }
 }
