@@ -7,4 +7,9 @@ public class MailException extends BaseException {
     public MailException(final ResponseCode errorCode) {
         super(errorCode);
     }
+
+    public MailException(final ResponseCode errorCode, final Throwable cause) {
+        super(errorCode);
+        initCause(cause);
+    }
 }
