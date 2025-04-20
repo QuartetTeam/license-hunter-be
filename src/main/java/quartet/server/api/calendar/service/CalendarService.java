@@ -47,14 +47,8 @@ public class CalendarService {
         }
 
         final Instant dbStartDate = DateUtils.getDateBefore(DateUtils.toLocalDate(startDate),0, 1, 0);
-
-
         final Instant dbEndDate = DateUtils.getDateAfter(DateUtils.toLocalDate(endDate),0, 1, 0);
-        System.out.println("========================");
-        System.out.println("startDate = " + startDate);
-        System.out.println("endDate = " + endDate);
-        System.out.println("dbStartDate = " + dbStartDate);
-        System.out.println("dbEndDate = " + dbEndDate);
+
         final Map<Long, Map<ScheduleKey, List<Instant>>> groupedSchedulesByCertificationId =
                 calendarQueryRepository.findCalendarSchedulesByCertificationIdsAndDateRange(certificationIds, dbStartDate, dbEndDate);
 
@@ -128,7 +122,7 @@ public class CalendarService {
 
         return CalendarResponse.CalendarScheduleResponse.of(
                 entry.getKey().scheduleType(),
-                entry.getKey().examType().getValue(),
+                entry.getKey().examType(),
                 entry.getKey().examRound(),
                 filteredDates
         );

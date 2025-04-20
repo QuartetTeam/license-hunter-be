@@ -36,9 +36,4 @@ public class CalendarController {
         calendarService.unsubscribeCalendar(certificationId, memberId);
         return ApiResponse.success(NO_CONTENT);
     }
-//    @GetMapping("/certifications/by-date")
-//    public ResponseEntity<List<CalendarResponse>> getCalendarsByDate() {
-//        List<CalendarResponse> responses = calendarService.getCalendarDataByMemberIdAndDateRange(1L);
-//        return ResponseEntity.ok(responses);
-//    }
 }
