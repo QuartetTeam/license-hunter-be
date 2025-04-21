@@ -43,7 +43,8 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
         response.addCookie(createCookie("accessToken", accessToken, 60 * 10));
         response.addCookie(createCookie("refreshToken", refreshToken, 24 * 60 * 60));
-        response.sendRedirect("http://localhost:5173/api/v1/oauth2-jwt-header");
+        getRedirectStrategy().sendRedirect(request, response,
+                "http://localhost:5173/api/v1/oauth2-jwt-header?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
     }
 
     public static Cookie createCookie(String key, String value, Integer expiredS) {
