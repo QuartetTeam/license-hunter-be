@@ -62,23 +62,58 @@ public record CertificationResponse(
         }
     }
 
-    public record CertificationScheduleResponse(
+    public record CertificationScheduleTemp(
             String scheduleType,
             ExamType examType,
             String examRound,
-            List<Instant> date
+            List<Instant> dates
     ){
         @QueryProjection
-        public CertificationScheduleResponse(
+        public CertificationScheduleTemp(
                 String scheduleType,
                 ExamType examType,
                 String examRound,
-                List<Instant> date
+                List<Instant> dates
         ){
             this.scheduleType = scheduleType;
             this.examType = examType;
             this.examRound = examRound;
-            this.date = date;
+            this.dates = dates;
+        }
+
+        public String getExamType() {
+            return examType != null ? examType.getValue() : null;
+        }
+    }
+
+    public record CertificationScheduleResponse(
+            String examRound,
+            List<ScheduleDetailResponse> scheduleDetails
+    ) {
+        @QueryProjection
+        public CertificationScheduleResponse(
+                String examRound,
+                List<ScheduleDetailResponse> scheduleDetails
+        ) {
+            this.examRound = examRound;
+            this.scheduleDetails = scheduleDetails;
+        }
+    }
+
+    public record ScheduleDetailResponse(
+            String scheduleType,
+            ExamType examType,
+            List<Instant> dates
+    ) {
+        @QueryProjection
+        public ScheduleDetailResponse(
+                String scheduleType,
+                ExamType examType,
+                List<Instant> dates
+        ) {
+            this.scheduleType = scheduleType;
+            this.examType = examType;
+            this.dates = dates;
         }
 
         public String getExamType() {

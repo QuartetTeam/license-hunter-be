@@ -135,10 +135,35 @@ public class CertificationQueryRepository {
         ));
     }
 
-    private List<CertificationResponse.CertificationScheduleResponse> getScheduleDetails(final long certificationId) {
+    private  List<CertificationResponse.CertificationScheduleResponse> getScheduleDetails(final long certificationId) {
+
+        List<CertificationResponse.CertificationScheduleTemp> temp = getScheduleTemp(certificationId);
+
+        HashMap<String, List<CertificationResponse.ScheduleDetailResponse>> result = new HashMap<>();
+
+        for (CertificationResponse.CertificationScheduleTemp x: temp){
+            String examRound = x.examRound();
+            List<CertificationResponse.ScheduleDetailResponse> details = result.computeIfAbsent(examRound,k -> new ArrayList<>());
+            details.add(new CertificationResponse.ScheduleDetailResponse(
+                    x.scheduleType(),
+                    x.examType(),
+                    x.dates()
+            ));
+        }
+
+        List<CertificationResponse.CertificationScheduleResponse> response = new ArrayList<>();
+        for (HashMap.Entry<String, List<CertificationResponse.ScheduleDetailResponse>> x: result.entrySet()){
+            response.add(new CertificationResponse.CertificationScheduleResponse(
+                    x.getKey(),
+                    x.getValue()
+            ));
+        }
+        return response;
+    }
+    private List<CertificationResponse.CertificationScheduleTemp> getScheduleTemp(final long certificationId) {
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
-        
-        // 일정 정보는 현재 연도 기준만 가져옵니다
+
+        // 일정 정보는 현재 연도 기준만 조회
         int currentYear = Instant.now().atZone(java.time.ZoneId.systemDefault()).getYear();
         Instant startOfYear = Instant.parse(currentYear + "-01-01T00:00:00Z");
         Instant endOfYear = Instant.parse(currentYear + "-12-31T23:59:59Z");
@@ -164,7 +189,7 @@ public class CertificationQueryRepository {
                 schedule.examType,
                 scheduleTypeExpression
             ).list(
-                new QCertificationResponse_CertificationScheduleResponse(
+                new QCertificationResponse_CertificationScheduleTemp(
                     scheduleTypeExpression,
                     schedule.examType,
                     schedule.examRound,
