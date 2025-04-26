@@ -3,39 +3,40 @@ package quartet.server.utils.fixture.Certification;
 import quartet.server.api.certification.dto.response.CertificationResponse;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.domain.certification.type.ExamType;
-import quartet.server.domain.certification.type.ScheduleType;
 import quartet.server.domain.certification.type.ProblemType;
-import quartet.server.domain.category.model.MainCategory;
-import quartet.server.domain.category.model.SubCategory;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class CertificationFixture {
     public static List<CertificationResponse.CertificationScheduleResponse> certificationScheduleResList() {
-        return List.of(
-            new CertificationResponse.CertificationScheduleResponse(
-                "접수일",
-                ExamType.PRACTICAL,
-                "1회차",
-                List.of(Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-02T09:00:00Z"))
-            ),
-            new CertificationResponse.CertificationScheduleResponse(
-                "시험일",
-                ExamType.PRACTICAL,
-                "1회차",
-                List.of(Instant.parse("2025-06-15T14:00:00Z"), Instant.parse("2025-06-16T14:00:00Z"))
-            ),
-            new CertificationResponse.CertificationScheduleResponse(
-                "합격일",
-                ExamType.PRACTICAL,
-                "1회차",
-                List.of(Instant.parse("2025-07-01T09:00:00Z"))
-            )
-        );
+        List<CertificationResponse.CertificationScheduleResponse> roundSchedules = new ArrayList<>();
+        
+        List<CertificationResponse.ScheduleDetailResponse> scheduleDetails = new ArrayList<>();
+        scheduleDetails.add(new CertificationResponse.ScheduleDetailResponse(
+            "접수일",
+            ExamType.PRACTICAL,
+            List.of(Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-02T09:00:00Z"))
+        ));
+        scheduleDetails.add(new CertificationResponse.ScheduleDetailResponse(
+            "시험일",
+            ExamType.PRACTICAL,
+            List.of(Instant.parse("2025-06-15T14:00:00Z"), Instant.parse("2025-06-16T14:00:00Z"))
+        ));
+        scheduleDetails.add(new CertificationResponse.ScheduleDetailResponse(
+            "합격일",
+            ExamType.PRACTICAL,
+            List.of(Instant.parse("2025-07-01T09:00:00Z"))
+        ));
+
+        roundSchedules.add(new CertificationResponse.CertificationScheduleResponse(
+            "1회차",
+            scheduleDetails
+        ));
+
+        return roundSchedules;
     }
 
     public static List<CertificationResponse.CertificationExamDetailResponse> certificationExamDetailResList() {
