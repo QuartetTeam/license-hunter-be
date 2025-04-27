@@ -1,14 +1,18 @@
 package quartet.server.api.member.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import quartet.server.api.common.response.ApiResponse;
-import quartet.server.api.member.dto.response.MemberMailingStatusResponse;
+import quartet.server.api.member.dto.request.UpdateEmailRequest;
+import quartet.server.api.member.dto.request.UpdateInterestsRequest;
+import quartet.server.api.member.dto.request.UpdateNicknameRequest;
+import quartet.server.api.member.dto.response.*;
 import quartet.server.api.member.service.MemberService;
+import quartet.server.core.security.userDetails.CustomUserDetails;
 
+import static quartet.server.core.code.CommonSuccessCode.NO_CONTENT;
 import static quartet.server.core.code.CommonSuccessCode.OK;
 
 @RestController
@@ -18,15 +22,52 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @GetMapping("/members/me/mailing-status")
-    public ApiResponse<MemberMailingStatusResponse> getMailingStatus() {
-        long memberId = 1L; // TODO: @AuthenticationPrincipal로 변경 예정
-        return ApiResponse.success(OK, memberService.getMailingStatus(memberId));
+    @GetMapping("/members/me")
+    public ApiResponse<MemberInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        return ApiResponse.success(OK, memberService.getMyInfo(memberId));
     }
 
-    @PatchMapping("/members/me/mailing-status")
-    public ApiResponse<MemberMailingStatusResponse> updateMailingStatus() {
-        long memberId = 1L; // TODO: @AuthenticationPrincipal로 변경 예정
+    @PatchMapping("/members/me/profile/nickname")
+    public ApiResponse<MemberNicknameResponse> updateNickname(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                              @RequestBody UpdateNicknameRequest request) {
+        long memberId = userDetails.getMemberId();
+        return ApiResponse.success(OK, memberService.updateNickname(memberId, request.nickname()));
+    }
+
+    @PatchMapping("/members/me/profile/email")
+    public ApiResponse<MemberEmailResponse> updateEmail(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                        @RequestBody UpdateEmailRequest request) {
+        long memberId = userDetails.getMemberId();
+        return ApiResponse.success(OK, memberService.updateEmail(memberId, request.email()));
+    }
+
+    @PostMapping("/members/me/profile/profile-image")
+    public ApiResponse<MemberProfileImageResponse> uploadProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestPart("image") MultipartFile image) {
+
+        long memberId = userDetails.getMemberId();
+        return ApiResponse.success(OK, memberService.updateProfileImage(memberId, image));
+    }
+
+    @PatchMapping("/members/me/profile/interests")
+    public ApiResponse<MemberInterestResponse> updateInterests(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                               @RequestBody UpdateInterestsRequest request) {
+        long memberId = userDetails.getMemberId();
+        return ApiResponse.success(OK, memberService.updateInterests(memberId, request.categoryIds()));
+    }
+
+    @PatchMapping("/members/me/settings/mailing-status")
+    public ApiResponse<MemberMailingStatusResponse> updateMailingStatus(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        long memberId = userDetails.getMemberId();
         return ApiResponse.success(OK, memberService.updateMailingStatus(memberId));
+    }
+
+    @DeleteMapping("/members/me/settings/delete-account")
+    public ApiResponse<Void> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        long memberId = userDetails.getMemberId();
+        memberService.deleteMember(memberId);
+        return ApiResponse.success(NO_CONTENT);
     }
 }

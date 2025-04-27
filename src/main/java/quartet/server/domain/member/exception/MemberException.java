@@ -4,7 +4,7 @@ import quartet.server.core.code.ResponseCode;
 import quartet.server.core.exception.BaseException;
 
 public class MemberException extends BaseException {
-    protected MemberException(ResponseCode errorCode) {
+    public MemberException(ResponseCode errorCode) {
         super(errorCode);
     }
 }
