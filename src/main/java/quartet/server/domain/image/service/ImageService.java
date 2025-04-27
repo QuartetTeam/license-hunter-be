@@ -13,9 +13,12 @@ import org.springframework.web.multipart.MultipartFile;
 import quartet.server.domain.image.exception.ImageDeletionFailedException;
 import quartet.server.domain.image.exception.ImageUploadFailedException;
 import quartet.server.domain.image.exception.InvalidImageUrlFormatException;
+import quartet.server.domain.image.exception.UnsupportedImageFormatException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.util.UUID;
 
 @Service
@@ -30,6 +33,8 @@ public class ImageService {
     private final String IMAGE_FOLDER = "images/";
 
     public String uploadImage(MultipartFile file) {
+        validateImageFile(file);
+
         try {
             String fileName = IMAGE_FOLDER + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
@@ -49,6 +54,28 @@ public class ImageService {
             throw new ImageUploadFailedException();
         } catch (Exception e) {
             log.error("[Exception] : 이미지 업로드 중 예상치 못한 오류 - {}", e.getMessage(), e);
+            throw new ImageUploadFailedException();
+        }
+    }
+
+    public String uploadImageFromUrl(String imageUrl) {
+        try (InputStream inputStream = new URL(imageUrl).openStream()) {
+            String fileName = IMAGE_FOLDER + "profile_" + UUID.randomUUID() + ".jpg";
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType("image/jpeg");
+
+            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, metadata));
+
+            return amazonS3.getUrl(bucketName, fileName).toString();
+        } catch (IOException e) {
+            log.error("[IOException] : 프로필 이미지 URL 읽기 실패 - {}", e.getMessage(), e);
+            throw new ImageUploadFailedException();
+        } catch (AmazonS3Exception e) {
+            log.error("[AmazonS3Exception] : S3 업로드 실패 - {}", e.getMessage(), e);
+            throw new ImageUploadFailedException();
+        } catch (Exception e) {
+            log.error("[Exception] : 프로필 이미지 업로드 중 예상치 못한 오류 - {}", e.getMessage(), e);
             throw new ImageUploadFailedException();
         }
     }
@@ -94,6 +121,13 @@ public class ImageService {
             return path;
         } catch (Exception e) {
             throw new InvalidImageUrlFormatException();
+        }
+    }
+
+    private void validateImageFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (!contentType.startsWith("image/")) {
+            throw new UnsupportedImageFormatException();
         }
     }
 }
