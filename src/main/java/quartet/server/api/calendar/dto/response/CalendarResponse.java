@@ -64,7 +64,7 @@ public record CalendarResponse(
 
         public static CalendarScheduleResponse of(
                 String scheduleType,
-                String examType,
+                ExamType examType,
                 String examRound,
                 List<Instant> date
         ) {

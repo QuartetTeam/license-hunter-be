@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시험 안내</title>
+</head>
+<body>
+<div style="padding: 20px; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #333;">자격저격</div>
+        <div style="background-color: #f2f2f2; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <div style="font-weight: bold;"><span th:text="${userName}">이예은</span>님,</div>
+            <div>
+                <span th:text="${dDay}">3</span>일 후에는 <span th:text="${examName}">정보처리기사</span> 시험일입니다.</div>
+        </div>
+        <div style="line-height: 1.6; margin-bottom: 20px;">
+            <span th:text="${userName}">이예은</span>님 안녕하세요,
+            <span th:text="${examName}">정보처리기사</span> 시험이 3일 후로 다가왔습니다.
+            시험을 위한 마무리 준비 시간입니다.
+            지금까지 준비해온 것들을 시험장에서 모두 발휘하시길 바랍니다.
+            시험 전 챙기셔야 하는 것들까지 자격저격이 상세하게 안내해드릴게요!
+        </div>
+        <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div style="font-weight: bold; color: #4285f4;">
+                시험일: <span th:text="${examDate}">2025.03.12</span> (<span th:text="${dDay == '0' ? '오늘 시작' : 'D-' + dDay}">D-7</span>)
+            </div>
+            <a th:href="${detailLink}" style="display: inline-block; background-color: #4285f4; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; text-align: center; border: none; cursor: pointer;">자격증 상세 정보 보기</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #777; font-size: 14px;">
+            <p>이 메일은 발신 전용이며, 회신하실 수 없습니다.</p>
+            <p>메일 수신을 원치 않으시면 자격저격 웹사이트에서 설정을 변경해주세요.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

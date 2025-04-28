@@ -8,12 +8,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import quartet.server.api.mail.dto.response.MailingResponse;
-import quartet.server.api.mail.dto.response.QMailingResponse;
+import quartet.server.api.mail.dto.response.*;
+import quartet.server.core.utils.DateUtils;
+import quartet.server.domain.certification.model.QAuthority;
 import quartet.server.domain.certification.model.QCertification;
 import quartet.server.domain.certification.model.QCertificationSchedule;
 import quartet.server.domain.certification.type.ScheduleType;
 import quartet.server.domain.mail.model.QMailing;
+import quartet.server.domain.mail.type.MailingStatus;
+import quartet.server.domain.member.model.QMember;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -79,5 +82,76 @@ public class MailingQueryRepository {
                 ));
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    public List<ApplicationMailProjection> findAllMailingTargetsForDate(
+            Instant targetDate, MailingStatus requiredMailingStatus) {
+
+        QMailing mailing = QMailing.mailing;
+        QMember member = QMember.member;
+        QCertification certification = QCertification.certification;
+        QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
+        QAuthority authority = QAuthority.authority;
+
+        Instant startOfDay = DateUtils.getDayStart(targetDate);
+        Instant endOfDay = DateUtils.getDayEnd(targetDate);
+
+        return queryFactory
+                .select(new QApplicationMailProjection(
+                        member.id,
+                        certification.id,
+                        member.nickname,
+                        member.email,
+                        certification.name,
+                        schedule.date,
+                        authority.applicationUrl,
+                        schedule.examType))
+                .from(mailing)
+                .join(mailing.member, member)
+                .join(mailing.certification, certification)
+                .join(certification.authority, authority)
+                .join(certification.schedules, schedule)
+                .where(
+                        member.mailingStatus.eq(requiredMailingStatus)
+                                .and(schedule.scheduleType.eq(ScheduleType.APPLICATION_START))
+//                                // examType이 null이거나 WRITTEN인 경우만 포함
+//                                .and(schedule.examType.isNull().or(schedule.examType.eq(ExamType.WRITTEN))) // todo 박현제: 추후에 미포함 여부 검토
+                                .and(schedule.date.between(startOfDay, endOfDay))
+                )
+                .orderBy(member.id.asc())
+                .fetch();
+        }
+
+    public List<ExamMailResponse> findExamNotificationsForDate(
+            Instant targetDate, MailingStatus requiredMailingStatus) {
+
+        QMailing mailing = QMailing.mailing;
+        QMember member = QMember.member;
+        QCertification certification = QCertification.certification;
+        QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
+
+
+        Instant startOfDay = DateUtils.getDayStart(targetDate);
+        Instant endOfDay = DateUtils.getDayEnd(targetDate);
+
+        return queryFactory
+                .select(new QExamMailResponse(
+                        member.id,
+                        certification.id,
+                        member.nickname,
+                        member.email,
+                        certification.name,
+                        schedule.date,
+                        schedule.examType))
+                .from(mailing)
+                .join(mailing.member, member)
+                .join(mailing.certification, certification)
+                .join(certification.schedules, schedule)
+                .where(
+                        member.mailingStatus.eq(requiredMailingStatus)
+                                .and(schedule.scheduleType.eq(ScheduleType.EXAM_START))
+                                .and(schedule.date.between(startOfDay, endOfDay))
+                )
+                .fetch();
     }
 }
