@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import quartet.server.api.mail.dto.response.MailingResponse;
 import quartet.server.api.mail.query.MailingQueryRepository;
+import quartet.server.core.utils.DateUtils;
 import quartet.server.domain.certification.exception.CertificationNotFoundException;
 import quartet.server.domain.certification.model.Certification;
 import quartet.server.domain.certification.repository.CertificationRepository;
@@ -17,8 +18,6 @@ import quartet.server.domain.member.exception.MemberNotFoundException;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -33,7 +32,7 @@ public class MailingService {
 
     public Page<MailingResponse> getMailingsByMemberId(final long memberId, final Pageable pageable) {
         return mailingQueryRepository.getMailingsByMemberId(memberId,
-                LocalDate.now().atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant(),
+                DateUtils.getTodayStart(),
                 pageable);
     }
 

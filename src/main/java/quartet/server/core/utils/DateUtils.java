@@ -8,26 +8,27 @@ import java.time.temporal.TemporalAdjusters;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DateUtils {
+    private static final ZoneId TIME_ZONE = ZoneId.systemDefault();
 
     public static Instant now() {
-        return ZonedDateTime.now(ZoneId.systemDefault()).toInstant();
+        return ZonedDateTime.now(TIME_ZONE).toInstant();
     }
 
     public static LocalDate today() {
-        return LocalDate.now(ZoneId.systemDefault());
+        return LocalDate.now(TIME_ZONE);
     }
 
     public static Instant toInstant(final LocalDate date) {
-        return date.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        return date.atStartOfDay(TIME_ZONE).toInstant();
     }
 
     public static LocalDate toLocalDate(final Instant instant) {
-        return LocalDate.ofInstant(instant, ZoneId.systemDefault());
+        return LocalDate.ofInstant(instant, TIME_ZONE);
     }
 
     public static Instant toInstant(final LocalDate date, final int hour, final int minute, final int second) {
         return LocalDateTime.of(date, LocalTime.of(hour, minute, second))
-                .atZone(ZoneId.systemDefault())
+                .atZone(TIME_ZONE)
                 .toInstant();
     }
 
@@ -59,6 +60,18 @@ public final class DateUtils {
     public static Instant getTodayStart() {
         return today()
                 .atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+    }
+    public static Instant getDayStart(final Instant instant) {
+        return toLocalDate(instant)
+                .atStartOfDay(TIME_ZONE)
+                .toInstant();
+    }
+
+    public static Instant getDayEnd(final Instant instant) {
+        return toLocalDate(instant)
+                .atTime(LocalTime.MAX)
+                .atZone(TIME_ZONE)
                 .toInstant();
     }
 
