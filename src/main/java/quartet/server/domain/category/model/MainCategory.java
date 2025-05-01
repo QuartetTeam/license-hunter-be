@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.IdentifiableEntity;
-import quartet.server.domain.certification.model.Certification;
 
 import java.util.ArrayList;
 import java.util.List;

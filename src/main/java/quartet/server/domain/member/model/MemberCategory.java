@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import quartet.server.core.entity.IdentifiableEntity;
-import quartet.server.domain.category.model.SubCategory;
+import quartet.server.domain.category.model.MainCategory;
 
 @Entity
 @Getter
@@ -20,16 +20,16 @@ public class MemberCategory extends IdentifiableEntity {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sub_category_id", nullable = false)
-    @Comment("소분류 카테고리 ID")
-    private SubCategory subCategory;
+    @JoinColumn(name = "main_category_id", nullable = false)
+    @Comment("대분류 카테고리 ID")
+    private MainCategory mainCategory;
 
-    private MemberCategory(final Member member, final SubCategory subCategory) {
+    private MemberCategory(final Member member, final MainCategory mainCategory) {
         this.member = member;
-        this.subCategory = subCategory;
+        this.mainCategory = mainCategory;
     }
 
-    public static MemberCategory of(final Member member, final SubCategory subCategory) {
-        return new MemberCategory(member, subCategory);
+    public static MemberCategory of(final Member member, final MainCategory mainCategory) {
+        return new MemberCategory(member, mainCategory);
     }
 }

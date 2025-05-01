@@ -7,13 +7,16 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import quartet.server.api.auth.dto.*;
+import quartet.server.domain.image.service.ImageService;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
+
 
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
+    private final ImageService imageService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -39,18 +42,21 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String socialProvider = oAuth2Response.getProvider();
         String email = oAuth2Response.getEmail();
         String nickname = oAuth2Response.getNickname();
-        String profileImageUrl = oAuth2Response.getProfileImageUrl();
+        String socialProfileImageUrl = oAuth2Response.getProfileImageUrl();
 
         Member existMember = memberRepository.findBySocialId(socialId);
         Long memberId = null;
 
         if (existMember == null) {
-            Member member = Member.of(socialId, socialProvider, email, nickname, profileImageUrl, null);
-            memberRepository.save(member);
-            memberId = memberRepository.findBySocialId(socialId).getId();
+            String profileImageUrl = null;
+            if (socialProfileImageUrl != null && !socialProfileImageUrl.isEmpty()) {
+                profileImageUrl = imageService.uploadImageFromUrl(socialProfileImageUrl);
+            }
+
+            Member newMember = Member.of(socialId, socialProvider, email, nickname, profileImageUrl);
+            memberRepository.save(newMember);
+            memberId = newMember.getId();
         } else {
-            existMember.updateProfile(nickname, profileImageUrl, null);
-            memberRepository.save(existMember);
             memberId = existMember.getId();
         }
 

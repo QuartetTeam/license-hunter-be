@@ -40,10 +40,6 @@ public class Member extends BaseAuditEntity {
     @Comment("프로필 이미지 URL")
     private String profileImageUrl;
 
-    @Column(name = "introduction", length = 1000)
-    @Comment("프로필 한 줄 소개")
-    private String introduction;
-
     @Column(name = "deleted_at")
     @Comment("계정 삭제 날짜")
     private LocalDateTime deletedAt;
@@ -67,29 +63,34 @@ public class Member extends BaseAuditEntity {
     private List<Mailing> mailings = new ArrayList<>();
 
     private Member(final String socialId, final String socialProvider, final String email, final String nickname,
-                   final String profileImageUrl, final String introduction) {
+                   final String profileImageUrl) {
         this.socialId = socialId;
         this.socialProvider = socialProvider;
         this.email = email;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
-        this.introduction = introduction;
         this.mailingStatus = MailingStatus.ACTIVE;
     }
 
     public static Member of(final String socialId, final String socialProvider, final String email, final String nickname,
-                            final String profileImageUrl, final String introduction) {
-        return new Member(socialId, socialProvider, email, nickname, profileImageUrl, introduction);
-    }
-
-    public void updateProfile(final String nickname, final String profileImageUrl, final String introduction) {
-        this.nickname = nickname;
-        this.profileImageUrl = profileImageUrl;
-        this.introduction = introduction;
+                            final String profileImageUrl) {
+        return new Member(socialId, socialProvider, email, nickname, profileImageUrl);
     }
 
     public void delete() {
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     public void updateMailingStatus(final MailingStatus mailAlarmStatus) {
