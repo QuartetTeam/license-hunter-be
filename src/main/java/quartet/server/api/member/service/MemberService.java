@@ -113,7 +113,6 @@ public class MemberService {
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         final MailingStatus oppositeStatus = MailingStatus.opposite(member.getMailingStatus());
         member.updateMailingStatus(oppositeStatus);
-        System.out.println(member.getMailingStatus());
 
         return new MemberMailingStatusResponse(oppositeStatus);
     }
