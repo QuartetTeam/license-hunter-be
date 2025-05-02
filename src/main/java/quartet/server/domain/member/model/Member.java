@@ -69,7 +69,7 @@ public class Member extends BaseAuditEntity {
         this.email = email;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
-        this.mailingStatus = MailingStatus.ACTIVE;
+        this.mailingStatus = MailingStatus.PAUSED;
     }
 
     public static Member of(final String socialId, final String socialProvider, final String email, final String nickname,
@@ -77,7 +77,7 @@ public class Member extends BaseAuditEntity {
         return new Member(socialId, socialProvider, email, nickname, profileImageUrl);
     }
 
-    public void delete() {
+    public void updateDeletedAt() {
         this.deletedAt = LocalDateTime.now();
     }
 
@@ -97,4 +97,3 @@ public class Member extends BaseAuditEntity {
         this.mailingStatus = mailAlarmStatus;
     }
 }
-
