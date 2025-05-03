@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import quartet.server.api.auth.dto.*;
 import quartet.server.domain.image.service.ImageService;
+import quartet.server.domain.mail.type.MailingStatus;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
 
@@ -53,7 +54,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 profileImageUrl = imageService.uploadImageFromUrl(socialProfileImageUrl);
             }
 
-            Member newMember = Member.of(socialId, socialProvider, email, nickname, profileImageUrl);
+            Member newMember = Member.of(socialId, socialProvider, email, nickname, profileImageUrl, MailingStatus.ACTIVE);
             memberRepository.save(newMember);
             memberId = newMember.getId();
         } else {
