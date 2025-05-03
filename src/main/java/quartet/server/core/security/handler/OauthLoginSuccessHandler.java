@@ -41,17 +41,33 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         RefreshToken newRefreshToken = RefreshToken.of(member, refreshToken);
         refreshTokenRepository.save(newRefreshToken);
 
-        response.addCookie(createCookie("accessToken", accessToken, 60 * 10));
-        response.addCookie(createCookie("refreshToken", refreshToken, 24 * 60 * 60));
+//        response.addCookie(createCookie("accessToken", accessToken, 60 * 10));
+//        response.addCookie(createCookie("refreshToken", refreshToken, 24 * 60 * 60));
+
+        addCookie(response, "accessToken", accessToken, 60 * 10);
+        addCookie(response, "refreshToken", refreshToken, 24 * 60 * 60);
+
         getRedirectStrategy().sendRedirect(request, response,
                 "http://localhost:5173/token?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
     }
 
-    public static Cookie createCookie(String key, String value, Integer expiredS) {
-        Cookie cookie = new Cookie(key, value);
-//        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(expiredS);
-        return cookie;
+//    public static Cookie createCookie(String key, String value, Integer expiredS) {
+//        Cookie cookie = new Cookie(key, value);
+////        cookie.setHttpOnly(true);
+//        cookie.setPath("/");
+//        cookie.setMaxAge(expiredS);
+//        return cookie;
+//    }
+
+    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+        String cookie = name + "=" + value +
+                "; Path=/" +
+                "; Max-Age=" + maxAgeSeconds +
+                "; HttpOnly" +
+                "; Secure" +
+                "; SameSite=None";
+//                "; Domain=license-hunter.vercel.app";
+
+        response.addHeader("Set-Cookie", cookie);
     }
 }
