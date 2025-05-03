@@ -2,6 +2,7 @@ package quartet.server.domain.calender.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import quartet.server.domain.calender.model.Calendar;
 
 import java.util.List;
@@ -16,4 +17,7 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
     boolean existsByIdAndMemberId(Long calendarId, Long memberId);
 
     Optional<Calendar> findByMemberIdAndCertificationId(Long memberId, Long certificationId);
+
+    @Transactional
+    void deleteByMemberId(Long memberId);
 }

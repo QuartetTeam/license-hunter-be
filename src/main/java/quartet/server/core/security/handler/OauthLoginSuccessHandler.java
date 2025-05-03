@@ -51,6 +51,7 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
                 "http://localhost:5173/token?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
     }
 
+
 //    public static Cookie createCookie(String key, String value, Integer expiredS) {
 //        Cookie cookie = new Cookie(key, value);
 //        cookie.setHttpOnly(true);
