@@ -49,7 +49,7 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
     public static Cookie createCookie(String key, String value, Integer expiredS) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setHttpOnly(true);
+//        cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(expiredS);
         return cookie;
