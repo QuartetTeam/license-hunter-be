@@ -1,6 +1,7 @@
 package quartet.server.utils.fixture.Certification;
 
 import quartet.server.api.certification.dto.response.CertificationResponse;
+import quartet.server.api.certification.dto.response.CertificationSearchResponse;
 import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ProblemType;
@@ -128,6 +129,13 @@ public class CertificationFixture {
                 )
             )),
             certificationScheduleResList()
+        );
+    }
+
+    public static List<CertificationSearchResponse> certificationSearchResponseList() {
+        return List.of(
+            new CertificationSearchResponse(1L, "IT", "DB", "자격증1", (Instant) null, null, 0),
+            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증2", (Instant) null, null, 0)
         );
     }
 }

@@ -4,6 +4,7 @@ import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,12 +12,13 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import quartet.server.api.certification.dto.response.*;
 import quartet.server.domain.certification.model.*;
-import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.QualificationType;
 import quartet.server.domain.certification.type.ScheduleType;
 import quartet.server.domain.category.model.QMainCategory;
 import quartet.server.domain.category.model.QSubCategory;
 import quartet.server.domain.certification.type.TechnicalGradeType;
+import quartet.server.domain.member.model.MemberCategory;
+import quartet.server.domain.member.model.QMemberCategory;
 
 import java.time.Instant;
 import java.util.*;
@@ -206,19 +208,6 @@ public class CertificationQueryRepository {
             .where(certification.subCategory.id.eq(subCategoryId));
     }
 
-
-    public List<CertificationSearchResponse> findAllCertificationByCategory(final long subCategoryId, final int count){
-
-        List<Long> certificationIds =
-                findAllCertificationsByCategoryBaseQuery(subCategoryId)
-                .limit(count)
-                .fetch();
-
-        if (certificationIds.isEmpty()) return List.of();
-
-        return getAllCertificationsByIds(certificationIds);
-    }
-
     public Page<CertificationSearchResponse> findAllCertificationByCategory(final long subCategoryId, final Pageable pageable){
             QCertification certification = QCertification.certification;
 
@@ -236,31 +225,6 @@ public class CertificationQueryRepository {
                                         .select(certification.count());
 
             return PageableExecutionUtils.getPage(certifications, pageable, countQuery::fetchOne);
-    }
-
-    public List<MainCategoryResponse> findAllMainCategories() {
-        QMainCategory mainCategory = QMainCategory.mainCategory;
-        return queryFactory
-                .select(new QMainCategoryResponse(
-                        mainCategory.id,
-                        mainCategory.name,
-                        mainCategory.isDefault
-                ))
-                .from(mainCategory)
-                .fetch();
-    }
-
-    public List<SubCategoryResponse> findAllSubCategoriesByMainCategoryId(final long mainCategoryId) {
-        QSubCategory subCategory = QSubCategory.subCategory;
-        return queryFactory
-                .select(new QSubCategoryResponse(
-                        subCategory.id,
-                        subCategory.name,
-                        subCategory.mainCategory.id
-                ))
-                .from(subCategory)
-                .where(subCategory.mainCategory.id.eq(mainCategoryId))
-                .fetch();
     }
 
     public List<CertificationSearchResponse> getCertificationsBySearch(final String name) {
@@ -321,7 +285,54 @@ public class CertificationQueryRepository {
                         )
                 ));
     }
+
+    public void incrementViewCountWithLock(final long certificationId) {
+        QCertification certification = QCertification.certification;
+        Certification entity = queryFactory
+                .selectFrom(certification)
+                .where(certification.id.eq(certificationId))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetchOne();
+        if (entity != null) {
+            entity.incrementViewCount();
+        }
+    }
+
+ 
+    public List<CertificationSearchResponse> getTop6ByViewCount() {
+        QCertification certification = QCertification.certification;
+        List<Long> top6Ids = queryFactory
+                .select(certification.id)
+                .from(certification)
+                .orderBy(certification.viewCount.desc())
+                .limit(6)
+                .fetch();
+        if (top6Ids.isEmpty()) return List.of();
+
+        return getAllCertificationsByIds(top6Ids);
+    }
+
+    public List<Long> findSubCategoryIdsByMainCategoryIds(final List<Long> mainCategoryIds) {
+        QSubCategory subCategory = QSubCategory.subCategory;
+        return queryFactory
+                .select(subCategory.id)
+                .from(subCategory)
+                .where(subCategory.mainCategory.id.in(mainCategoryIds))
+                .fetch();
+    }
+
+
+    public List<CertificationSearchResponse> findTop6BySubCategoryIdsOrderByViewCountDesc(final List<Long> subCategoryIds) {
+        QCertification certification = QCertification.certification;
+
+        List<Long> top6Ids = queryFactory
+                .select(certification.id)
+                .from(certification)
+                .where(certification.subCategory.id.in(subCategoryIds))
+                .orderBy(certification.viewCount.desc())
+                .limit(6)
+                .fetch();
+        if (top6Ids.isEmpty()) return List.of();
+        return getAllCertificationsByIds(top6Ids);
+    }
 }
-
-
-

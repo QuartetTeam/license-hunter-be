@@ -57,7 +57,7 @@ public class CalendarFixture {
                         List.of(
                                 CalendarResponse.CalendarScheduleResponse.of(
                                         ScheduleGroup.APPLICATION.getValue(),
-                                        ExamType.WRITTEN.getValue(),
+                                        ExamType.WRITTEN,
                                         "1회",
                                         List.of(
                                                 Instant.parse("2024-01-15T00:00:00Z"),
@@ -67,7 +67,7 @@ public class CalendarFixture {
                                 ),
                                 CalendarResponse.CalendarScheduleResponse.of(
                                         ScheduleGroup.EXAM.getValue(),
-                                        ExamType.WRITTEN.getValue(),
+                                        ExamType.WRITTEN,
                                         "1회",
                                         List.of(
                                                 Instant.parse("2024-03-01T00:00:00Z"),
@@ -77,7 +77,7 @@ public class CalendarFixture {
                                 ),
                                 CalendarResponse.CalendarScheduleResponse.of(
                                         ScheduleGroup.PASS.getValue(),
-                                        ExamType.WRITTEN.getValue(),
+                                        ExamType.WRITTEN,
                                         "1회",
                                         List.of(
                                                 Instant.parse("2024-04-09T00:00:00Z"),

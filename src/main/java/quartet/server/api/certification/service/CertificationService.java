@@ -18,8 +18,10 @@ import quartet.server.domain.certification.repository.*;
 import quartet.server.domain.certification.exception.CertificationNotFoundException;
 import quartet.server.domain.category.exception.CategoryNotFoundException;
 import quartet.server.domain.category.exception.SubCategoryNotFoundException;
+import quartet.server.domain.member.model.MemberCategory;
 import quartet.server.domain.member.repository.MemberCategoryRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -42,9 +44,22 @@ public class CertificationService {
     private final RandomGenerator randomGenerator;
 
 
+    @Transactional(readOnly = false)
     public CertificationResponse getCertification(final long certificationId) {
-        return certificationQueryRepository.getCertification(certificationId)
-                 .orElseThrow(CertificationNotFoundException::new);
+        // 데이터 조회
+        CertificationResponse response = certificationQueryRepository.getCertification(certificationId)
+                .orElseThrow(CertificationNotFoundException::new);
+        // 조회수 
+        incrementViewCount(certificationId);
+        return response;
+    }
+
+    /**
+     * select for update로 viewCount를 증가시키는 메서드 (별도 트랜잭션, QueryDSL)
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void incrementViewCount(long certificationId) {
+        certificationQueryRepository.incrementViewCountWithLock(certificationId);
     }
 
     public Page<CertificationSearchResponse> getAllCertificationsByCategory(
@@ -89,10 +104,8 @@ public class CertificationService {
     }
 
     public Long getRecommendedCategoryId(final Long memberId) {
-        if (memberId == null) return categoryQueryRepository.getDefaultRecommendedCategoryId();
-
         List<Long> interestedCategoryIds = categoryQueryRepository.findInterestedCategoryIds(memberId);
-        if (interestedCategoryIds.isEmpty()) return categoryQueryRepository.getDefaultRecommendedCategoryId();
+
         if (interestedCategoryIds.size() == 1) return interestedCategoryIds.getFirst();
 
         Long randomItem = randomGenerator.getRandomItem(interestedCategoryIds);
@@ -101,8 +114,21 @@ public class CertificationService {
     }
 
     public List<CertificationSearchResponse> getRecommendedCertifications(final Long memberId) {
-        long categoryId = getRecommendedCategoryId(memberId);
-        return certificationQueryRepository.findAllCertificationByCategory(categoryId, 6);
+        // 관심 카테고리가 없는 경우 - 조회수 상위 6개 반환
+        if (memberId == null) return certificationQueryRepository.getTop6ByViewCount();
+
+        List<MemberCategory> interestedMainCategories = memberCategoryRepository.findByMemberId(memberId);
+
+        if (interestedMainCategories.isEmpty()) return certificationQueryRepository.getTop6ByViewCount();
+        else {
+            List<Long> mainCategoryIds = new ArrayList<>();
+            for (MemberCategory x: interestedMainCategories){
+                mainCategoryIds.add(x.getMainCategory().getId());
+            }
+            List<Long> subCategoryIds = certificationQueryRepository.findSubCategoryIdsByMainCategoryIds(mainCategoryIds);
+            return certificationQueryRepository.findTop6BySubCategoryIdsOrderByViewCountDesc(subCategoryIds);
+
+        }
     }
 
     public List<CertificationSearchResponse> getCertificationsBySearch(final String name) {

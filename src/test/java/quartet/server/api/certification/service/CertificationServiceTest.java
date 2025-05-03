@@ -338,27 +338,39 @@ class CertificationServiceTest {
 
     @Nested
     class getRecommendedCertifications {
+
         @Test
-        @DisplayName("관심 카테고리가 있는 로그인 유저에게, 관심 분야에 대한 추천 자격증을 조회한다")
-        public void success() {
+        @DisplayName("비회원의 경우, 조회수 상위 최대 6개 데이터를 추천한다")
+        void success_whenNonUserRecommendation(){
             // given
-            final long memberId = 1L;
-            final long categoryId = 1L;
-            final List<CertificationSearchResponse> certificationList = List.of(
-                new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 100),
-                new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", Instant.parse("2025-05-01T08:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 50)
-            );
-            doReturn(categoryId).when(certificationService).getRecommendedCategoryId(memberId);
-            when(certificationQueryRepository.findAllCertificationByCategory(categoryId, 6))
-                    .thenReturn(certificationList);
+            final Long memberId = null;
+            List<CertificationSearchResponse> expected = CertificationFixture.certificationSearchResponseList();
+            when(certificationQueryRepository.getTop6ByViewCount()).thenReturn(expected);
 
             // when
-            final List<CertificationSearchResponse> result = certificationService.getRecommendedCertifications(memberId);
+            List<CertificationSearchResponse> result = certificationService.getRecommendedCertifications(memberId);
 
             // then
-            assertThat(result).isEqualTo(certificationList);
-            verify(certificationService, times(1)).getRecommendedCategoryId(memberId);
-            verify(certificationQueryRepository, times(1)).findAllCertificationByCategory(categoryId, 6);
+            assertThat(result).isEqualTo(CertificationFixture.certificationSearchResponseList());
+            verify(certificationQueryRepository).getTop6ByViewCount();
+        }
+
+        @Test
+        @DisplayName("관심 카테고리가 없는 경우 조회수 상위 최대 6개 데이터를 추천한다")
+        void success_whenNoInterestedCategories() {
+            // given
+            final long memberId = 1L;
+            List<CertificationSearchResponse> expected = CertificationFixture.certificationSearchResponseList();
+            when(memberCategoryRepository.findByMemberId(memberId)).thenReturn(List.of());
+            when(certificationQueryRepository.getTop6ByViewCount()).thenReturn(expected);
+
+            // when
+            List<CertificationSearchResponse> result = certificationService.getRecommendedCertifications(memberId);
+
+            // then
+            assertThat(result).isEqualTo(expected);
+            verify(memberCategoryRepository.findByMemberId(memberId));
+            verify(certificationQueryRepository).getTop6ByViewCount();
         }
     }
 } 
