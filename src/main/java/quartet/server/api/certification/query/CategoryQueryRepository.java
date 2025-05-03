@@ -31,7 +31,7 @@ public class CategoryQueryRepository {
 
     public List<Long> findInterestedCategoryIds(final Long memberId) {
         return queryFactory
-                .select(memberCategory.subCategory.id)
+                .select(memberCategory.mainCategory.id)
                 .from(memberCategory)
                 .where(memberCategory.member.id.eq(memberId))
                 .fetch();
@@ -42,7 +42,7 @@ public class CategoryQueryRepository {
                 .select(subCategory.id)
                 .from(subCategory)
                 .join(subCategory.mainCategory, mainCategory)
-                .where(mainCategory.isDefault.eq(true))
+                .where(mainCategory.id.eq(23L))
                 .orderBy(subCategory.id.asc())
                 .limit(1)
                 .fetchOne();
