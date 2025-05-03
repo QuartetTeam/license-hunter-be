@@ -28,7 +28,7 @@ public class JwtUtil {
         this.refreshTokenExpiration = refreshTokenExpiration * 1000;
     }
 
-    public String generateAccessToken(Long memberId) {
+    public String generateAccessToken(final Long memberId) {
         return Jwts.builder()
                 .claim("memberId", memberId)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -37,7 +37,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(Long memberId) {
+    public String generateRefreshToken(final Long memberId) {
         return Jwts.builder()
                 .claim("memberId", memberId)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -46,7 +46,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Long getMemberId(String token) {
+    public Long getMemberId(final String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
