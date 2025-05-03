@@ -55,7 +55,11 @@ public class JwtUtil {
                 .get("memberId", Long.class);
     }
 
-    public void validateAccessToken(final String accessToken) {
+    public void validateAccessToken(String accessToken) {
+        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+            accessToken = accessToken.substring(7);
+        }
+
         validateToken(accessToken, false);
     }
 
