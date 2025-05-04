@@ -23,49 +23,49 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/members/me")
-    public ApiResponse<MemberInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ApiResponse<MemberInfoResponse> getMyInfo(@AuthenticationPrincipal final CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
         return ApiResponse.success(OK, memberService.getMyInfo(memberId));
     }
 
     @PatchMapping("/members/me/profile/nickname")
-    public ApiResponse<MemberNicknameResponse> updateNickname(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                              @RequestBody UpdateNicknameRequest request) {
+    public ApiResponse<MemberNicknameResponse> updateNickname(@AuthenticationPrincipal final CustomUserDetails userDetails,
+                                                              @RequestBody final UpdateNicknameRequest request) {
         long memberId = userDetails.getMemberId();
         return ApiResponse.success(OK, memberService.updateNickname(memberId, request.nickname()));
     }
 
     @PatchMapping("/members/me/profile/email")
-    public ApiResponse<MemberEmailResponse> updateEmail(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                        @RequestBody UpdateEmailRequest request) {
+    public ApiResponse<MemberEmailResponse> updateEmail(@AuthenticationPrincipal final CustomUserDetails userDetails,
+                                                        @RequestBody final UpdateEmailRequest request) {
         long memberId = userDetails.getMemberId();
         return ApiResponse.success(OK, memberService.updateEmail(memberId, request.email()));
     }
 
     @PostMapping("/members/me/profile/profile-image")
     public ApiResponse<MemberProfileImageResponse> uploadProfileImage(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestPart("image") MultipartFile image) {
+            @AuthenticationPrincipal final CustomUserDetails userDetails,
+            @RequestPart("image") final MultipartFile image) {
 
         long memberId = userDetails.getMemberId();
         return ApiResponse.success(OK, memberService.updateProfileImage(memberId, image));
     }
 
     @PatchMapping("/members/me/profile/interests")
-    public ApiResponse<MemberInterestResponse> updateInterests(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                               @RequestBody UpdateInterestsRequest request) {
+    public ApiResponse<MemberInterestResponse> updateInterests(@AuthenticationPrincipal final CustomUserDetails userDetails,
+                                                               @RequestBody final UpdateInterestsRequest request) {
         long memberId = userDetails.getMemberId();
         return ApiResponse.success(OK, memberService.updateInterests(memberId, request.categoryIds()));
     }
 
     @PatchMapping("/members/me/settings/mailing-status")
-    public ApiResponse<MemberMailingStatusResponse> updateMailingStatus(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ApiResponse<MemberMailingStatusResponse> updateMailingStatus(@AuthenticationPrincipal final CustomUserDetails userDetails) {
         long memberId = userDetails.getMemberId();
         return ApiResponse.success(OK, memberService.updateMailingStatus(memberId));
     }
 
     @DeleteMapping("/members/me/settings/delete-account")
-    public ApiResponse<Void> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ApiResponse<Void> deleteAccount(@AuthenticationPrincipal final CustomUserDetails userDetails) {
         long memberId = userDetails.getMemberId();
         memberService.deleteMember(memberId);
         return ApiResponse.success(NO_CONTENT);

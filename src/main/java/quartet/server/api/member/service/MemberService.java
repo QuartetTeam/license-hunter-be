@@ -8,9 +8,11 @@ import quartet.server.api.member.dto.response.*;
 import quartet.server.core.code.MemberErrorCode;
 import quartet.server.domain.auth.repository.RefreshTokenRepository;
 import quartet.server.domain.calender.exception.CategorySelectionLimitExceededException;
+import quartet.server.domain.calender.repository.CalendarRepository;
 import quartet.server.domain.category.model.MainCategory;
 import quartet.server.domain.category.repository.MainCategoryRepository;
 import quartet.server.domain.image.service.ImageService;
+import quartet.server.domain.mail.repository.MailingRepository;
 import quartet.server.domain.mail.type.MailingStatus;
 import quartet.server.domain.member.exception.MemberException;
 import quartet.server.domain.member.exception.MemberNotFoundException;
@@ -31,6 +33,8 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final MainCategoryRepository mainCategoryRepository;
     private final MemberCategoryRepository memberCategoryRepository;
+    private final CalendarRepository calendarRepository;
+    private final MailingRepository mailingRepository;
     private final ImageService imageService;
 
     public MemberInfoResponse getMyInfo(final long memberId) {
@@ -78,19 +82,19 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberInterestResponse updateInterests(final long memberId, List<Long> categoryIds) {
+    public MemberInterestResponse updateInterests(final long memberId, final List<Long> categoryIds) {
         if (categoryIds.size() > 3) {
             throw new CategorySelectionLimitExceededException();
         }
 
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
         // 기존 관심 분야 제거
         member.getMemberCategories().clear();
 
         // 새 관심 분야 추가
-        List<MainCategory> categories = mainCategoryRepository.findAllById(categoryIds);
-        List<MemberCategory> newInterests = categories.stream()
+        final List<MainCategory> categories = mainCategoryRepository.findAllById(categoryIds);
+        final List<MemberCategory> newInterests = categories.stream()
                 .map(category -> MemberCategory.of(member, category))
                 .toList();
 
@@ -109,15 +113,16 @@ public class MemberService {
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         final MailingStatus oppositeStatus = MailingStatus.opposite(member.getMailingStatus());
         member.updateMailingStatus(oppositeStatus);
-        System.out.println(member.getMailingStatus());
 
         return new MemberMailingStatusResponse(oppositeStatus);
     }
 
     @Transactional
     public void deleteMember(final long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        mailingRepository.deleteByMemberId(memberId);
+        calendarRepository.deleteByMemberId(memberId);
+        memberCategoryRepository.deleteByMemberId(memberId);
         refreshTokenRepository.deleteByMemberId(memberId);
         memberRepository.delete(member);
     }
