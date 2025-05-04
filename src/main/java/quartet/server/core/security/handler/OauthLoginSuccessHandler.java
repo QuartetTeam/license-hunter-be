@@ -49,7 +49,7 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
         getRedirectStrategy().sendRedirect(request, response,
 
-                "https://license-hunter.vercel.app/token?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
+                "http://localhost:5173/token?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
     }
 
 
