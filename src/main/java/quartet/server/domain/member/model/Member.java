@@ -63,21 +63,21 @@ public class Member extends BaseAuditEntity {
     private List<Mailing> mailings = new ArrayList<>();
 
     private Member(final String socialId, final String socialProvider, final String email, final String nickname,
-                   final String profileImageUrl) {
+                   final String profileImageUrl, final MailingStatus mailingStatus) {
         this.socialId = socialId;
         this.socialProvider = socialProvider;
         this.email = email;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
-        this.mailingStatus = MailingStatus.ACTIVE;
+        this.mailingStatus = mailingStatus;
     }
 
     public static Member of(final String socialId, final String socialProvider, final String email, final String nickname,
-                            final String profileImageUrl) {
-        return new Member(socialId, socialProvider, email, nickname, profileImageUrl);
+                            final String profileImageUrl, final MailingStatus mailingStatus) {
+        return new Member(socialId, socialProvider, email, nickname, profileImageUrl, mailingStatus);
     }
 
-    public void delete() {
+    public void updateDeletedAt() {
         this.deletedAt = LocalDateTime.now();
     }
 
@@ -97,4 +97,3 @@ public class Member extends BaseAuditEntity {
         this.mailingStatus = mailAlarmStatus;
     }
 }
-
