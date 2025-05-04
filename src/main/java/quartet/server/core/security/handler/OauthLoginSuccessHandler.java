@@ -48,7 +48,7 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         addCookie(response, "refreshToken", refreshToken, 24 * 60 * 60);
 
         getRedirectStrategy().sendRedirect(request, response,
-                "http://localhost:5173/token?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
+                "https://license-hunter.vercel.app/token?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
     }
 
 //    public static Cookie createCookie(String key, String value, Integer expiredS) {
@@ -59,15 +59,27 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 //        return cookie;
 //    }
 
-    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
-        String cookie = name + "=" + value +
-                "; Path=/" +
-                "; Max-Age=" + maxAgeSeconds +
-                "; HttpOnly" +
-                "; Secure" +
-                "; SameSite=None";
-//                "; Domain=license-hunter.vercel.app";
+//    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+//        String cookie = name + "=" + value +
+//                "; Path=/" +
+//                "; Max-Age=" + maxAgeSeconds +
+//                "; HttpOnly" +
+//                "; Secure" +
+//                "; SameSite=None";
+////                "; Domain=license-hunter.vercel.app";
+//
+//        response.addHeader("Set-Cookie", cookie);
+//    }
 
-        response.addHeader("Set-Cookie", cookie);
+    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setPath("/");
+        cookie.setMaxAge(maxAgeSeconds);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setDomain("license-hunter.vercel.app"); // 필요 시 설정
+        cookie.setAttribute("SameSite", "None");
+
+        response.addCookie(cookie);
     }
 }
