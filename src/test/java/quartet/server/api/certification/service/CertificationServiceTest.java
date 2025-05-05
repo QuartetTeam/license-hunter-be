@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
 import quartet.server.api.certification.dto.response.CertificationResponse;
-import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.api.certification.dto.response.CertificationSearchResponse;
 import quartet.server.api.certification.query.CategoryQueryRepository;
 import quartet.server.api.certification.query.CertificationQueryRepository;
@@ -31,7 +30,7 @@ import quartet.server.utils.fixture.Certification.CertificationCategoryFixture;
 import quartet.server.utils.fixture.Certification.CertificationFixture;
 import quartet.server.utils.fixture.Pageable.PageableFixture;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -185,8 +184,8 @@ class CertificationServiceTest {
             Pageable pageable = PageableFixture.pageable();
             SubCategory subCategory = CertificationCategoryFixture.subCategory(CertificationCategoryFixture.mainCategory());
             List<CertificationSearchResponse> certificationList = List.of(
-                new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 100),
-                new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", Instant.parse("2025-05-01T08:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 50)
+                new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", LocalDateTime.parse("2025-05-01T09:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 100),
+                new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", LocalDateTime.parse("2025-05-01T08:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 50)
             );
             Page<CertificationSearchResponse> certificationPage = new PageImpl<>(certificationList);
 

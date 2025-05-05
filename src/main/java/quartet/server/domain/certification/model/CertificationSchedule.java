@@ -9,7 +9,7 @@ import quartet.server.core.entity.IdentifiableEntity;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ScheduleType;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -33,14 +33,14 @@ public class CertificationSchedule extends IdentifiableEntity {
 
     @Column(nullable = false)
     @Comment("일자")
-    private Instant date;
+    private LocalDateTime date;
 
     @Column(nullable = true, length = 255)
     @Comment("시험 회차")
     private String examRound;
 
     private CertificationSchedule(final Certification certification, final ExamType examType, 
-                                final ScheduleType scheduleType, final Instant date, final String examRound) {
+                                final ScheduleType scheduleType, final LocalDateTime date, final String examRound) {
         this.certification = certification;
         this.examType = examType;
         this.scheduleType = scheduleType;
@@ -49,7 +49,7 @@ public class CertificationSchedule extends IdentifiableEntity {
     }
 
     public static CertificationSchedule of(final Certification certification, final ExamType examType, 
-                                         final ScheduleType scheduleType, final Instant date, final String examRound) {
+                                         final ScheduleType scheduleType, final LocalDateTime date, final String examRound) {
         return new CertificationSchedule(certification, examType, scheduleType, date, examRound);
     }
 }

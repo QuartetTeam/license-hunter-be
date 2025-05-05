@@ -20,7 +20,8 @@ import quartet.server.domain.certification.type.TechnicalGradeType;
 import quartet.server.domain.member.model.MemberCategory;
 import quartet.server.domain.member.model.QMemberCategory;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -166,9 +167,9 @@ public class CertificationQueryRepository {
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
         // 일정 정보는 현재 연도 기준만 조회
-        int currentYear = Instant.now().atZone(java.time.ZoneId.systemDefault()).getYear();
-        Instant startOfYear = Instant.parse(currentYear + "-01-01T00:00:00Z");
-        Instant endOfYear = Instant.parse(currentYear + "-12-31T23:59:59Z");
+        int currentYear = LocalDateTime.now(ZoneId.of("Asia/Seoul")).getYear();
+        LocalDateTime startOfYear = LocalDateTime.of(currentYear, 1, 1, 0, 0);
+        LocalDateTime endOfYear = LocalDateTime.of(currentYear, 12, 31, 23, 59, 59);
 
         var scheduleTypeExpression = cases()
             .when(schedule.scheduleType.in(ScheduleType.APPLICATION_START, ScheduleType.APPLICATION_END))
@@ -258,12 +259,12 @@ public class CertificationQueryRepository {
                 .join(subCategory.mainCategory, mainCategory)
                 .leftJoin(applicationSchedule).on(
                         applicationSchedule.certification.eq(certification)
-                                .and(applicationSchedule.date.after(Instant.now()))
+                                .and(applicationSchedule.date.after(LocalDateTime.now(ZoneId.of("Asia/Seoul"))))
                                 .and(applicationSchedule.scheduleType.in(ScheduleType.APPLICATION_START,ScheduleType.APPLICATION_END)
                 ))
                 .leftJoin(examSchedule).on(
                         examSchedule.certification.eq(certification)
-                                .and(examSchedule.date.after(Instant.now()))
+                                .and(examSchedule.date.after(LocalDateTime.now(ZoneId.of("Asia/Seoul"))))
                                 .and(examSchedule.scheduleType.in(ScheduleType.EXAM_START,ScheduleType.EXAM_END)
                 ))
                 .where(certification.id.in(certificationIds))
@@ -276,11 +277,11 @@ public class CertificationQueryRepository {
                                 cases()
                                         .when(applicationSchedule.id.isNotNull())
                                         .then(GroupBy.min(applicationSchedule.date))
-                                        .otherwise(Expressions.nullExpression(Instant.class)),
+                                        .otherwise(Expressions.nullExpression(LocalDateTime.class)),
                                 cases()
                                         .when(examSchedule.id.isNotNull())
                                         .then(GroupBy.min(examSchedule.date))
-                                        .otherwise(Expressions.nullExpression(Instant.class)),
+                                        .otherwise(Expressions.nullExpression(LocalDateTime.class)),
                                 Expressions.constant(0)
                         )
                 ));
