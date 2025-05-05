@@ -4,13 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import quartet.server.api.certification.dto.response.CertificationResponse;
 import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
 import quartet.server.api.certification.dto.response.CertificationSearchResponse;
-import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.api.certification.service.CertificationService;
 import quartet.server.api.common.response.ApiResponse;
+import quartet.server.core.security.userDetails.CustomUserDetails;
+
 import java.util.List;
 
 import static quartet.server.core.code.CommonSuccessCode.OK;
@@ -59,9 +61,8 @@ public class CertificationController {
     }
 
     @GetMapping("/recommendation")
-    public ApiResponse<List<CertificationSearchResponse>> getRecommendedCertifications() {
-        // @TODO 최지희: @AuthenticationPrincipal로 변경 예정
-        long memberId = 1L;
+    public ApiResponse<List<CertificationSearchResponse>> getRecommendedCertifications(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = (userDetails != null) ? userDetails.getMemberId() : null;
         List<CertificationSearchResponse> recommendedCertifications = certificationService.getRecommendedCertifications(memberId);
         return ApiResponse.success(OK, recommendedCertifications);
     }
