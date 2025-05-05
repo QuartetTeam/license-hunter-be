@@ -16,7 +16,6 @@ import quartet.server.api.common.response.ApiResponse;
 import quartet.server.core.code.CommonErrorCode;
 import quartet.server.core.exception.BaseException;
 import quartet.server.domain.calender.exception.CalendarException;
-import quartet.server.domain.example.exception.ExampleException;
 import quartet.server.domain.image.exception.ImageException;
 import quartet.server.domain.mail.exception.MailException;
 
@@ -72,11 +71,6 @@ public class GlobalExceptionHandler {
         return ApiResponse.fail(CommonErrorCode.FILE_SIZE_EXCEEDED);
     }
 
-    @ExceptionHandler(ExampleException.class)
-    protected ApiResponse<Void> handleExampleException(final ExampleException e) {
-        log.warn("[ExampleException] : {}", e.getMessage(), e);
-        return ApiResponse.fail(e.getErrorCode());
-    }
     @ExceptionHandler(CalendarException.class)
     protected ApiResponse<Void> handleCalendarException(final CalendarException e) {
         log.warn("[CalendarException] : {}", e.getMessage(), e);
