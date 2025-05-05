@@ -66,12 +66,13 @@ public class SecurityConfig {
                         .successHandler(oauthLoginSuccessHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/","/actuator/health", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue",
-                                "/api/v1/certifications/**","/api/v1/calendars/**","/api/v1/mailings/**", "/v3/api-docs/**",  // OpenAPI 3 문서 엔드포인트
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/swagger-resources/**",
-                                "/webjars/**",
-                                "/swagger-ui/index.html"
+                                "/api/v1/certifications/**"
+//                                , "/v3/api-docs/**"  // OpenAPI 3 문서 엔드포인트
+//                                "/swagger-ui/**",
+//                                "/swagger-ui.html",
+//                                "/swagger-resources/**",
+//                                "/webjars/**",
+//                                "/swagger-ui/index.html"
                                 ).permitAll() // TODO: 나중에 더 추가, 스웨거 삭제
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
