@@ -48,8 +48,12 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         addCookie(response, "refreshToken", refreshToken, 24 * 60 * 60);
 
         getRedirectStrategy().sendRedirect(request, response,
+
+
                 "https://license-hunter.vercel.app/token?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
     }
+
+
 
 //    public static Cookie createCookie(String key, String value, Integer expiredS) {
 //        Cookie cookie = new Cookie(key, value);
@@ -58,6 +62,7 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 //        cookie.setMaxAge(expiredS);
 //        return cookie;
 //    }
+
 
 //    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
 //        String cookie = name + "=" + value +
@@ -81,5 +86,6 @@ public class OauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         cookie.setAttribute("SameSite", "None");
 
         response.addCookie(cookie);
+
     }
 }
