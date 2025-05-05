@@ -2,7 +2,7 @@ package quartet.server.api.certification.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record CertificationSearchResponse(
         long id,
@@ -19,8 +19,8 @@ public record CertificationSearchResponse(
             String mainCategory,
             String subCategory,
             String name,
-            Instant applicationDate,
-            Instant examDate,
+            LocalDateTime applicationDate,
+            LocalDateTime examDate,
             int calendarSubscription
     ) {
         this(
