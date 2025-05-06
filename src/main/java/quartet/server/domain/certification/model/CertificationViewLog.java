@@ -8,7 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import quartet.server.core.entity.IdentifiableEntity;
 import quartet.server.domain.member.model.Member;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,7 +26,7 @@ public class CertificationViewLog extends IdentifiableEntity {
 
     @CreatedDate
     @Column(name = "created_at",nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     private CertificationViewLog(final Member member, final Certification certification) {
         this.member = member;

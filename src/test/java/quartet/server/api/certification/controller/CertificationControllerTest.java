@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import quartet.server.api.certification.dto.response.CertificationCategoriesResponse;
 import quartet.server.api.certification.dto.response.CertificationResponse;
 import quartet.server.api.certification.dto.response.CertificationSearchResponse;
-import quartet.server.api.certification.dto.response.CertificationsByCategoryResponse;
 import quartet.server.api.certification.service.CertificationService;
 import quartet.server.api.common.response.ApiResponse;
 import quartet.server.core.code.CommonSuccessCode;
@@ -20,13 +19,11 @@ import quartet.server.utils.fixture.Certification.CertificationFixture;
 import quartet.server.utils.fixture.Certification.CertificationCategoryFixture;
 import quartet.server.utils.fixture.Pageable.PageableFixture;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -135,8 +132,8 @@ public class CertificationControllerTest {
         final long categoryId = 1L;
         final Pageable pageable = PageableFixture.pageable(0,10, Sort.by(Sort.Order.asc("id")));
         final List<CertificationSearchResponse> certificationList = List.of(
-            new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 100),
-            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", Instant.parse("2025-05-01T08:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 50)
+            new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", LocalDateTime.parse("2025-05-01T09:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 100),
+            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", LocalDateTime.parse("2025-05-01T08:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 50)
         );
         final Page<CertificationSearchResponse> responses = new PageImpl<>(certificationList);
         final ApiResponse<Page<CertificationSearchResponse>> expectedResponse = ApiResponse.success(
@@ -196,8 +193,8 @@ public class CertificationControllerTest {
         // given
         final long memberId = 1L;
         final List<CertificationSearchResponse> responses = List.of(
-            new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 100),
-            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", Instant.parse("2025-05-01T08:00:00Z"), Instant.parse("2025-05-01T10:00:00Z"), 50)
+            new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", LocalDateTime.parse("2025-05-01T09:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 100),
+            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", LocalDateTime.parse("2025-05-01T08:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 50)
         );
         final ApiResponse<List<CertificationSearchResponse>> expectedResponse = ApiResponse.success(
                 CommonSuccessCode.OK, responses);
@@ -216,5 +213,38 @@ public class CertificationControllerTest {
         final String expectedJson = objectMapper.writeValueAsString(expectedResponse);
         assertThat(result).isEqualTo(expectedJson);
         verify(certificationService, times(1)).getRecommendedCertifications(memberId);
+    }
+
+    @Test
+    @DisplayName("전체 자격증을 페이징하여 조회한다")
+    void success_getAllCertifications() throws Exception {
+        // given
+        final int page = 0;
+        final int pageSize = 10;
+        final PageRequest pageable = PageRequest.of(page, pageSize);
+        final List<CertificationSearchResponse> certificationList = List.of(
+            new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", LocalDateTime.parse("2025-05-01T09:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 100),
+            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", LocalDateTime.parse("2025-05-01T08:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 50)
+        );
+        final Page<CertificationSearchResponse> responses = new PageImpl<>(certificationList, pageable, certificationList.size());
+        final ApiResponse<Page<CertificationSearchResponse>> expectedResponse = ApiResponse.success(
+                CommonSuccessCode.OK, responses);
+        when(certificationService.getAllCertifications(pageable)).thenReturn(responses);
+
+        // when
+        final String result = mockMvc.perform(
+                get("/api/v1/certifications/")
+                        .param("page", String.valueOf(page))
+                        .param("pageSize", String.valueOf(pageSize))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // then
+        final String expectedJson = objectMapper.writeValueAsString(expectedResponse);
+        assertThat(result).isEqualTo(expectedJson);
+        verify(certificationService, times(1)).getAllCertifications(pageable);
     }
 }

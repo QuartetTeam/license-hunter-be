@@ -54,9 +54,6 @@ public class CertificationService {
         return response;
     }
 
-    /**
-     * select for update로 viewCount를 증가시키는 메서드 (별도 트랜잭션, QueryDSL)
-     */
     @Transactional(propagation = Propagation.REQUIRED)
     public void incrementViewCount(long certificationId) {
         certificationQueryRepository.incrementViewCountWithLock(certificationId);
@@ -131,7 +128,12 @@ public class CertificationService {
         }
     }
 
-    public List<CertificationSearchResponse> getCertificationsBySearch(final String name) {
-        return certificationQueryRepository.getCertificationsBySearch(name);
+    public Page<CertificationSearchResponse> getCertificationsBySearch(final String name, final Pageable pageable) {
+        if (name == null || name.trim().isEmpty()) return certificationQueryRepository.findAllCertifications(pageable);
+        return certificationQueryRepository.getCertificationsBySearch(name, pageable);
+    }
+
+    public Page<CertificationSearchResponse> getAllCertifications(final Pageable pageable) {
+        return certificationQueryRepository.findAllCertifications(pageable);
     }
 }

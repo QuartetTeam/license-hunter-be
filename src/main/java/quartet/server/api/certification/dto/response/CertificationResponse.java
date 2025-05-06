@@ -4,7 +4,7 @@ import com.querydsl.core.annotations.QueryProjection;
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ProblemType;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -66,14 +66,14 @@ public record CertificationResponse(
             String scheduleType,
             ExamType examType,
             String examRound,
-            List<Instant> dates
+            List<LocalDateTime> dates
     ){
         @QueryProjection
         public CertificationScheduleTemp(
                 String scheduleType,
                 ExamType examType,
                 String examRound,
-                List<Instant> dates
+                List<LocalDateTime> dates
         ){
             this.scheduleType = scheduleType;
             this.examType = examType;
@@ -103,13 +103,13 @@ public record CertificationResponse(
     public record ScheduleDetailResponse(
             String scheduleType,
             ExamType examType,
-            List<Instant> dates
+            List<LocalDateTime> dates
     ) {
         @QueryProjection
         public ScheduleDetailResponse(
                 String scheduleType,
                 ExamType examType,
-                List<Instant> dates
+                List<LocalDateTime> dates
         ) {
             this.scheduleType = scheduleType;
             this.examType = examType;

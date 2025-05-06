@@ -6,7 +6,7 @@ import quartet.server.api.certification.dto.response.CertificationsByCategoryRes
 import quartet.server.domain.certification.type.ExamType;
 import quartet.server.domain.certification.type.ProblemType;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -19,17 +19,17 @@ public class CertificationFixture {
         scheduleDetails.add(new CertificationResponse.ScheduleDetailResponse(
             "접수일",
             ExamType.PRACTICAL,
-            List.of(Instant.parse("2025-05-01T09:00:00Z"), Instant.parse("2025-05-02T09:00:00Z"))
+            List.of(LocalDateTime.parse("2025-05-01T09:00:00Z"), LocalDateTime.parse("2025-05-02T09:00:00Z"))
         ));
         scheduleDetails.add(new CertificationResponse.ScheduleDetailResponse(
             "시험일",
             ExamType.PRACTICAL,
-            List.of(Instant.parse("2025-06-15T14:00:00Z"), Instant.parse("2025-06-16T14:00:00Z"))
+            List.of(LocalDateTime.parse("2025-06-15T14:00:00Z"), LocalDateTime.parse("2025-06-16T14:00:00Z"))
         ));
         scheduleDetails.add(new CertificationResponse.ScheduleDetailResponse(
             "합격일",
             ExamType.PRACTICAL,
-            List.of(Instant.parse("2025-07-01T09:00:00Z"))
+            List.of(LocalDateTime.parse("2025-07-01T09:00:00Z"))
         ));
 
         roundSchedules.add(new CertificationResponse.CertificationScheduleResponse(
@@ -91,15 +91,15 @@ public class CertificationFixture {
             new CertificationsByCategoryResponse(
                 1L,
                 "자격증 1",
-                Instant.parse("2025-05-01T09:00:00Z"),
-                Instant.parse("2025-05-01T10:00:00Z"),
+                LocalDateTime.parse("2025-05-01T09:00:00Z"),
+                LocalDateTime.parse("2025-05-01T10:00:00Z"),
                 100
             ),
             new CertificationsByCategoryResponse(
                 2L,
                 "자격증 2",
-                Instant.parse("2025-05-01T08:00:00Z"),
-                Instant.parse("2025-05-01T10:00:00Z"),
+                LocalDateTime.parse("2025-05-01T08:00:00Z"),
+                LocalDateTime.parse("2025-05-01T10:00:00Z"),
                 50
             )
         );
@@ -134,8 +134,8 @@ public class CertificationFixture {
 
     public static List<CertificationSearchResponse> certificationSearchResponseList() {
         return List.of(
-            new CertificationSearchResponse(1L, "IT", "DB", "자격증1", (Instant) null, null, 0),
-            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증2", (Instant) null, null, 0)
+            new CertificationSearchResponse(1L, "IT", "DB", "자격증1", (LocalDateTime) null, null, 0),
+            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증2", (LocalDateTime) null, null, 0)
         );
     }
 }

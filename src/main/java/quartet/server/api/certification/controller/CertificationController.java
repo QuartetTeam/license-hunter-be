@@ -14,6 +14,7 @@ import quartet.server.api.common.response.ApiResponse;
 import quartet.server.core.security.userDetails.CustomUserDetails;
 
 import java.util.List;
+import java.util.Optional;
 
 import static quartet.server.core.code.CommonSuccessCode.OK;
 
@@ -68,9 +69,24 @@ public class CertificationController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<CertificationSearchResponse>> getCertificationsBySearch(
-            @RequestParam final String name) {
-        List<CertificationSearchResponse> certifications = certificationService.getCertificationsBySearch(name);
+    public ApiResponse<Page<CertificationSearchResponse>> getCertificationsBySearch(
+            @RequestParam final String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int pageSize
+    ) {
+        PageRequest pageable = PageRequest.of(page, pageSize);
+        Page<CertificationSearchResponse> certifications = certificationService.getCertificationsBySearch(name, pageable);
+        return ApiResponse.success(OK, certifications);
+    }
+
+    // 전체 자격증 조회 
+    @GetMapping("/")
+    public ApiResponse<Page<CertificationSearchResponse>> getAllCertifications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int pageSize
+    ) {
+        PageRequest pageable = PageRequest.of(page, pageSize);
+        Page<CertificationSearchResponse> certifications = certificationService.getAllCertifications(pageable);
         return ApiResponse.success(OK, certifications);
     }
 }

@@ -2,21 +2,21 @@ package quartet.server.api.certification.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record CertificationsByCategoryResponse(
         long id,
         String name,
-        Instant applicationDate,
-        Instant examDate,
+        LocalDateTime applicationDate,
+        LocalDateTime examDate,
         int CalendarSubscriptionCount
 ) {
     @QueryProjection
     public CertificationsByCategoryResponse(
         long id,
         String name,
-        Instant applicationDate,
-        Instant examDate,
+        LocalDateTime applicationDate,
+        LocalDateTime examDate,
         int CalendarSubscriptionCount
     ){
         this.id = id;
