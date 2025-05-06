@@ -55,12 +55,12 @@ public class CertificationService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void incrementViewCount(long certificationId) {
+    public void incrementViewCount(final long certificationId) {
         certificationQueryRepository.incrementViewCountWithLock(certificationId);
     }
 
     public Page<CertificationSearchResponse> getAllCertificationsByCategory(
-            boolean isMain, long categoryId, final Pageable pageable) {
+            final boolean isMain, final long categoryId, final Pageable pageable) {
         Long subCategoryId;
         if (isMain)  {
             subCategoryId = categoryQueryRepository.getDefaultSubCategoryId(categoryId)
