@@ -214,4 +214,37 @@ public class CertificationControllerTest {
         assertThat(result).isEqualTo(expectedJson);
         verify(certificationService, times(1)).getRecommendedCertifications(memberId);
     }
+
+    @Test
+    @DisplayName("전체 자격증을 페이징하여 조회한다")
+    void success_getAllCertifications() throws Exception {
+        // given
+        final int page = 0;
+        final int pageSize = 10;
+        final PageRequest pageable = PageRequest.of(page, pageSize);
+        final List<CertificationSearchResponse> certificationList = List.of(
+            new CertificationSearchResponse(1L, "IT", "데이터베이스", "자격증 1", LocalDateTime.parse("2025-05-01T09:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 100),
+            new CertificationSearchResponse(2L, "IT", "프로그래밍", "자격증 2", LocalDateTime.parse("2025-05-01T08:00:00Z"), LocalDateTime.parse("2025-05-01T10:00:00Z"), 50)
+        );
+        final Page<CertificationSearchResponse> responses = new PageImpl<>(certificationList, pageable, certificationList.size());
+        final ApiResponse<Page<CertificationSearchResponse>> expectedResponse = ApiResponse.success(
+                CommonSuccessCode.OK, responses);
+        when(certificationService.getAllCertifications(pageable)).thenReturn(responses);
+
+        // when
+        final String result = mockMvc.perform(
+                get("/api/v1/certifications/")
+                        .param("page", String.valueOf(page))
+                        .param("pageSize", String.valueOf(pageSize))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // then
+        final String expectedJson = objectMapper.writeValueAsString(expectedResponse);
+        assertThat(result).isEqualTo(expectedJson);
+        verify(certificationService, times(1)).getAllCertifications(pageable);
+    }
 }

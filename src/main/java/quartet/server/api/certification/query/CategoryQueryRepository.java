@@ -3,9 +3,6 @@ package quartet.server.api.certification.query;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import quartet.server.domain.category.model.QMainCategory;
-import quartet.server.domain.category.model.QSubCategory;
-import quartet.server.domain.member.model.QMemberCategory;
 
 import java.util.List;
 import java.util.Optional;
