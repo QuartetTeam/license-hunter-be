@@ -66,8 +66,6 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)) // OAuth2 로그인 설정
                         .successHandler(oauthLoginSuccessHandler))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","/actuator/health", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue",
-                                "/api/v1/certifications/**"
                         .requestMatchers(HttpMethod.GET, "/api/v1/certifications/**").permitAll()
                         .requestMatchers("/","/actuator/health", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue"
 //                                , "/v3/api-docs/**"  // OpenAPI 3 문서 엔드포인트
