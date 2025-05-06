@@ -15,13 +15,13 @@ import static quartet.server.core.code.CommonSuccessCode.NO_CONTENT;
 public class EmailTestController { // todo: 테스트 후 삭제 예정
 
     private final MailingScheduleService mailingScheduleService;
-
-    /**
-     * 이메일 전송 직접 테스트
-     */
-    @PostMapping("/schedule")
-    public ApiResponse<Void> sendWelcomeEmail() {
-        mailingScheduleService.sendDailyNotifications();
-        return ApiResponse.success(NO_CONTENT);
-    }
+//
+//    /**
+//     * 이메일 전송 직접 테스트
+//     */
+//    @PostMapping("/schedule")
+//    public ApiResponse<Void> sendWelcomeEmail() {
+//        mailingScheduleService.sendDailyNotifications();
+//        return ApiResponse.success(NO_CONTENT);
+//    }
 }

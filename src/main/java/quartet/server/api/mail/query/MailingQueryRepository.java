@@ -64,7 +64,7 @@ public class MailingQueryRepository {
                 .where(mailing.member.id.eq(memberId))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(mailing.createdAt.desc())
+                .orderBy(mailing.createdAt.asc())
                 .transform(GroupBy.groupBy(mailing.id).list(
                         new QMailingResponse(
                                 mailing.id,
