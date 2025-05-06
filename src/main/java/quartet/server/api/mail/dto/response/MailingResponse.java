@@ -3,7 +3,7 @@ package quartet.server.api.mail.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record MailingResponse(
         long mailingId,
@@ -17,8 +17,8 @@ public record MailingResponse(
             long mailingId,
             long certificationId,
             String name,
-            Instant applicationDate,
-            Instant examDate
+            LocalDateTime applicationDate,
+            LocalDateTime examDate
     ) {
         this(
                 mailingId,

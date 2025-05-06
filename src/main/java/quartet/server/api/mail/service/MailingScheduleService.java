@@ -5,15 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import quartet.server.api.mail.dto.response.*;
+import quartet.server.api.mail.dto.response.ApplicationMailProjection;
+import quartet.server.api.mail.dto.response.ApplicationMailResponse;
+import quartet.server.api.mail.dto.response.ExamMailResponse;
 import quartet.server.api.mail.query.MailingQueryRepository;
 import quartet.server.core.utils.DateUtils;
 import quartet.server.domain.mail.type.MailingStatus;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -41,20 +44,21 @@ public class MailingScheduleService {
     private void sendExamMail(final LocalDate today) {
         // 특정 일수 후에 시험이 시작되는 날짜 계산
         LocalDate examDate = today.plusDays(EXAM_NOTIFICATION_DAY_BEFORE);
-        Instant targetInstant = examDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        LocalDateTime targetDateTime = examDate.atStartOfDay();
 
         List<ExamMailResponse> examNotifications = mailingQueryRepository.findExamNotificationsForDate(
-                targetInstant, MailingStatus.ACTIVE);
+                targetDateTime, MailingStatus.ACTIVE);
 
         examNotifications.forEach(emailProcessingService::processExamNotificationInIsolatedTransaction);
     }
 
     private void sendApplicationMail(final LocalDate today) {
         // 특정 일수 후에 접수가 시작되는 날짜 계산
-        Instant targetDate = DateUtils.getDateAfter(today, 0, 0, APPLICATION_NOTIFICATION_DAY_BEFORE);
+        LocalDate applicationDate = today.plusDays(APPLICATION_NOTIFICATION_DAY_BEFORE);
+        LocalDateTime targetDateTime = applicationDate.atStartOfDay();
 
         List<ApplicationMailProjection> allTargets = mailingQueryRepository.findAllMailingTargetsForDate(
-                targetDate, MailingStatus.ACTIVE);
+                targetDateTime, MailingStatus.ACTIVE);
 
         Map<Long, ApplicationMailResponse> memberMailings = groupTargetsByMemberId(allTargets);
 

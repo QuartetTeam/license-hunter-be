@@ -18,7 +18,7 @@ import quartet.server.domain.mail.model.QMailing;
 import quartet.server.domain.mail.type.MailingStatus;
 import quartet.server.domain.member.model.QMember;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +31,7 @@ public class MailingQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public Page<MailingResponse> getMailingsByMemberId(final long memberId, final Instant startDate, final Pageable pageable) {
+    public Page<MailingResponse> getMailingsByMemberId(final long memberId, final LocalDateTime startDate, final Pageable pageable) {
         QMailing mailing = QMailing.mailing;
         QCertification certification = QCertification.certification;
         QCertificationSchedule applicationSchedule = new QCertificationSchedule("applicationSchedule");
@@ -73,11 +73,11 @@ public class MailingQueryRepository {
                                 cases()
                                         .when(applicationSchedule.id.isNotNull())
                                         .then(GroupBy.min(applicationSchedule.date))
-                                        .otherwise(Expressions.nullExpression(Instant.class)),
+                                        .otherwise(Expressions.nullExpression(LocalDateTime.class)),
                                 cases()
                                         .when(examSchedule.id.isNotNull())
                                         .then(GroupBy.min(examSchedule.date))
-                                        .otherwise(Expressions.nullExpression(Instant.class))
+                                        .otherwise(Expressions.nullExpression(LocalDateTime.class))
                         )
                 ));
 
@@ -85,7 +85,7 @@ public class MailingQueryRepository {
     }
 
     public List<ApplicationMailProjection> findAllMailingTargetsForDate(
-            Instant targetDate, MailingStatus requiredMailingStatus) {
+            final LocalDateTime targetDate, final MailingStatus requiredMailingStatus) {
 
         QMailing mailing = QMailing.mailing;
         QMember member = QMember.member;
@@ -93,8 +93,8 @@ public class MailingQueryRepository {
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
         QAuthority authority = QAuthority.authority;
 
-        Instant startOfDay = DateUtils.getDayStart(targetDate);
-        Instant endOfDay = DateUtils.getDayEnd(targetDate);
+        LocalDateTime startOfDay = DateUtils.getDayStart(targetDate);
+        LocalDateTime endOfDay = DateUtils.getDayEnd(targetDate);
 
         return queryFactory
                 .select(new QApplicationMailProjection(
@@ -123,16 +123,15 @@ public class MailingQueryRepository {
         }
 
     public List<ExamMailResponse> findExamNotificationsForDate(
-            Instant targetDate, MailingStatus requiredMailingStatus) {
+            final LocalDateTime targetDate, final MailingStatus requiredMailingStatus) {
 
         QMailing mailing = QMailing.mailing;
         QMember member = QMember.member;
         QCertification certification = QCertification.certification;
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
-
-        Instant startOfDay = DateUtils.getDayStart(targetDate);
-        Instant endOfDay = DateUtils.getDayEnd(targetDate);
+        LocalDateTime startOfDay = DateUtils.getDayStart(targetDate);
+        LocalDateTime endOfDay = DateUtils.getDayEnd(targetDate);
 
         return queryFactory
                 .select(new QExamMailResponse(

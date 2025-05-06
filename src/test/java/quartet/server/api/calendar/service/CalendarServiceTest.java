@@ -23,6 +23,7 @@ import quartet.server.domain.member.repository.MemberRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,19 +64,19 @@ class CalendarServiceTest {
             // given
             final long memberId = 1L;
 
-            final Instant startDate = Instant.parse("2024-02-01T00:00:00Z");
-            final Instant endDate = Instant.parse("2024-04-30T23:59:59Z");
+            final LocalDateTime startDate = LocalDateTime.parse("2024-02-01T00:00:00");
+            final LocalDateTime endDate = LocalDateTime.parse("2024-04-30T23:59:59");
 
             // DateUtils 변경 사항 반영
             LocalDate startLocalDate = DateUtils.toLocalDate(startDate);
             LocalDate endLocalDate = DateUtils.toLocalDate(endDate);
-            Instant dbStartDate = DateUtils.getDateBefore(startLocalDate, 0, 1, 0);
-            Instant dbEndDate = DateUtils.getDateAfter(endLocalDate, 0, 1, 0);
+            LocalDateTime dbStartDate = DateUtils.getFirstDayOfMonth(startLocalDate.minusMonths(1));
+            LocalDateTime dbEndDate = DateUtils.getLastDayOfMonth(endLocalDate.plusMonths(1));
 
             List<CalendarResponse> mockResponses = CalendarFixture.mockCalendarResponses();
             List<Long> certificationIds = List.of(1L);
 
-            Map<Long, Map<ScheduleKey, List<Instant>>> mockSchedules = CalendarFixture.mockSchedulesByDateRange();
+            Map<Long, Map<ScheduleKey, List<LocalDateTime>>> mockSchedules = CalendarFixture.mockSchedulesByDateRange();
 
             // when
             when(calendarQueryRepository.findCalendarResponsesByMemberId(memberId))
@@ -103,8 +104,9 @@ class CalendarServiceTest {
         public void testGetCalendarsByMemberId_withNoResponses() {
             // given
             final long memberId = 1L;
-            final Instant startDate = Instant.parse("2024-02-01T00:00:00Z");
-            final Instant endDate = Instant.parse("2024-04-30T23:59:59Z");
+            final LocalDateTime startDate = LocalDateTime.parse("2024-02-01T00:00:00");
+            final LocalDateTime endDate = LocalDateTime.parse("2024-04-30T23:59:59");
+
 
             // when
             when(calendarQueryRepository.findCalendarResponsesByMemberId(memberId))
@@ -123,19 +125,19 @@ class CalendarServiceTest {
         public void testGetCalendarsByMemberId_withNoMatchingSchedules() {
             // given
             final long memberId = 1L;
-            final Instant startDate = Instant.parse("2027-01-01T00:00:00Z");
-            final Instant endDate = Instant.parse("2027-02-01T00:00:00Z");
+            final LocalDateTime startDate = LocalDateTime.parse("2024-02-01T00:00:00");
+            final LocalDateTime endDate = LocalDateTime.parse("2024-04-30T23:59:59");
 
             // DateUtils 변경 사항 반영
             LocalDate startLocalDate = DateUtils.toLocalDate(startDate);
             LocalDate endLocalDate = DateUtils.toLocalDate(endDate);
-            Instant dbStartDate = DateUtils.getDateBefore(startLocalDate, 0, 1, 0);
-            Instant dbEndDate = DateUtils.getDateAfter(endLocalDate, 0, 1, 0);
+            LocalDateTime dbStartDate = DateUtils.getFirstDayOfMonth(startLocalDate.minusMonths(1));
+            LocalDateTime dbEndDate = DateUtils.getLastDayOfMonth(endLocalDate.plusMonths(1));
 
             List<CalendarResponse> mockResponses = CalendarFixture.mockCalendarResponses();
             List<Long> certificationIds = List.of(1L);
 
-            Map<Long, Map<ScheduleKey, List<Instant>>> mockEmptySchedules =
+            Map<Long, Map<ScheduleKey, List<LocalDateTime>>> mockEmptySchedules =
                     Map.of(1L, Map.of());
 
             // when

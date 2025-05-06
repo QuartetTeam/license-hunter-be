@@ -19,8 +19,11 @@ import quartet.server.domain.member.exception.MemberNotFoundException;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
 
-import java.time.Instant;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,8 +39,8 @@ public class CalendarService {
 
     public List<CalendarResponse> getCalendarsByMemberId(
             final long memberId,
-            @NotNull final Instant startDate,
-            @NotNull final Instant endDate) {
+            @NotNull final LocalDateTime startDate,
+            @NotNull final LocalDateTime endDate) {
         List<CalendarResponse> calendarResponses = calendarQueryRepository.findCalendarResponsesByMemberId(memberId);
 
         List<Long> certificationIds = extractCertificationIds(calendarResponses);
@@ -46,10 +49,10 @@ public class CalendarService {
             return Collections.emptyList();
         }
 
-        final Instant dbStartDate = DateUtils.getDateBefore(DateUtils.toLocalDate(startDate),0, 1, 0);
-        final Instant dbEndDate = DateUtils.getDateAfter(DateUtils.toLocalDate(endDate),0, 1, 0);
+        final LocalDateTime dbStartDate = DateUtils.getFirstDayOfMonth(startDate.minusMonths(1));
+        final LocalDateTime dbEndDate = DateUtils.getLastDayOfMonth(endDate.plusMonths(1));
 
-        final Map<Long, Map<ScheduleKey, List<Instant>>> groupedSchedulesByCertificationId =
+        final Map<Long, Map<ScheduleKey, List<LocalDateTime>>> groupedSchedulesByCertificationId =
                 calendarQueryRepository.findCalendarSchedulesByCertificationIdsAndDateRange(certificationIds, dbStartDate, dbEndDate);
 
         return convertToCalendarResponses(calendarResponses, groupedSchedulesByCertificationId, startDate, endDate);
@@ -64,9 +67,9 @@ public class CalendarService {
 
     private List<CalendarResponse> convertToCalendarResponses(
             final List<CalendarResponse> responses,
-            final Map<Long, Map<ScheduleKey, List<Instant>>> groupedSchedulesByCertId,
-            final Instant startDate,
-            final Instant endDate) {
+            final Map<Long, Map<ScheduleKey, List<LocalDateTime>>> groupedSchedulesByCertId,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate) {
 
         return responses.stream()
                 .map(response -> processCalendarResponse(response, groupedSchedulesByCertId, startDate, endDate))
@@ -76,11 +79,11 @@ public class CalendarService {
 
     private CalendarResponse processCalendarResponse(
             final CalendarResponse response,
-            final Map<Long, Map<ScheduleKey, List<Instant>>> groupedSchedulesByCertId,
-            final Instant startDate,
-            final Instant endDate) {
+            final Map<Long, Map<ScheduleKey, List<LocalDateTime>>> groupedSchedulesByCertId,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate) {
 
-        final Map<ScheduleKey, List<Instant>> schedulesMap =
+        final Map<ScheduleKey, List<LocalDateTime>> schedulesMap =
                 groupedSchedulesByCertId.getOrDefault(response.certificationId(), Collections.emptyMap());
 
         final List<CalendarResponse.CalendarScheduleResponse> schedules =
@@ -99,9 +102,9 @@ public class CalendarService {
     }
 
     private List<CalendarResponse.CalendarScheduleResponse> createFilteredSchedules(
-            final Map<ScheduleKey, List<Instant>> schedulesMap,
-            final Instant startDate,
-            final Instant endDate) {
+            final Map<ScheduleKey, List<LocalDateTime>> schedulesMap,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate) {
 
         return schedulesMap.entrySet().stream()
                 .map(entry -> createScheduleIfInRange(entry, startDate, endDate))
@@ -110,11 +113,11 @@ public class CalendarService {
     }
 
     private CalendarResponse.CalendarScheduleResponse createScheduleIfInRange(
-            final Map.Entry<ScheduleKey, List<Instant>> entry,
-            final Instant startDate,
-            final Instant endDate) {
+            final Map.Entry<ScheduleKey, List<LocalDateTime>> entry,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate) {
 
-        final List<Instant> filteredDates = filterDatesByRange(entry.getValue(), startDate, endDate);
+        final List<LocalDateTime> filteredDates = filterDatesByRange(entry.getValue(), startDate, endDate);
 
         if (filteredDates.isEmpty()) {
             return null;
@@ -128,14 +131,15 @@ public class CalendarService {
         );
     }
 
-    private List<Instant> filterDatesByRange(
-            final List<Instant> dates,
-            final Instant startDate,
-            final Instant endDate) {
-        boolean hasDateAfterStart = dates.stream().anyMatch(date -> !date.isBefore(startDate));
-        boolean hasDateBeforeEnd = dates.stream().anyMatch(date -> !date.isAfter(endDate));
+    private List<LocalDateTime> filterDatesByRange(
+            final List<LocalDateTime> dates,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate) {
+        boolean hasDateInRange = dates.stream()
+                .anyMatch(date ->
+                        (!date.isBefore(startDate) && !date.isAfter(endDate)));
 
-        if (hasDateAfterStart || hasDateBeforeEnd) {
+        if (hasDateInRange) {
             return dates.stream().sorted().toList();
         }
 
