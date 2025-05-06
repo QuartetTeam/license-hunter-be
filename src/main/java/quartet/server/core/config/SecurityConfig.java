@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -67,13 +68,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/","/actuator/health", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue",
                                 "/api/v1/certifications/**"
+                        .requestMatchers(HttpMethod.GET, "/api/v1/certifications/**").permitAll()
+                        .requestMatchers("/","/actuator/health", "/login", "/logout", "/api/v1/oauth2-jwt-header", "/api/v1/reissue"
 //                                , "/v3/api-docs/**"  // OpenAPI 3 문서 엔드포인트
 //                                "/swagger-ui/**",
 //                                "/swagger-ui.html",
 //                                "/swagger-resources/**",
 //                                "/webjars/**",
 //                                "/swagger-ui/index.html"
-                                ).permitAll() // TODO: 나중에 더 추가, 스웨거 삭제
+                                ).permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .logout(AbstractHttpConfigurer::disable) // 기본 로그아웃 비활성화
