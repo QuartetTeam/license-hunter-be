@@ -2,7 +2,7 @@ package quartet.server.api.mail.dto.response;
 
 import quartet.server.domain.certification.type.ExamType;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,14 +44,14 @@ public record ApplicationMailResponse(
     public record CertificationInfoResponse(
             Long certificationId,
             String certificationName,
-            Instant date,
+            LocalDateTime date,
             String applicationUrl,
             ExamType examType
     ) {
         public static CertificationInfoResponse of(
                 Long certificationId,
                 String certificationName,
-                Instant date,
+                LocalDateTime date,
                 String applicationUrl,
                 ExamType examType
         ) {

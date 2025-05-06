@@ -7,6 +7,7 @@ import quartet.server.domain.certification.type.ScheduleGroup;
 import quartet.server.domain.certification.type.ScheduleType;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -23,25 +24,26 @@ public class CalendarFixture {
         );
     }
 
-    public static Map<Long, Map<ScheduleKey, List<Instant>>> mockSchedulesByDateRange() {
+    public static Map<Long, Map<ScheduleKey, List<LocalDateTime>>> mockSchedulesByDateRange() {
         ScheduleKey applicationKey = new ScheduleKey(ScheduleGroup.APPLICATION.getValue(), ExamType.WRITTEN, "1회");
         ScheduleKey examKey = new ScheduleKey(ScheduleGroup.EXAM.getValue(), ExamType.WRITTEN, "1회");
         ScheduleKey passKey = new ScheduleKey(ScheduleGroup.PASS.getValue(), ExamType.WRITTEN, "1회");
 
-        Map<ScheduleKey, List<Instant>> scheduleMap = Map.of(
+        Map<ScheduleKey, List<LocalDateTime>> scheduleMap = Map.of(
                 applicationKey, List.of(
-                        Instant.parse("2024-01-15T00:00:00Z"), // 범위 밖 날짜
-                        Instant.parse("2024-02-01T00:00:00Z"),
-                        Instant.parse("2024-02-07T00:00:00Z")
+                        LocalDateTime.parse("2024-01-15T00:00:00"), // 범위 밖 날짜
+                        LocalDateTime.parse("2024-02-01T00:00:00"),
+                        LocalDateTime.parse("2024-02-07T00:00:00")
                 ),
                 examKey, List.of(
-                        Instant.parse("2024-03-01T00:00:00Z"),
-                        Instant.parse("2024-03-06T00:00:00Z"),
-                        Instant.parse("2024-05-10T00:00:00Z")  // 범위 밖 날짜
+                        LocalDateTime.parse("2024-03-01T00:00:00"),
+                        LocalDateTime.parse("2024-03-06T00:00:00"),
+                        LocalDateTime.parse("2024-05-10T00:00:00")  // 범위 밖 날짜
                 ),
                 passKey, List.of(
-                        Instant.parse("2024-04-09T00:00:00Z"),
-                        Instant.parse("2024-06-01T00:00:00Z")  // 범위 밖 날짜
+                        LocalDateTime.parse("2024-04-09T00:00:00"),
+                        LocalDateTime.parse("2024-06-01T00:00:00")  // 범위 밖 날짜
+
                 )
         );
 
@@ -60,9 +62,9 @@ public class CalendarFixture {
                                         ExamType.WRITTEN,
                                         "1회",
                                         List.of(
-                                                Instant.parse("2024-01-15T00:00:00Z"),
-                                                Instant.parse("2024-02-01T00:00:00Z"),
-                                                Instant.parse("2024-02-07T00:00:00Z")
+                                                LocalDateTime.parse("2024-01-15T00:00:00"),
+                                                LocalDateTime.parse("2024-02-01T00:00:00"),
+                                                LocalDateTime.parse("2024-02-07T00:00:00")
                                         )
                                 ),
                                 CalendarResponse.CalendarScheduleResponse.of(
@@ -70,9 +72,9 @@ public class CalendarFixture {
                                         ExamType.WRITTEN,
                                         "1회",
                                         List.of(
-                                                Instant.parse("2024-03-01T00:00:00Z"),
-                                                Instant.parse("2024-03-06T00:00:00Z"),
-                                                Instant.parse("2024-05-10T00:00:00Z")
+                                                LocalDateTime.parse("2024-03-01T00:00:00"),
+                                                LocalDateTime.parse("2024-03-06T00:00:00"),
+                                                LocalDateTime.parse("2024-05-10T00:00:00")
                                         )
                                 ),
                                 CalendarResponse.CalendarScheduleResponse.of(
@@ -80,8 +82,8 @@ public class CalendarFixture {
                                         ExamType.WRITTEN,
                                         "1회",
                                         List.of(
-                                                Instant.parse("2024-04-09T00:00:00Z"),
-                                                Instant.parse("2024-06-01T00:00:00Z")
+                                                LocalDateTime.parse("2024-04-09T00:00:00"),
+                                                LocalDateTime.parse("2024-06-01T00:00:00")
                                         )
                                 )
                         )

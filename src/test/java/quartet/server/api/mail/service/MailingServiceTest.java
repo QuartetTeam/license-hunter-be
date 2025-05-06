@@ -16,6 +16,7 @@ import quartet.server.api.mail.dto.response.MailingResponse;
 import quartet.server.api.mail.fixture.MailingFixture;
 import quartet.server.api.mail.query.MailingQueryRepository;
 import quartet.server.api.member.fixture.MemberFixture;
+import quartet.server.core.utils.DateUtils;
 import quartet.server.domain.certification.exception.CertificationNotFoundException;
 import quartet.server.domain.certification.model.Certification;
 import quartet.server.domain.certification.repository.CertificationRepository;
@@ -26,9 +27,7 @@ import quartet.server.domain.member.exception.MemberNotFoundException;
 import quartet.server.domain.member.model.Member;
 import quartet.server.domain.member.repository.MemberRepository;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,7 +68,7 @@ class MailingServiceTest {
             final List<MailingResponse> expectedResponses = MailingFixture.mailingResponses();
             final Page<MailingResponse> expectedPage = new PageImpl<>(expectedResponses, pageable, expectedResponses.size());
 
-            final Instant startDate = LocalDate.now().atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant();
+            final LocalDateTime startDate = DateUtils.getTodayStart();
 
             when(mailingQueryRepository.getMailingsByMemberId(eq(memberId), eq(startDate), eq(pageable)))
                     .thenReturn(expectedPage);

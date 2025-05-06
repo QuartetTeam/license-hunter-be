@@ -3,7 +3,7 @@ package quartet.server.api.calendar.dto.response;
 import com.querydsl.core.annotations.QueryProjection;
 import quartet.server.domain.certification.type.ExamType;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,14 +45,14 @@ public record CalendarResponse(
             String scheduleType,
             String examType,
             String examRound,
-            List<Instant> date
+            List<LocalDateTime> date
     ) {
         @QueryProjection
         public CalendarScheduleResponse(
                 String scheduleType,
                 ExamType examType,
                 String examRound,
-                List<Instant> date
+                List<LocalDateTime> date
         ) {
             this(
                     scheduleType,
@@ -66,7 +66,7 @@ public record CalendarResponse(
                 String scheduleType,
                 ExamType examType,
                 String examRound,
-                List<Instant> date
+                List<LocalDateTime> date
         ) {
             return new CalendarScheduleResponse(
                     scheduleType,
