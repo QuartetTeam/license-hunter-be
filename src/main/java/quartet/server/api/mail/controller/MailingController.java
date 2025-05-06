@@ -1,10 +1,8 @@
 package quartet.server.api.mail.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import quartet.server.api.common.response.ApiResponse;
 import quartet.server.api.common.response.PageResponse;

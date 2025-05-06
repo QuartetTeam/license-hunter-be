@@ -8,7 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @MappedSuperclass
@@ -16,9 +16,9 @@ import java.time.Instant;
 public abstract class BaseTimeEntity extends IdentifiableEntity {
     @CreatedDate
     @Column(name = "created_at",nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at",nullable = false)
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
 }

@@ -16,7 +16,7 @@ import quartet.server.domain.certification.model.QCertification;
 import quartet.server.domain.certification.model.QCertificationSchedule;
 import quartet.server.domain.certification.type.ScheduleGroup;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +28,9 @@ import static com.querydsl.core.types.dsl.Expressions.cases;
 @Slf4j
 public class CalendarQueryRepository {
     private final JPAQueryFactory queryFactory;
-    public Map<Long, Map<ScheduleKey, List<Instant>>> findCalendarSchedulesByCertificationIdsAndDateRange(final List<Long> certificationIds,
-                                                                                                          @NotNull final Instant startDate,
-                                                                                                          @NotNull final Instant endDate) {
+    public Map<Long, Map<ScheduleKey, List<LocalDateTime>>> findCalendarSchedulesByCertificationIdsAndDateRange(final List<Long> certificationIds,
+                                                                                                                @NotNull final LocalDateTime startDate,
+                                                                                                                @NotNull final LocalDateTime endDate) {
         QCertificationSchedule schedule = QCertificationSchedule.certificationSchedule;
 
         var scheduleTypeExpression = cases()
