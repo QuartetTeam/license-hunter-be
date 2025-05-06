@@ -129,6 +129,7 @@ public class CertificationControllerTest {
     @DisplayName("특정 자격증 카테고리에 속하는 자격증들을 조회한다")
     void success_getAllCertificationByCategoryTest() throws Exception {
         // given
+        final boolean isMain = false;
         final long categoryId = 1L;
         final Pageable pageable = PageableFixture.pageable(0,10, Sort.by(Sort.Order.asc("id")));
         final List<CertificationSearchResponse> certificationList = List.of(
@@ -139,9 +140,7 @@ public class CertificationControllerTest {
         final ApiResponse<Page<CertificationSearchResponse>> expectedResponse = ApiResponse.success(
                 CommonSuccessCode.OK, responses);
 
-        when(certificationService.getAllCertificationsByCategory(
-                eq(categoryId), eq(pageable)
-        )).thenReturn(responses);
+        when(certificationService.getAllCertificationsByCategory(eq(isMain), eq(categoryId), eq(pageable))).thenReturn(responses);
 
         // when
         final String result = mockMvc.perform(
@@ -158,7 +157,7 @@ public class CertificationControllerTest {
         // then
         final String expectedJson = objectMapper.writeValueAsString(expectedResponse);
         assertThat(result).isEqualTo(expectedJson);
-        verify(certificationService, times(1)).getAllCertificationsByCategory(categoryId,pageable);
+        verify(certificationService, times(1)).getAllCertificationsByCategory(isMain, categoryId,pageable);
     }
 
     @Test

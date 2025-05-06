@@ -60,11 +60,15 @@ public class CertificationService {
     }
 
     public Page<CertificationSearchResponse> getAllCertificationsByCategory(
-            long categoryId, final Pageable pageable) {
-        SubCategory subCategory = subCategoryRepository.findById(categoryId)
-                .orElseThrow(SubCategoryNotFoundException::new);
-
-        return certificationQueryRepository.findAllCertificationByCategory(categoryId, pageable);
+            boolean isMain, long categoryId, final Pageable pageable) {
+        Long subCategoryId;
+        if (isMain)  {
+            subCategoryId = categoryQueryRepository.getDefaultSubCategoryId(categoryId)
+                            .orElseThrow(SubCategoryNotFoundException::new);
+        }
+        else subCategoryId = categoryId;
+        System.out.println(subCategoryId);
+        return certificationQueryRepository.findAllCertificationByCategory(subCategoryId, pageable);
     }
 
     public List<CertificationCategoriesResponse> getCategories(final boolean isDefault) {

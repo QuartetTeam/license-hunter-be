@@ -21,9 +21,7 @@ public class CategoryQueryRepository {
                 .select(subCategory.id)
                 .from(subCategory)
                 .where(subCategory.mainCategory.id.eq(mainCategoryId))
-                .orderBy(subCategory.id.asc())
-                .limit(1)
-                .fetchOne());
+                .fetchFirst());
     }
 
     public List<Long> findInterestedCategoryIds(final Long memberId) {

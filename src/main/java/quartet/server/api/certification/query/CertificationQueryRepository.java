@@ -17,8 +17,6 @@ import quartet.server.domain.certification.type.ScheduleType;
 import quartet.server.domain.category.model.QMainCategory;
 import quartet.server.domain.category.model.QSubCategory;
 import quartet.server.domain.certification.type.TechnicalGradeType;
-import quartet.server.domain.member.model.MemberCategory;
-import quartet.server.domain.member.model.QMemberCategory;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
