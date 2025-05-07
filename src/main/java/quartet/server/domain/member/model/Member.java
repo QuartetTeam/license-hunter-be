@@ -28,7 +28,7 @@ public class Member extends BaseAuditEntity {
     @Comment("소셜 로그인 제공자")
     private String socialProvider;
 
-    @Column(name = "email", length = 100, unique = true)
+    @Column(name = "email", length = 100)
     @Comment("이메일")
     private String email;
 
