@@ -71,12 +71,14 @@ public class EmailProcessingService {
         contextData.put("userName", response.userName());
         contextData.put("dDay", String.valueOf(APPLICATION_NOTIFICATION_DAY_BEFORE));
         contextData.put("certifications", response.certifications().stream()
-                .map(cert -> Map.of(
-                        "certificationName", cert.certificationName() + " " + cert.examType().getValue(),
-                        "applicationDate", cert.date().atZone(ZoneId.systemDefault()).toLocalDate().toString(),
-                        "detailLink", "https://www.quartet.com/certifications/" + cert.certificationId(), //todo 박현제: 최종 결정된 프론트 URL에 따라 수정
-                        "applicationUrl", cert.applicationUrl()
-                ))
+                .map(cert -> {
+                    Map<String, Object> certMap = new HashMap<>();
+                    certMap.put("certificationName", cert.certificationName() + (cert.examType() != null ?  (" " + cert.examType().getValue()) :""));
+                    certMap.put("applicationDate", cert.date().atZone(ZoneId.systemDefault()).toLocalDate().toString());
+                    certMap.put("detailLink", "https://license-hunter.vercel.app/certificateDetail?id=" + cert.certificationId());
+                    certMap.put("applicationUrl", cert.applicationUrl() != null ? cert.applicationUrl() : "");
+                    return certMap;
+                })
                 .collect(Collectors.toList())
         );
         return contextData;
@@ -96,7 +98,7 @@ public class EmailProcessingService {
         contextData.put("examName", notification.certificationName());
         contextData.put("examDate", notification.examDate().atZone(ZoneId.systemDefault()).toLocalDate().toString());
         contextData.put("dDay", String.valueOf(EXAM_NOTIFICATION_DAY_BEFORE));
-        contextData.put("detailLink", "https://www.quartet.com/certifications/" + notification.certificationId()); //todo 박현제: 최종 결정된 프론트 URL에 따라 수정
+        contextData.put("detailLink", "https://license-hunter.vercel.app/certificateDetail?id=" + notification.certificationId());
 
         return contextData;
     }
