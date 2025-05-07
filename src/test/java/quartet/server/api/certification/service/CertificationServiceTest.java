@@ -192,7 +192,7 @@ class CertificationServiceTest {
 
             // when
             Page<CertificationSearchResponse> result = certificationService.getAllCertificationsByCategory(
-                    subCategoryId, pageable);
+                    false, subCategoryId, pageable);
 
             // then
             assertThat(result).isEqualTo(certificationPage);
@@ -208,7 +208,7 @@ class CertificationServiceTest {
             when(subCategoryRepository.findById(subCategoryId)).thenReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> certificationService.getAllCertificationsByCategory(subCategoryId, pageable))
+            assertThatThrownBy(() -> certificationService.getAllCertificationsByCategory(false, subCategoryId, pageable))
                     .isInstanceOf(SubCategoryNotFoundException.class);
             verify(certificationQueryRepository, never()).findAllCertificationByCategory(subCategoryId, pageable);
         }
