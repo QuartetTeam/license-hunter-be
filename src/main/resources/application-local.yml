@@ -78,6 +78,7 @@ spring:
             scope:
               - profile_nickname
               - profile_image
+              - account_email
           naver:
             client-name: naver
             client-id: ${NAVER_CLIENT_ID}
