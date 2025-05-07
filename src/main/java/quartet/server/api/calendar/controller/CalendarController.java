@@ -36,7 +36,7 @@ public class CalendarController {
     public ApiResponse<Void> unsubscribeCalendar(
             @AuthenticationPrincipal final CustomUserDetails userDetails,
             @PathVariable("certificationId") final long certificationId) {
-        calendarService.unsubscribeCalendar(certificationId, userDetails.getMemberId());
+        calendarService.unsubscribeCalendar(userDetails.getMemberId(), certificationId);
         return ApiResponse.success(NO_CONTENT);
     }
 }
