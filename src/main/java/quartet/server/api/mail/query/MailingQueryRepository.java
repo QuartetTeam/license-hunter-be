@@ -2,11 +2,12 @@ package quartet.server.api.mail.query;
 
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import quartet.server.api.mail.dto.response.*;
 import quartet.server.core.utils.DateUtils;
@@ -19,9 +20,7 @@ import quartet.server.domain.mail.type.MailingStatus;
 import quartet.server.domain.member.model.QMember;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static com.querydsl.core.types.dsl.Expressions.cases;
 
@@ -31,58 +30,63 @@ public class MailingQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public Page<MailingResponse> getMailingsByMemberId(final long memberId, final LocalDateTime startDate, final Pageable pageable) {
-        QMailing mailing = QMailing.mailing;
-        QCertification certification = QCertification.certification;
-        QCertificationSchedule applicationSchedule = new QCertificationSchedule("applicationSchedule");
-        QCertificationSchedule examSchedule = new QCertificationSchedule("examSchedule");
+public Page<MailingResponse> getMailingsByMemberId(final long memberId, final LocalDateTime startDate, final Pageable pageable) {
+    QMailing mailing = QMailing.mailing;
+    QCertification certification = QCertification.certification;
+    QCertificationSchedule applicationSchedule = new QCertificationSchedule("applicationSchedule");
+    QCertificationSchedule examSchedule = new QCertificationSchedule("examSchedule");
 
-        final long total = Optional.ofNullable(queryFactory
-                        .select(mailing.count())
-                        .from(mailing)
-                        .where(mailing.member.id.eq(memberId))
-                        .fetchOne())
-                .orElse(0L);
+    JPAQuery<Long> countQuery = queryFactory
+            .select(mailing.count())
+            .from(mailing)
+            .where(mailing.member.id.eq(memberId));
 
-        if (total == 0) {
-            return new PageImpl<>(Collections.emptyList(), pageable, total);
-        }
+    List<Long> mailingIds = queryFactory
+            .select(mailing.id)
+            .from(mailing)
+            .where(mailing.member.id.eq(memberId))
+            .orderBy(mailing.createdAt.asc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
 
-        List<MailingResponse> content = queryFactory
-                .from(mailing)
-                .join(mailing.certification, certification)
-                .leftJoin(applicationSchedule).on(
-                        applicationSchedule.certification.eq(certification)
-                                .and(applicationSchedule.date.after(startDate))
-                                .and(applicationSchedule.scheduleType.eq(ScheduleType.APPLICATION_START))
-                )
-                .leftJoin(examSchedule).on(
-                        examSchedule.certification.eq(certification)
-                                .and(examSchedule.date.after(startDate))
-                                .and(examSchedule.scheduleType.eq(ScheduleType.EXAM_START))
-                )
-                .where(mailing.member.id.eq(memberId))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(mailing.createdAt.asc())
-                .transform(GroupBy.groupBy(mailing.id).list(
-                        new QMailingResponse(
-                                mailing.id,
-                                certification.id,
-                                certification.name,
-                                cases()
-                                        .when(applicationSchedule.id.isNotNull())
-                                        .then(GroupBy.min(applicationSchedule.date))
-                                        .otherwise(Expressions.nullExpression(LocalDateTime.class)),
-                                cases()
-                                        .when(examSchedule.id.isNotNull())
-                                        .then(GroupBy.min(examSchedule.date))
-                                        .otherwise(Expressions.nullExpression(LocalDateTime.class))
-                        )
-                ));
-
-        return new PageImpl<>(content, pageable, total);
+    if (mailingIds.isEmpty()) {
+        return Page.empty(pageable);
     }
+
+    List<MailingResponse> content = queryFactory
+            .from(mailing)
+            .join(mailing.certification, certification)
+            .leftJoin(applicationSchedule).on(
+                    applicationSchedule.certification.eq(certification)
+                            .and(applicationSchedule.date.after(startDate))
+                            .and(applicationSchedule.scheduleType.eq(ScheduleType.APPLICATION_START))
+            )
+            .leftJoin(examSchedule).on(
+                    examSchedule.certification.eq(certification)
+                            .and(examSchedule.date.after(startDate))
+                            .and(examSchedule.scheduleType.eq(ScheduleType.EXAM_START))
+            )
+            .where(mailing.id.in(mailingIds))
+            .orderBy(mailing.createdAt.asc())
+            .transform(GroupBy.groupBy(mailing.id).list(
+                    new QMailingResponse(
+                            mailing.id,
+                            certification.id,
+                            certification.name,
+                            cases()
+                                    .when(applicationSchedule.id.isNotNull())
+                                    .then(GroupBy.min(applicationSchedule.date))
+                                    .otherwise(Expressions.nullExpression(LocalDateTime.class)),
+                            cases()
+                                    .when(examSchedule.id.isNotNull())
+                                    .then(GroupBy.min(examSchedule.date))
+                                    .otherwise(Expressions.nullExpression(LocalDateTime.class))
+                    )
+            ));
+
+    return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+}
 
     public List<ApplicationMailProjection> findAllMailingTargetsForDate(
             final LocalDateTime targetDate, final MailingStatus requiredMailingStatus) {
