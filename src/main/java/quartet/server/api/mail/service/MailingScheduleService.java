@@ -29,7 +29,7 @@ public class MailingScheduleService {
     private final int APPLICATION_NOTIFICATION_DAY_BEFORE = 1;
     private final int EXAM_NOTIFICATION_DAY_BEFORE = 3;
 
-    @Scheduled(cron = "0 0 8 * * ?")
+    @Scheduled(cron = "0 0 8 * * ?", zone = "Asia/Seoul")
     @Transactional(readOnly = true)
     public void sendDailyNotifications() {
         log.info("자격증 접수 알림 이메일 발송 스케줄러 실행");
