@@ -49,16 +49,28 @@ public class CertificationController {
     }
 
     // 특정 카테고리 자격증 조회
+//    @GetMapping("")
+//    public ApiResponse<Page<CertificationSearchResponse>> getAllCertificationByCategory(
+//            @RequestParam boolean isMain,
+//            @RequestParam long categoryId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "15") int pageSize
+//    ) {
+//        PageRequest pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("id")));
+//        Page<CertificationSearchResponse> certifications = certificationService.getAllCertificationsByCategory(
+//                isMain, categoryId, pageable);
+//        return ApiResponse.success(OK, certifications);
+//    }
+
     @GetMapping("")
     public ApiResponse<Page<CertificationSearchResponse>> getAllCertificationByCategory(
-            @RequestParam boolean isMain,
             @RequestParam long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int pageSize
     ) {
         PageRequest pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("id")));
         Page<CertificationSearchResponse> certifications = certificationService.getAllCertificationsByCategory(
-                isMain, categoryId, pageable);
+               categoryId, pageable);
         return ApiResponse.success(OK, certifications);
     }
 
