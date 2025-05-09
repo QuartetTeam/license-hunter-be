@@ -59,20 +59,15 @@ public class CertificationService {
         certificationQueryRepository.incrementViewCountWithLock(certificationId);
     }
 
-//    public Page<CertificationSearchResponse> getAllCertificationsByCategory(
-//            final boolean isMain, final long categoryId, final Pageable pageable) {
-//        Long subCategoryId;
-//        if (isMain)  {
-//            subCategoryId = categoryQueryRepository.getDefaultSubCategoryId(categoryId)
-//                            .orElseThrow(SubCategoryNotFoundException::new);
-//        }
-//        else subCategoryId = categoryId;
-//        return certificationQueryRepository.findAllCertificationByCategory(subCategoryId, pageable);
-//    }
-
     public Page<CertificationSearchResponse> getAllCertificationsByCategory(
-            final long categoryId, final Pageable pageable) {
-        return certificationQueryRepository.findAllCertificationByCategory(categoryId, pageable);
+            final boolean isMain, final long categoryId, final Pageable pageable) {
+        Long subCategoryId;
+        if (isMain)  {
+            subCategoryId = categoryQueryRepository.getDefaultSubCategoryId(categoryId)
+                            .orElseThrow(SubCategoryNotFoundException::new);
+        }
+        else subCategoryId = categoryId;
+        return certificationQueryRepository.findAllCertificationByCategory(subCategoryId, pageable);
     }
 
     public List<CertificationCategoriesResponse> getCategories(final boolean isDefault) {
